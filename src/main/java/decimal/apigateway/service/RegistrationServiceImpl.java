@@ -1,6 +1,5 @@
 package decimal.apigateway.service;
 
-import decimal.apigateway.commons.Constant;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.AuthenticationClient;
 import decimal.apigateway.service.clients.SecurityClient;
@@ -26,12 +25,20 @@ public class RegistrationServiceImpl implements RegistrationService {
     public Object register(String request, Map<String, String> httpHeaders) {
         MicroserviceResponse response = securityClient.validateRegistration(request, httpHeaders);
 
-
+/*
         if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(response.getStatus()))
         {
             //TODO - Return invalid response according to registration failure
-        }
+        }*/
 
         return authenticationClient.register(request, httpHeaders);
+    }
+
+    @Override
+    public Object authenticate(String request, Map<String, String> httpHeaders)
+    {
+        MicroserviceResponse response = securityClient.validateAuthentication(request, httpHeaders);
+
+        return null;
     }
 }

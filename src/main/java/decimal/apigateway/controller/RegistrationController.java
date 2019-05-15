@@ -24,4 +24,11 @@ public class RegistrationController
     {
         return registrationService.register(request, httpHeaders);
     }
+
+
+    @PostMapping("authenticate")
+    public Object authenticate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders)
+    {
+        return registrationService.authenticate(request, httpHeaders);
+    }
 }

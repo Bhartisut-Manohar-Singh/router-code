@@ -15,4 +15,7 @@ public interface SecurityClient
 {
     @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/validateRegistration")
     MicroserviceResponse validateRegistration(@RequestBody String requestBody, @RequestHeader Map<String, String> httpHeaders);
+
+    @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/validateAuthentication")
+    MicroserviceResponse validateAuthentication(@RequestBody String requestBody, @RequestHeader Map<String, String> httpHeaders);
 }
