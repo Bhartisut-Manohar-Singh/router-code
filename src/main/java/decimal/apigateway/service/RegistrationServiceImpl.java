@@ -1,5 +1,7 @@
 package decimal.apigateway.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.AuthenticationClient;
 import decimal.apigateway.service.clients.SecurityClient;
@@ -15,10 +17,13 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private AuthenticationClient authenticationClient;
 
+    private ObjectMapper objectMapper;
+
     @Autowired
-    public RegistrationServiceImpl(SecurityClient securityClient, AuthenticationClient authenticationClient) {
+    public RegistrationServiceImpl(SecurityClient securityClient, AuthenticationClient authenticationClient, ObjectMapper objectMapper) {
         this.securityClient = securityClient;
         this.authenticationClient = authenticationClient;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -30,6 +35,12 @@ public class RegistrationServiceImpl implements RegistrationService {
         {
             //TODO - Return invalid response according to registration failure
         }*/
+
+        ObjectNode jsonNodes = objectMapper.convertValue(response.getResponse(), ObjectNode.class);
+
+        String userName = jsonNodes.get("username").asText();
+
+        httpHeaders.put("username", userName);
 
         return authenticationClient.register(request, httpHeaders);
     }
