@@ -18,4 +18,13 @@ public interface SecurityClient
 
     @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/validateAuthentication")
     MicroserviceResponse validateAuthentication(@RequestBody String requestBody, @RequestHeader Map<String, String> httpHeaders);
+
+    @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/generateResponseHash")
+    MicroserviceResponse generateResponseHash(@RequestBody String finalResponse, @RequestHeader Map<String, String> httpHeaders);
+
+    @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/generateAuthResponseHash")
+    MicroserviceResponse generateAuthResponseHash(@RequestBody String finalResponse, @RequestHeader Map<String, String> httpHeaders);
+
+    @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/encryptResponse")
+    MicroserviceResponse encryptResponse(@RequestBody String finalResponse, @RequestHeader Map<String, String> httpHeaders);
 }

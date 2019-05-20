@@ -1,6 +1,7 @@
 package decimal.apigateway.service.clients;
 
 import decimal.apigateway.commons.Constant;
+import decimal.apigateway.model.MicroserviceResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,5 +13,8 @@ import java.util.Map;
 public interface AuthenticationClient {
 
     @PostMapping(value = Constant.AUTHENTICATION_MICRO_SERVICE + "/register")
-    Object register(@RequestBody String requestBody, @RequestHeader Map<String, String> headers);
+    MicroserviceResponse register(@RequestBody String requestBody, @RequestHeader Map<String, String> headers);
+
+    @PostMapping(value = Constant.AUTHENTICATION_MICRO_SERVICE + "/authenticate")
+    MicroserviceResponse authenticate(@RequestBody Object plainRequest, @RequestHeader  Map<String, String> httpHeaders);
 }

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -20,15 +22,13 @@ public class RegistrationController
     }
 
     @PostMapping("register")
-    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders)
-    {
-        return registrationService.register(request, httpHeaders);
+    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
+        return registrationService.register(request, httpHeaders, response);
     }
 
 
     @PostMapping("authenticate")
-    public Object authenticate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders)
-    {
-        return registrationService.authenticate(request, httpHeaders);
+    public Object authenticate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
+        return registrationService.authenticate(request, httpHeaders, response);
     }
 }
