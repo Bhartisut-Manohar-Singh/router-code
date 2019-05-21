@@ -11,4 +11,10 @@ public class Constant {
     public static final String ERROR_LOGGER = "error";
     public static final String AUDIT_LOGGER = "audit";
     public static final String ADMIN_PORTAL_LOGGER = "adminportal";
+    public static final String ESB = "esb";
+    public static final String VALIDATION_TYPE_CLIENT_SECRET = "CLIENT_SECRET";
+    public static final String VALIDATION_TYPE_SERVICE_NAME = "SERVICE_NAME";
+    public static final String VALIDATION_TYPE_IP = "IP";
+    public static final String VALIDATION_TYPE_HEADERS = "HEADERS";
+    public static final String VALIDATION_TYPE_TXN_KEy = "TXN_KEY";
 }

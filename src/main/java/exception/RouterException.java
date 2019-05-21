@@ -56,4 +56,9 @@ public class RouterException extends Exception {
         this.errorMessage = errorMessage;
         this.response = detailedLogs;
     }
+
+    public RouterException(Object response)
+    {
+        this.response = response;
+    }
 }

@@ -143,8 +143,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         response.addHeader("hash", authResponseHash.getMessage());
 
-
-
         return finalResponseMap;
     }
 }
