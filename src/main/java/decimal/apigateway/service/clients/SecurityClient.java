@@ -26,6 +26,9 @@ public interface SecurityClient
     @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/encryptResponse")
     MicroserviceResponse encryptResponse(@RequestBody String finalResponse, @RequestHeader Map<String, String> httpHeaders);
 
-    @GetMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/validate/{validationType}")
-    MicroserviceResponse validate(@PathVariable String validationType,  @RequestHeader Map<String, String> httpHeaders);
+    @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/decryptRequest")
+    MicroserviceResponse decryptRequest(@RequestBody String finalResponse, @RequestHeader Map<String, String> httpHeaders);
+
+    @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/validate/{validationType}")
+    MicroserviceResponse validate(@RequestBody String request, @PathVariable String validationType,  @RequestHeader Map<String, String> httpHeaders);
 }

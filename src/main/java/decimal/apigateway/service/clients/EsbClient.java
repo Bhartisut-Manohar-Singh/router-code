@@ -12,5 +12,5 @@ import java.util.Map;
 public interface EsbClient {
 
     @PostMapping(value =  Constant.ESB + "/service-executor/execute", consumes = "application/json")
-    Object executeAuthentication(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
+    Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
 }
