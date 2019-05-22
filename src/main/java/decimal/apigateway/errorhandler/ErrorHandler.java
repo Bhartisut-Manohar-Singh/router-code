@@ -19,6 +19,9 @@ public class ErrorHandler implements ErrorDecoder {
         try
         {
             responseBody = IOUtils.toString(response.body().asInputStream());
+
+            System.out.println("Error received from target server with body: " + responseBody);
+
             return new RouterException(responseBody);
         }
 

@@ -1,11 +1,11 @@
 package decimal.apigateway.service.validator;
 
 import decimal.apigateway.commons.Constant;
+import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.enums.RequestValidationTypes;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.SecurityClient;
 import exception.RouterException;
-import feign.Headers;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -24,7 +24,9 @@ public class RequestValidator {
 
     public void validatePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException {
 
-        RequestValidationTypes[] requestValidationTypes = {HEADERS, CLIENT_SECRET, IP, SERVICE_NAME};
+        httpHeaders.put("scopeToCheck", "PUBLIC");
+
+        RequestValidationTypes[] requestValidationTypes = {HEADERS, CLIENT_SECRET, IP, SERVICE_NAME, SERVICE_SCOPE};
 
         for (RequestValidationTypes plainRequestValidation : requestValidationTypes)
         {
@@ -51,7 +53,13 @@ public class RequestValidator {
         if (!Constant.SUCCESS_STATUS.equalsIgnoreCase(status))
             throw new RouterException(response.getResponse());
 
-        httpHeaders.put("username", response.getResponse().toString());
+        String userName = response.getResponse().toString();
+
+        int size = RouterOperations.getStringArray(userName, Constant.TILD_SPLITTER).size();
+
+        httpHeaders.put("username", userName);
+
+        httpHeaders.put("scopeToCheck", size > 3 ? "SECURE" : "OPEN");
 
         RequestValidationTypes[] requestValidationTypesArr = {SESSION, IP, SERVICE_SCOPE, TXN_KEY, HASH};
 
@@ -65,7 +73,7 @@ public class RequestValidator {
                 throw new RouterException(response.getResponse());
         }
 
-        httpHeaders.put("loginid", httpHeaders.get("username").split(Constant.TILD_SPLITTER)[2]);
+        httpHeaders.put("loginid", userName.split(Constant.TILD_SPLITTER)[2]);
 
         return httpHeaders;
     }
