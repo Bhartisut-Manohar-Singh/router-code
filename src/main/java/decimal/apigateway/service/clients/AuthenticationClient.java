@@ -20,5 +20,5 @@ public interface AuthenticationClient {
     MicroserviceResponse authenticate(@RequestBody Object plainRequest, @RequestHeader  Map<String, String> httpHeaders);
 
     @GetMapping(value = Constant.AUTHENTICATION_MICRO_SERVICE + "/logout")
-    MicroserviceResponse logout(@RequestBody Object plainRequest, @RequestHeader  Map<String, String> httpHeaders);
+    MicroserviceResponse logout(@RequestHeader  Map<String, String> httpHeaders);
 }

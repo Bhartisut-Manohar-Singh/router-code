@@ -156,6 +156,6 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response)
     {
-        return authenticationClient.logout(request, httpHeaders).getResponse();
+        return authenticationClient.logout(httpHeaders).getResponse();
     }
 }
