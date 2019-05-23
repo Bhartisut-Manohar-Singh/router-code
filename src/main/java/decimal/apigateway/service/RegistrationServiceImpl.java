@@ -1,10 +1,8 @@
 package decimal.apigateway.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.netflix.discovery.converters.Auto;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.ResponseOperations;
 import decimal.apigateway.model.MicroserviceResponse;
@@ -153,5 +151,11 @@ public class RegistrationServiceImpl implements RegistrationService {
         loginDetailsStorage.storeLoginDetails(plainRequest, httpHeaders);
 
         return finalResponseMap;
+    }
+
+    @Override
+    public Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response)
+    {
+        return authenticationClient.logout(request, httpHeaders).getResponse();
     }
 }

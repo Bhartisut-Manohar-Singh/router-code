@@ -24,7 +24,7 @@ public interface SecurityClient
     MicroserviceResponse generateAuthResponseHash(@RequestBody String finalResponse, @RequestHeader Map<String, String> httpHeaders);
 
     @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/encryptResponse")
-    MicroserviceResponse encryptResponse(@RequestBody String finalResponse, @RequestHeader Map<String, String> httpHeaders);
+    MicroserviceResponse encryptResponse(@RequestBody Object finalResponse, @RequestHeader Map<String, String> httpHeaders);
 
     @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/decryptRequest")
     MicroserviceResponse decryptRequest(@RequestBody String finalResponse, @RequestHeader Map<String, String> httpHeaders);

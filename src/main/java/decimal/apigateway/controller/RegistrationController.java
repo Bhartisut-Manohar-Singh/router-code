@@ -30,4 +30,9 @@ public class RegistrationController
     public Object authenticate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
         return registrationService.authenticate(request, httpHeaders, response);
     }
+
+    @PostMapping("logout")
+    public Object logout(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
+        return registrationService.logout(request, httpHeaders, response);
+    }
 }
