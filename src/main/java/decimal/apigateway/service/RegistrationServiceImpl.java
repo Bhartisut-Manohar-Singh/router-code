@@ -115,17 +115,18 @@ public class RegistrationServiceImpl implements RegistrationService {
             return new ResponseEntity<>(authenticateResponse.getResponse(), HttpStatus.BAD_REQUEST);
         }
 
-        Map<String, String> authResponse = objectMapper.convertValue(authenticateResponse.getResponse(), new TypeReference<Map<String, String>>() {
+        Map<String, Object> authResponse = objectMapper.convertValue(authenticateResponse.getResponse(), new TypeReference<Map<String, Object>>() {
         });
 
+        System.out.println("Auth response  " + authResponse);
 
-        String finalResponse = responseOperations.prepareResponseObject(httpHeaders.get("requestid"),
+        Object finalResponse = responseOperations.prepareResponseObject(httpHeaders.get("requestid"),
                 httpHeaders.get("servicename"),
-                objectMapper.writeValueAsString(authResponse)).toString();
+                objectMapper.writeValueAsString(authResponse));
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(finalResponse, httpHeaders);
 
-        response.addHeader("Authorization", authResponse.get("jwtToken"));
+        response.addHeader("Authorization", authResponse.get("jwtToken").toString());
 
         if(!encryptedResponse.getStatus().equalsIgnoreCase(Constant.SUCCESS_STATUS))
         {
@@ -135,7 +136,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
 
-        MicroserviceResponse authResponseHash = securityClient.generateAuthResponseHash(finalResponse, httpHeaders);
+        MicroserviceResponse authResponseHash = securityClient.generateAuthResponseHash(finalResponse.toString(), httpHeaders);
 
         System.out.println(authenticateResponse);
 
@@ -157,5 +158,10 @@ public class RegistrationServiceImpl implements RegistrationService {
     public Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response)
     {
         return authenticationClient.logout(httpHeaders).getResponse();
+    }
+
+    @Override
+    public Object forceLogout(String request, Map<String, String> httpHeaders, HttpServletResponse response) {
+        return authenticationClient.forceLogout(httpHeaders).getResponse();
     }
 }

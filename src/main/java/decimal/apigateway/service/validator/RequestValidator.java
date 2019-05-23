@@ -74,6 +74,7 @@ public class RequestValidator {
         }
 
         httpHeaders.put("loginid", userName.split(Constant.TILD_SPLITTER)[2]);
+        httpHeaders.put("logsrequired", "Y");
 
         return httpHeaders;
     }

@@ -40,4 +40,9 @@ public class RegistrationController {
     public Object logout(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
         return registrationService.logout(request, httpHeaders, response);
     }
+
+    @PostMapping("forceLogout")
+    public Object forceLogout(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
+        return registrationService.forceLogout(request, httpHeaders, response);
+    }
 }
