@@ -61,7 +61,7 @@ public class RequestValidator {
 
         httpHeaders.put("scopeToCheck", size > 3 ? "SECURE" : "OPEN");
 
-        RequestValidationTypes[] requestValidationTypesArr = {SESSION, IP, SERVICE_SCOPE, TXN_KEY, HASH};
+        RequestValidationTypes[] requestValidationTypesArr = {APPLICATION, INACTIVE_SESSION, SESSION, IP, SERVICE_SCOPE, TXN_KEY, HASH};
 
         for (RequestValidationTypes requestValidationTypes : requestValidationTypesArr)
         {
