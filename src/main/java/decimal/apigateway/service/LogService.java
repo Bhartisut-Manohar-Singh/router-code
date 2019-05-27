@@ -38,7 +38,7 @@ public class LogService
         endpointDetails.setType(type);
 
         endpointDetails.setHeaders(jackson.objectToObjectNode(httpHeaders));
-        endpointDetails.setRequest(jackson.stringToObjectNode(request));
+        endpointDetails.setRequest(jackson.objectToObjectNode(request));
 
         return endpointDetails;
     }
@@ -62,7 +62,7 @@ public class LogService
         logsData.setRequestTimeStamp(CURRENT_TIME_STAMP.get());
         logsData.setRequestId(httpHeaders.get("requestid"));
 
-        logsData.setRequest(jackson.stringToObjectNode(request));
+        logsData.setRequest(jackson.objectToObjectNode(request));
         logsData.setRequestHeaders(jackson.objectToObjectNode(httpHeaders));
 
 
@@ -85,7 +85,7 @@ public class LogService
         try {
             System.out.println("Final logsData object: " + Jackson.objectToJsonString(new LogsData(logsData)));
         } catch (IOException e) {
-            e.printStackTrace();
+            ERROR_LOGGER.error("Error in writing final object of logs to console");
         }
     }
 }

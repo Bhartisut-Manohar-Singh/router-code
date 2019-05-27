@@ -45,7 +45,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
-        MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").toString(), httpHeaders);
+        MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
 
         Object response = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
 
