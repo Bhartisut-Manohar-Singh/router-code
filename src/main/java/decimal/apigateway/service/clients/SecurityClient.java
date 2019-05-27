@@ -30,5 +30,5 @@ public interface SecurityClient
     MicroserviceResponse decryptRequest(@RequestBody String finalResponse, @RequestHeader Map<String, String> httpHeaders);
 
     @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/validate/{validationType}")
-    MicroserviceResponse validate(@RequestBody String request, @PathVariable String validationType,  @RequestHeader Map<String, String> httpHeaders);
+    MicroserviceResponse validate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String validationType);
 }

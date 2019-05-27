@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.ResponseOperations;
+import decimal.apigateway.model.LogsData;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.AuthenticationClient;
 import decimal.apigateway.service.clients.SecurityClient;
+import decimal.apigateway.service.validator.RequestValidator;
+import exception.RouterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +36,12 @@ public class RegistrationServiceImpl implements RegistrationService {
     ResponseOperations responseOperations;
 
     @Autowired
+    RequestValidator requestValidator;
+
+    @Autowired
+    LogsData logsData;
+
+    @Autowired
     public RegistrationServiceImpl(SecurityClient securityClient, AuthenticationClient authenticationClient, ObjectMapper objectMapper) {
         this.securityClient = securityClient;
         this.authenticationClient = authenticationClient;
@@ -40,35 +49,28 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
-        MicroserviceResponse microserviceResponse = securityClient.validateRegistration(request, httpHeaders);
+    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
-        if (!Constant.SUCCESS_STATUS.equalsIgnoreCase(microserviceResponse.getStatus())) {
-           return new ResponseEntity<>(microserviceResponse.getResponse(), HttpStatus.BAD_REQUEST);
-
-        }
-
-        ObjectNode jsonNodes = objectMapper.convertValue(microserviceResponse.getResponse(), ObjectNode.class);
+        ObjectNode jsonNodes = objectMapper.convertValue(requestValidator.validateRegistrationRequest(request, httpHeaders), ObjectNode.class);
 
         String userName = jsonNodes.get("username").asText();
 
         httpHeaders.put("username", userName);
 
+        logsData.setLoginId(userName);
+
         MicroserviceResponse registerResponse = authenticationClient.register(request, httpHeaders);
-
-        String status = registerResponse.getStatus();
-
-        if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(status))
-        {
-            return new ResponseEntity<>(registerResponse.getResponse(), HttpStatus.BAD_REQUEST);
-        }
 
         Map<String, Object> rsaKeysMap = objectMapper.convertValue(registerResponse.getResponse(), new TypeReference<Map<String, Object>>() {
         });
 
         String jwtToken = String.valueOf(rsaKeysMap.get("jwtToken"));
 
+        ObjectNode node = objectMapper.createObjectNode();
+
         response.addHeader("Authorization", "Bearer " + jwtToken);
+
+        node.put("Authorization", "Bearer " + jwtToken);
 
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("rsa", objectMapper.writeValueAsString(rsaKeysMap));
@@ -79,14 +81,10 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         MicroserviceResponse responseHash = securityClient.generateResponseHash(finalResponse, httpHeaders);
 
-        status = responseHash.getStatus();
-
-        if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(status))
-        {
-            return new ResponseEntity<>(responseHash.getResponse(), HttpStatus.BAD_REQUEST);
-        }
-
         response.addHeader("hash", responseHash.getMessage());
+        node.put("hash", responseHash.getMessage());
+
+        logsData.setResponseHeaders(node);
 
         return finalResponse;
     }
@@ -95,30 +93,20 @@ public class RegistrationServiceImpl implements RegistrationService {
     LoginDetailsStorage loginDetailsStorage;
 
     @Override
-    public Object authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
-        MicroserviceResponse microserviceResponse = securityClient.validateAuthentication(request, httpHeaders);
+    public Object authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
-        String status = microserviceResponse.getStatus();
-
-        if (!Constant.SUCCESS_STATUS.equalsIgnoreCase(status)) {
-            return new ResponseEntity<>(microserviceResponse.getResponse(), HttpStatus.BAD_REQUEST);
-        }
-
-        Object plainRequest = microserviceResponse.getResponse();
+        MicroserviceResponse microserviceResponse = requestValidator.validateAuthentication(request, httpHeaders);
 
         httpHeaders.put("username", microserviceResponse.getMessage());
 
-        MicroserviceResponse authenticateResponse = authenticationClient.authenticate(plainRequest, httpHeaders);
+        logsData.setLoginId(microserviceResponse.getMessage());
 
-        if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(authenticateResponse.getStatus()))
-        {
-            return new ResponseEntity<>(authenticateResponse.getResponse(), HttpStatus.BAD_REQUEST);
-        }
+        Object plainRequest = microserviceResponse.getResponse();
+
+        MicroserviceResponse authenticateResponse = authenticationClient.authenticate(plainRequest, httpHeaders);
 
         Map<String, Object> authResponse = objectMapper.convertValue(authenticateResponse.getResponse(), new TypeReference<Map<String, Object>>() {
         });
-
-        System.out.println("Auth response  " + authResponse);
 
         Object finalResponse = responseOperations.prepareResponseObject(httpHeaders.get("requestid"),
                 httpHeaders.get("servicename"),
@@ -126,10 +114,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(finalResponse, httpHeaders);
 
+        ObjectNode node = objectMapper.createObjectNode();
+
+        node.put("Authorization", authResponse.get("jwtToken").toString());
         response.addHeader("Authorization", authResponse.get("jwtToken").toString());
 
-        if(!encryptedResponse.getStatus().equalsIgnoreCase(Constant.SUCCESS_STATUS))
-        {
+        if (!encryptedResponse.getStatus().equalsIgnoreCase(Constant.SUCCESS_STATUS)) {
             return new ResponseEntity<>(authenticateResponse.getResponse(), HttpStatus.BAD_REQUEST);
         }
 
@@ -138,16 +128,9 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         MicroserviceResponse authResponseHash = securityClient.generateAuthResponseHash(finalResponse.toString(), httpHeaders);
 
-        System.out.println(authenticateResponse);
-
-        status = authResponseHash.getStatus();
-
-        if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(status))
-        {
-            return new ResponseEntity<>(authResponseHash.getResponse(), HttpStatus.BAD_REQUEST);
-        }
-
         response.addHeader("hash", authResponseHash.getMessage());
+
+        node.put("hash", authResponseHash.getMessage());
 
         loginDetailsStorage.storeLoginDetails(plainRequest, httpHeaders);
 
@@ -155,8 +138,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    public Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response)
-    {
+    public Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response) {
         return authenticationClient.logout(httpHeaders).getResponse();
     }
 

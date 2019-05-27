@@ -5,15 +5,20 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Map;
 
-public class Jackson {
-	private Jackson()
-	{
-		
-	}
+import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
+
+@Component
+public class Jackson
+{
+	@Autowired
+	ObjectMapper objectMapper;
+
 	public static <T> JsonNode objectToJson(T t) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		String jsonInString = mapper.writeValueAsString(t);
@@ -29,9 +34,24 @@ public class Jackson {
 		String jsonInString = mapper.writeValueAsString(t);
 		return arr.add(mapper.readTree(jsonInString));
 	}
-	public static JsonNode stringToJsonNode(String jsonString) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		return mapper.readTree(jsonString);
+
+	public static JsonNode stringToJsonNode(String request) throws IOException {
+		return new ObjectMapper().readTree(request);
+	}
+	public ObjectNode objectToObjectNode(Object jsonString)
+	{
+		if(jsonString == null)
+		{
+			return null;
+		}
+
+		if(jsonString instanceof String)
+		{
+			return stringToObjectNode(String.valueOf(jsonString));
+		}
+		else{
+			return objectMapper.convertValue(jsonString, ObjectNode.class);
+		}
 	}
 	public static Map<String, Object> stringToMap(String jsonString) {
 		try
@@ -54,5 +74,20 @@ public class Jackson {
 		{
 			return null;
 		}
+	}
+
+	public ObjectNode stringToObjectNode(String request)
+	{
+
+		if(request == null || request.isEmpty())
+			return null;
+
+		try {
+			return objectMapper.readValue(request, ObjectNode.class);
+		} catch (IOException e) {
+			ERROR_LOGGER.error("Error occurred in parsing request to object node", e);
+		}
+
+		return objectMapper.createObjectNode();
 	}
 }

@@ -131,7 +131,8 @@ public class ResponseOperations {
 
       oneRecordData.put("primary_key", primaryKeyValue.toString());
       if (recordOutput.getRecordError() == null) {
-        JsonNode recordsOutput = Jackson.stringToJsonNode(recordOutput.getRecordOutputArray());
+        JsonNode recordsOutput = Jackson
+                .stringToJsonNode(recordOutput.getRecordOutputArray());
 
         if (recordsOutput != null && recordsOutput.getNodeType() == JsonNodeType.ARRAY) {
           oneRecordData.set("data", recordsOutput);

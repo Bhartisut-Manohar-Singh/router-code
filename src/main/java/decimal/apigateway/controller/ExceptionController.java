@@ -15,7 +15,7 @@ public class ExceptionController {
     ObjectMapper objectMapper;
 
     @ExceptionHandler(value = RouterException.class)
-    public Object handleRouterException(RouterException ex) {
+    public ResponseEntity<Object> handleRouterException(RouterException ex) {
 
        return new ResponseEntity<>(ex.getResponse(), HttpStatus.BAD_REQUEST);
     }

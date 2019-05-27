@@ -1,6 +1,7 @@
 package decimal.apigateway.controller;
 
 import decimal.apigateway.service.RegistrationService;
+import exception.RouterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +21,10 @@ public class RegistrationController {
     }
 
     @PostMapping("register")
-    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
+    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
         String serviceName = httpHeaders.get("servicename");
+        System.out.println("Service Name: " + serviceName);
 
         if (serviceName.contains("AUTH") || serviceName.contains("auth"))
             return registrationService.authenticate(request, httpHeaders, response);
@@ -32,7 +34,7 @@ public class RegistrationController {
 
 
     @PostMapping("authenticate")
-    public Object authenticate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
+    public Object authenticate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
         return registrationService.authenticate(request, httpHeaders, response);
     }
 

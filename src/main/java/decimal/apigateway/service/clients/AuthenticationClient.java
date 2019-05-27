@@ -2,7 +2,6 @@ package decimal.apigateway.service.clients;
 
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.model.MicroserviceResponse;
-import decimal.apigateway.model.RouterResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +23,6 @@ public interface AuthenticationClient {
     MicroserviceResponse logout(@RequestHeader  Map<String, String> httpHeaders);
 
     @GetMapping(value = Constant.AUTHENTICATION_MICRO_SERVICE + "/forceLogout")
-    RouterResponse forceLogout(Map<String, String> httpHeaders);
+    MicroserviceResponse forceLogout(Map<String, String> httpHeaders);
 
 }
