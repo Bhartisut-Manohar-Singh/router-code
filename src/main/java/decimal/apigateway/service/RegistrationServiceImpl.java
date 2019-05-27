@@ -138,7 +138,11 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    public Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response) {
+    public Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws RouterException {
+        MicroserviceResponse microserviceResponse = requestValidator.validateLogout(request, httpHeaders);
+
+        httpHeaders.put("username", microserviceResponse.getResponse().toString());
+
         return authenticationClient.logout(httpHeaders).getResponse();
     }
 

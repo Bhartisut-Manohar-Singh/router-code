@@ -12,7 +12,7 @@ public interface RegistrationService
 
     Object authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException;
 
-    Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response);
+    Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws RouterException;
 
     Object forceLogout(String request, Map<String, String> httpHeaders, HttpServletResponse response);
 }

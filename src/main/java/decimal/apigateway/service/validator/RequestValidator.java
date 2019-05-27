@@ -75,4 +75,8 @@ public class RequestValidator {
     public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterException {
         return securityClient.validateAuthentication(request, httpHeaders);
     }
+
+    public MicroserviceResponse validateLogout(String request, Map<String, String> httpHeaders) throws RouterException {
+        return securityClient.validate(request, httpHeaders, RequestValidationTypes.REQUEST.name());
+    }
 }
