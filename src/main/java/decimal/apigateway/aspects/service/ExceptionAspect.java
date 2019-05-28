@@ -2,7 +2,6 @@ package decimal.apigateway.aspects.service;
 
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.service.LogService;
-import exception.RouterException;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +17,8 @@ public class ExceptionAspect {
         this.logService = logService;
     }
 
-    @AfterReturning(value = "execution(* decimal.apigateway.controller.ExceptionController.handleRouterException(..)) && args(exception)", returning = "response")
-    public void exceptionHandler(RouterException exception, ResponseEntity<Object> response)
+    @AfterReturning(value = "execution(* decimal.apigateway.controller.ExceptionController.*(..))", returning = "response")
+    public void exceptionHandler(ResponseEntity<Object> response)
     {
         logService.updateLogsData(response.getBody(), response.getStatusCode().toString(), Constant.FAILURE_STATUS);
     }

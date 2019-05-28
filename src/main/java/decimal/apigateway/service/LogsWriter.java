@@ -44,6 +44,7 @@ public class LogsWriter
             GENERAL_LOGGER.info("Send request to push logs to kafka");
 
             ProducerServiceImpl producerService = new ProducerServiceImpl();
+
             producerService.executeProducer(finalLogs, kafkaUrl);
 
             GENERAL_LOGGER.info("Logs has been pushed to kafka");
