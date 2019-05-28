@@ -89,9 +89,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         return finalResponse;
     }
 
-    @Autowired
-    LoginDetailsStorage loginDetailsStorage;
-
     @Override
     public Object authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
@@ -131,8 +128,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         response.addHeader("hash", authResponseHash.getMessage());
 
         node.put("hash", authResponseHash.getMessage());
-
-        loginDetailsStorage.storeLoginDetails(plainRequest, httpHeaders);
 
         return finalResponseMap;
     }

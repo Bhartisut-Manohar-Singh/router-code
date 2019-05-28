@@ -30,6 +30,9 @@ public class LogService
     @Autowired
     Jackson jackson;
 
+    @Autowired
+    LogsWriter logsWriter;
+
     public EndpointDetails initiateEndpoint(String type, String request, Map<String, String> httpHeaders)
     {
         EndpointDetails endpointDetails = new EndpointDetails();
@@ -82,10 +85,6 @@ public class LogService
         logsData.setResponseCode(statusCode);
         logsData.setResponseStatus(status);
 
-        try {
-            System.out.println("Final logsData object: " + Jackson.objectToJsonString(new LogsData(logsData)));
-        } catch (IOException e) {
-            ERROR_LOGGER.error("Error in writing final object of logs to console");
-        }
+        logsWriter.writeLogs(new LogsData(logsData));
     }
 }
