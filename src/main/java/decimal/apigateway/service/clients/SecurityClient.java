@@ -31,4 +31,7 @@ public interface SecurityClient
 
     @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/validate/{validationType}")
     MicroserviceResponse validate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String validationType);
+
+    @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/validateExecutionRequest")
+    MicroserviceResponse validateExecutionRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
 }
