@@ -49,8 +49,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Object response = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
 
-        System.out.println("Response from ESB: " + response);
-
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(response, httpHeaders);
 
         if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus()))
