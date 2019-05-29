@@ -1,5 +1,6 @@
 package decimal.apigateway.errorhandler;
 
+import exception.RouterException;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import org.apache.commons.io.IOUtils;
@@ -11,17 +12,25 @@ import java.io.IOException;
 public class ErrorHandler implements ErrorDecoder {
 
     @Override
-    public Exception decode(String s, Response response)
-    {
-        System.out.println("Error while executing an api");
+    public Exception decode(String s, Response response) {
 
-        try {
-            String responseBody = IOUtils.toString(response.body().asInputStream());
-        } catch (IOException e) {
+        Object responseBody = null;
+
+        try
+        {
+            responseBody = IOUtils.toString(response.body().asInputStream());
+
+            System.out.println("Error received from target server with body: " + responseBody);
+
+            return new RouterException(responseBody);
+        }
+
+        catch (IOException e)
+        {
             e.printStackTrace();
         }
 
-
         return null;
+
     }
 }
