@@ -60,16 +60,10 @@ public class RequestValidator {
         logsData.setLoginId(userName);
         httpHeaders.put("scopeToCheck", size > 3 ? "SECURE" : "OPEN");
 
-        securityClient.validateExecutionRequest(request, httpHeaders);
-
-       /* RequestValidationTypes[] requestValidationTypesArr = {APPLICATION, INACTIVE_SESSION, SESSION, IP, SERVICE_SCOPE, TXN_KEY, HASH};
-
-        for (RequestValidationTypes requestValidationTypes : requestValidationTypesArr) {
-            securityClient.validate(request, httpHeaders, requestValidationTypes.name());
-        }*/
+        response = securityClient.validateExecutionRequest(request, httpHeaders);
 
         httpHeaders.put("loginid", userName.split(Constant.TILD_SPLITTER)[2]);
-        httpHeaders.put("logsrequired", "Y");
+        httpHeaders.put("logsrequired", response.getResponse().toString());
 
         return httpHeaders;
     }
