@@ -8,15 +8,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@SuppressWarnings("WeakerAccess")
 @Service
 public class MaskServiceImpl implements MaskService {
 
     @Value("#{'${keys_to_mask}'.split(',')}")
     List<String> keysToMask;
 
-    @Override
-    public String maskMessage(String message) {
+    public  String maskMessage(String message)  {
 
         String maskedMessage = message;
 
@@ -29,33 +27,47 @@ public class MaskServiceImpl implements MaskService {
         return maskedMessage;
     }
 
-    private String maskJsonData(String message, String keyToMask) {
+    private static String maskJsonData(String message, String keyToMask) {
 
         String maskedMessage = message;
-        if (message != null) {
-            for (String getRegex : getRegexPattern(keyToMask)) {
 
-                Pattern pattern = Pattern.compile(getRegex, Pattern.CASE_INSENSITIVE);
+        try {
+            if (message != null) {
 
-                Matcher matcher = pattern.matcher(message);
+                for (String getRegex : getRegexPattern(keyToMask)) {
 
-                while (matcher.find()) {
-                    String maskMessage = matcher.group(3);
-                    maskedMessage = maskedMessage.replaceFirst(maskMessage, "\"*****\"");
+                    Pattern pattern = Pattern.compile(getRegex,
+                            Pattern.CASE_INSENSITIVE);
+                    Matcher matcher = pattern.matcher(message);
+                    while (matcher.find()) {
+                        String keyName = matcher.group(1).replaceAll("\"", "");
+                        String maskMessage = matcher.group(3);
+
+                        if (maskMessage != null && keyToMask.equalsIgnoreCase(keyName) && !maskMessage.isEmpty()
+                                && !maskMessage.equalsIgnoreCase("\"\""))
+                            maskedMessage = maskedMessage.replace(maskMessage, "\"*****\"");
+                    }
+
                 }
-
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return maskedMessage;
-
     }
+
 
     private static List<String> getRegexPattern(String key) {
         List<String> regex = new ArrayList<>();
-        regex.add("(" + "\"" + key + "\"" + ")(\\s*+:\\s*+)(\".+?\")");
-        regex.add("(" + key + ")(\\s*=\\s*)(.+?)[\\s{ 0 , }?]");
+        try {
+            String regex2 = "(" + "\"" + key + "\"" + ")(\\s*+:\\s*+)((\"\"|\".+?\"))";
 
+            regex.add(regex2);
+            regex.add("(.+?)(?:,|$)(" + key + ")(\\s*=\\s*)(.+?)[\\s{ 0 , }?]");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return regex;
     }
 

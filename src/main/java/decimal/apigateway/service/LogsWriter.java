@@ -3,7 +3,7 @@ package decimal.apigateway.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import decimal.apigateway.commons.Jackson;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.model.LogsData;
 import decimal.apigateway.service.masking.MaskService;
 import decimal.kafka.Service.ProducerServiceImpl;
@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
 
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
 import static decimal.apigateway.commons.Loggers.GENERAL_LOGGER;
@@ -22,6 +20,9 @@ public class LogsWriter
 {
     @Value("${kafka.integration.url}")
     String kafkaUrl;
+
+    @Value("microServiceLogs")
+    String microServiceLogs;
 
     @Autowired
     MaskService maskService;
@@ -41,20 +42,26 @@ public class LogsWriter
                 apiLogFormatter.setData(objectMapper.convertValue(logsData, ObjectNode.class));
                 finalLogs = objectMapper.writeValueAsString(apiLogFormatter);
                 finalLogs = maskService.maskMessage(finalLogs);
+
             }
             catch (JsonProcessingException e)
             {
                 finalLogs="{}";
             }
 
-            GENERAL_LOGGER.info("Send request to push logs to kafka");
+            if(microServiceLogs.equalsIgnoreCase("ON"))
+            {
+                GENERAL_LOGGER.info("Send request to push logs to kafka");
 
-            ProducerServiceImpl producerService = new ProducerServiceImpl();
+                ProducerServiceImpl producerService = new ProducerServiceImpl();
 
-            producerService.executeProducer(finalLogs, kafkaUrl);
+                producerService.executeProducer(finalLogs, kafkaUrl, Constant.LOGS_TOPIC);
 
-            GENERAL_LOGGER.info("Logs has been pushed to kafka");
-
+                GENERAL_LOGGER.info("Logs has been pushed to kafka");
+            }
+            else {
+                GENERAL_LOGGER.info("Logs is not enabled");
+            }
         }
         catch (Exception e)
         {
