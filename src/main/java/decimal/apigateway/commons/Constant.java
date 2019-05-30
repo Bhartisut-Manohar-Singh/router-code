@@ -17,4 +17,5 @@ public class Constant {
     public static final String VALIDATION_TYPE_IP = "IP";
     public static final String VALIDATION_TYPE_HEADERS = "HEADERS";
     public static final String VALIDATION_TYPE_TXN_KEy = "TXN_KEY";
+    public static final String SAVE = "SAVE";
 }

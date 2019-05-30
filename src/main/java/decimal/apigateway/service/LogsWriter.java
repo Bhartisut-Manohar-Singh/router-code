@@ -1,6 +1,8 @@
 package decimal.apigateway.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Jackson;
 import decimal.apigateway.model.LogsData;
 import decimal.apigateway.service.masking.MaskService;
@@ -24,6 +26,9 @@ public class LogsWriter
     @Autowired
     MaskService maskService;
 
+    @Autowired
+    ObjectMapper objectMapper;
+
     @Async
     public void writeLogs(LogsData logsData)
     {
@@ -32,8 +37,9 @@ public class LogsWriter
         {
             try
             {
-                finalLogs = Jackson.objectToJsonString(logsData);
-
+                ApiLogFormatter apiLogFormatter = new ApiLogFormatter(logsData);
+                apiLogFormatter.setData(objectMapper.convertValue(logsData, ObjectNode.class));
+                finalLogs = objectMapper.writeValueAsString(apiLogFormatter);
                 finalLogs = maskService.maskMessage(finalLogs);
             }
             catch (JsonProcessingException e)
@@ -50,7 +56,7 @@ public class LogsWriter
             GENERAL_LOGGER.info("Logs has been pushed to kafka");
 
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             ERROR_LOGGER.error("Unable to push logs to Kafka", e);
         }
