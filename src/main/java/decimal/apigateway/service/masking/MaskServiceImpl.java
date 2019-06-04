@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,17 +12,20 @@ import java.util.regex.Pattern;
 @Service
 public class MaskServiceImpl implements MaskService {
 
-    @Value("#{'${keys_to_mask}'.split(',')}")
-    List<String> keysToMask;
+    @Value("${keys_to_mask}")
+    String keyToMask;
 
     public  String maskMessage(String message)  {
 
         String maskedMessage = message;
 
-        if (keysToMask != null) {
-            for (String keyToMask : keysToMask) {
-                maskedMessage = maskJsonData(maskedMessage, keyToMask);
-            }
+        if(keyToMask == null || keyToMask.isEmpty())
+            return maskedMessage;
+
+        String[] keysToMask = keyToMask.split(",");
+
+        for (String keyToMask : keysToMask) {
+            maskedMessage = maskJsonData(maskedMessage, keyToMask);
         }
 
         return maskedMessage;
@@ -64,7 +68,7 @@ public class MaskServiceImpl implements MaskService {
             String regex2 = "(" + "\"" + key + "\"" + ")(\\s*+:\\s*+)((\"\"|\".+?\"))";
 
             regex.add(regex2);
-            regex.add("(.+?)(?:,|$)(" + key + ")(\\s*=\\s*)(.+?)[\\s{ 0 , }?]");
+//            regex.add("(.+?)(?:,|$)(" + key + ")(\\s*=\\s*)(.+?)[\\s{ 0 , }?]");
         } catch (Exception e) {
             e.printStackTrace();
         }

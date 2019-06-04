@@ -30,7 +30,7 @@ public class LogsWriter
     @Autowired
     ObjectMapper objectMapper;
 
-    @Async
+    @Async("myTaskExecutor")
     public void writeLogs(LogsData logsData)
     {
         String finalLogs;
@@ -43,6 +43,8 @@ public class LogsWriter
                 finalLogs = objectMapper.writeValueAsString(apiLogFormatter);
                 finalLogs = maskService.maskMessage(finalLogs);
 
+                GENERAL_LOGGER.info(Thread.currentThread().getName());
+
             }
             catch (JsonProcessingException e)
             {
@@ -52,6 +54,8 @@ public class LogsWriter
             if(!microServiceLogs.equalsIgnoreCase("ON"))
             {
                 GENERAL_LOGGER.info("Send request to push logs to kafka");
+
+                GENERAL_LOGGER.info("Logs: " + finalLogs);
 
                 ProducerServiceImpl producerService = new ProducerServiceImpl();
 
