@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -24,8 +25,8 @@ public class LogsData {
     private String loginId;
     private String resourceName;
     private String resourceVersion;
-    private Timestamp requestTimeStamp;
-    private Timestamp responseTimeStamp;
+    private LocalDateTime requestTimeStamp;
+    private LocalDateTime responseTimeStamp;
     private String responseCode;
     private String requestId;
     private String requestInterfaceIP;

@@ -62,7 +62,7 @@ public class LogService
         logsData.setEndpointDetails(new ArrayList<>());
         logsData.setResourceName(httpHeaders.get("servicename"));
         logsData.setResourceVersion(httpHeaders.get("version"));
-        logsData.setRequestTimeStamp(CURRENT_TIME_STAMP.get());
+        logsData.setRequestTimeStamp(CURRENT_TIME_STAMP.get().toLocalDateTime());
         logsData.setRequestId(httpHeaders.get("requestid"));
 
         logsData.setRequest(jackson.objectToObjectNode(request));
@@ -79,8 +79,8 @@ public class LogService
 
     public void updateLogsData(Object response, String statusCode, String status)
     {
-        logsData.setResponseTimeStamp(CURRENT_TIME_STAMP.get());
-        logsData.setExecutionTimeMs(logsData.getResponseTimeStamp().getTime() - logsData.getRequestTimeStamp().getTime());
+        logsData.setResponseTimeStamp(CURRENT_TIME_STAMP.get().toLocalDateTime());
+        logsData.setExecutionTimeMs(logsData.getResponseTimeStamp().getSecond()*1000 - logsData.getRequestTimeStamp().getSecond()*1000);
         logsData.setResponse(jackson.objectToObjectNode(response));
         logsData.setResponseCode(statusCode);
         logsData.setResponseStatus(status);
