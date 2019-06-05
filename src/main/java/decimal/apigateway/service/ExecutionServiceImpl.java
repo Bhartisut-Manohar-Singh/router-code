@@ -34,6 +34,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException {
 
         requestValidator.validatePlainRequest(request, httpHeaders);
+        httpHeaders.put("logsrequired", "Y");
 
         return esbClient.executeRequest(request, httpHeaders);
     }
