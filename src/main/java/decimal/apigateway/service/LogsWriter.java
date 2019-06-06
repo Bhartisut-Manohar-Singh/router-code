@@ -51,7 +51,7 @@ public class LogsWriter
                 finalLogs="{}";
             }
 
-            if(!microServiceLogs.equalsIgnoreCase("ON"))
+            if(microServiceLogs.equalsIgnoreCase("ON"))
             {
                 GENERAL_LOGGER.info("Send request to push logs to kafka");
 
