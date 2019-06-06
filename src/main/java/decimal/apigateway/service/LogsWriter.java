@@ -21,7 +21,7 @@ public class LogsWriter
     @Value("${kafka.integration.url}")
     String kafkaUrl;
 
-    @Value("microServiceLogs")
+    @Value("${microServiceLogs}")
     String microServiceLogs;
 
     @Autowired
