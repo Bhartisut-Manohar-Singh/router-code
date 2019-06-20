@@ -8,7 +8,6 @@ import decimal.apigateway.model.LogsData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Timestamp;
@@ -55,7 +54,17 @@ public class LogService
     }
 
     public void initiateLogsData(String request, Map<String, String> httpHeaders) {
-        List<String> clientId = RouterOperations.getStringArray(httpHeaders.get("clientid"), Constant.TILD_SPLITTER);
+        List<String> clientId;
+        try {
+
+            clientId = RouterOperations.getStringArray(httpHeaders.get("clientid"), Constant.TILD_SPLITTER);
+        }
+        catch (Exception ex)
+        {
+            clientId = new ArrayList<>();
+            clientId.add(httpHeaders.get("orgid"));
+            clientId.add(httpHeaders.get("appid"));
+        }
 
         logsData.setOrgId(clientId.get(0));
         logsData.setAppId(clientId.get(1));

@@ -36,6 +36,7 @@ public class RequestValidator {
 
         httpHeaders.put("scopeToCheck", "PUBLIC");
         httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
+        httpHeaders.put("username", httpHeaders.get("clientid"));
 
         RequestValidationTypes[] requestValidationTypes = {HEADERS, CLIENT_SECRET, IP, SERVICE_NAME, SERVICE_SCOPE};
 
