@@ -35,8 +35,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         requestValidator.validatePlainRequest(request, httpHeaders);
         httpHeaders.put("logsrequired", "Y");
+        httpHeaders.put("loginid", "random_login_id");
 
-        return esbClient.executeRequest(request, httpHeaders);
+        return esbClient.executePlainRequest(request, httpHeaders);
     }
 
     @Override

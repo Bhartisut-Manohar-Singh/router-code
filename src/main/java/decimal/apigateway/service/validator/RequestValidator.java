@@ -35,6 +35,8 @@ public class RequestValidator {
     public void validatePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException {
 
         httpHeaders.put("scopeToCheck", "PUBLIC");
+        httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
+        httpHeaders.put("username", httpHeaders.get("clientid"));
 
         RequestValidationTypes[] requestValidationTypes = {HEADERS, CLIENT_SECRET, IP, SERVICE_NAME, SERVICE_SCOPE};
 
