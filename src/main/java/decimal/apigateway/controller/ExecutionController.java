@@ -21,6 +21,18 @@ public class ExecutionController
         return executionService.executePlainRequest(request, httpHeaders);
     }
 
+    @PostMapping("execute/{orgId}/{appId}/{serviceName}/{version}")
+    public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String orgId,
+                                      @PathVariable String appId, @PathVariable String serviceName, @PathVariable String version) throws RouterException
+    {
+        httpHeaders.put("servicename", serviceName);
+        httpHeaders.put("orgid", orgId);
+        httpHeaders.put("appid", appId);
+        httpHeaders.put("version", version);
+
+        return executionService.executePlainRequest(request, httpHeaders);
+    }
+
     @PostMapping("gateway")
     public Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         return executionService.executeRequest(request, httpHeaders);
