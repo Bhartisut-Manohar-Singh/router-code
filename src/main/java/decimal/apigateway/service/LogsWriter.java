@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
 import static decimal.apigateway.commons.Loggers.GENERAL_LOGGER;
 
@@ -34,6 +37,13 @@ public class LogsWriter
     public void writeLogs(LogsData logsData)
     {
         String finalLogs;
+
+        String requestTime=logsData.getRequestTimeStamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS"));
+        logsData.setRequestTimeStamp(LocalDateTime.parse(requestTime));
+
+        String responseTime=logsData.getResponseTimeStamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS"));
+        logsData.setResponseTimeStamp(LocalDateTime.parse(responseTime));
+
         try
         {
             try
