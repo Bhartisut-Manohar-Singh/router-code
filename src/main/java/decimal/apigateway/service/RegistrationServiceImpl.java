@@ -90,7 +90,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    public Object authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+    public Object  authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
         MicroserviceResponse microserviceResponse = requestValidator.validateAuthentication(request, httpHeaders);
 
