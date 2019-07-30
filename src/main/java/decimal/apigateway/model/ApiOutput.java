@@ -1,7 +1,7 @@
 package decimal.apigateway.model;
 
-import exception.RouterError;
-import exception.RouterException;
+import decimal.apigateway.exception.RouterError;
+import decimal.apigateway.exception.RouterException;
 
 import java.io.Serializable;
 import java.util.List;

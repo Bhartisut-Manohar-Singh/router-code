@@ -5,7 +5,6 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.model.MicroserviceResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Map;
 
 @FeignClient(value =  Constant.API_SECURITY_MICRO_SERVICE)
