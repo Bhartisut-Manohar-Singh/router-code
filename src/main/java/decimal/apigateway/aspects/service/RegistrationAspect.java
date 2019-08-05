@@ -5,6 +5,7 @@ import com.netflix.discovery.util.StringUtil;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.service.LogService;
+import decimal.common.micrometer.ConstantUtil;
 import decimal.common.micrometer.CustomEndpointMetrics;
 import decimal.common.micrometer.CustomMetricsData;
 import decimal.common.utils.CommonUtils;
@@ -34,9 +35,6 @@ public class RegistrationAspect {
     @Autowired
     private CustomEndpointMetrics customEndpointMetrics;
 
-    @Value("${metricsName}")
-    private String registerMetrics;
-
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final static ObjectMapper mapper = new ObjectMapper();
@@ -62,9 +60,9 @@ public class RegistrationAspect {
         }
         try {
             if (httpHeaders.get("version") != null)
-                this.customEndpointMetrics.registerMetrics(registerMetrics, new Long(request.getBytes().length), clientId.get(0), clientId.get(1), httpHeaders.get("username"), httpHeaders.get("servicename"), CommonUtils.getCurrentUTC(), "serviceVersion", httpHeaders.get("version"));
+                this.customEndpointMetrics.registerMetrics(httpHeaders.get("requestid"), new Long(request.getBytes().length), clientId.get(0), clientId.get(1), httpHeaders.get("username"), httpHeaders.get("servicename"), CommonUtils.getCurrentUTC(), "serviceVersion", httpHeaders.get("version"));
             else
-                this.customEndpointMetrics.registerMetrics(registerMetrics, clientId.get(0), clientId.get(1), httpHeaders.get("username"), httpHeaders.get("servicename"), CommonUtils.getCurrentUTC(), new Long(request.getBytes().length));
+                this.customEndpointMetrics.registerMetrics(httpHeaders.get("requestid"), clientId.get(0), clientId.get(1), httpHeaders.get("username"), httpHeaders.get("servicename"), CommonUtils.getCurrentUTC(), new Long(request.getBytes().length));
 
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -77,7 +75,7 @@ public class RegistrationAspect {
     public void updateLogs(Object response) {
         logService.updateLogsData(response, HttpStatus.OK.toString(), Constant.SUCCESS_STATUS);
         try {
-            this.customEndpointMetrics.persistMetrics("SUCCESS", CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response).getBytes().length));
+            this.customEndpointMetrics.persistMetrics(ConstantUtil.SUCCESS_STATUS, CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response).getBytes().length));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
