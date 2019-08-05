@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 
+import java.text.ParseException;
 import java.util.Map;
 
 @Aspect
@@ -52,7 +53,6 @@ public class ExecutionAspect {
         logService.updateLogsData(response, HttpStatus.OK.toString(), Constant.SUCCESS_STATUS);
         try {
             this.customEndpointMetrics.persistMetrics(ConstantUtil.SUCCESS_STATUS, CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response).getBytes().length));
-
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -61,7 +61,9 @@ public class ExecutionAspect {
     @Before(value = "execution(* decimal.apigateway.service.ExecutionServiceImpl.executePlainRequest(..)) && args(request, httpHeaders)")
     public void registerGatewayProcessorMetrics(String request, Map<String, String> httpHeaders) {
         try {
-            this.customEndpointMetrics.registerMetrics(httpHeaders.get("requestid"), new Long(request.getBytes().length), httpHeaders.get("orgid"), httpHeaders.get("appid"), httpHeaders.get("username"), httpHeaders.get("servicename"), CommonUtils.getCurrentUTC(), "serviceVersion", httpHeaders.get("version"));
+//            this.customEndpointMetrics.registerMetrics(httpHeaders.get("requestid"), new Long(request.getBytes().length), httpHeaders.get("orgid"), httpHeaders.get("appid"), httpHeaders.get("username"), httpHeaders.get("servicename"), CommonUtils.getCurrentUTC(), "serviceVersion", httpHeaders.get("version"));
+            this.registerMetrics(request,  httpHeaders);
+
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -72,7 +74,9 @@ public class ExecutionAspect {
                                         String appId, String serviceName, String version) {
 
         try {
-            this.customEndpointMetrics.registerMetrics(httpHeaders.get("requestid"), new Long(request.getBytes().length), orgId, appId, httpHeaders.get("username"), serviceName, CommonUtils.getCurrentUTC(), "serviceVersion", version);
+//            this.customEndpointMetrics.registerMetrics(httpHeaders.get("requestid"), new Long(request.getBytes().length), orgId, appId, httpHeaders.get("username"), serviceName, CommonUtils.getCurrentUTC(), "serviceVersion", version);
+            this.registerMetrics(request,  httpHeaders);
+
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -81,14 +85,44 @@ public class ExecutionAspect {
     @Before(value = "execution(* decimal.apigateway.service.ExecutionServiceImpl.executeRequest(..)) && args(request, httpHeaders)")
     public void registerExecuteRequestMetrics(String request, Map<String, String> httpHeaders) {
 
-        String clientId = httpHeaders.get("clientid");
-
-        String orgid = clientId.split(Constant.TILD_SPLITTER)[0];
-        String appid = clientId.split(Constant.TILD_SPLITTER)[1];
+//        String clientId = httpHeaders.get("clientid");
+//
+//        String orgid = clientId.split(Constant.TILD_SPLITTER)[0];
+//        String appid = clientId.split(Constant.TILD_SPLITTER)[1];
         try {
-            this.customEndpointMetrics.registerMetrics(httpHeaders.get("requestid"), new Long(request.getBytes().length), orgid, appid, httpHeaders.get("username"), httpHeaders.get("servicename"), CommonUtils.getCurrentUTC(), "serviceVersion", httpHeaders.get("version"));
+//            this.customEndpointMetrics.registerMetrics(httpHeaders.get("requestid"), new Long(request.getBytes().length), orgid, appid, httpHeaders.get("username"), httpHeaders.get("servicename"), CommonUtils.getCurrentUTC(), "serviceVersion", httpHeaders.get("version"));
+            this.registerMetrics(request,  httpHeaders);
+
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
+        }
+    }
+
+    public void registerMetrics(String request, Map<String, String> httpHeaders) throws ParseException {
+        String requestId = httpHeaders.get("requestid");
+        String clientId = httpHeaders.get("clientid");
+
+        String orgId = clientId.split(Constant.TILD_SPLITTER)[0];//orgID
+        String appId = clientId.split(Constant.TILD_SPLITTER)[1];//appID
+        String userId = null;
+
+        if (httpHeaders.containsValue("username")) {
+            String userName = httpHeaders.get("username");
+            String[] userArr = httpHeaders.get("username").split(Constant.TILD_SPLITTER);
+            if (userArr.length == 4) {
+                userId = userArr[2];
+            }
+        }
+
+        if (userId != null) {
+            customEndpointMetrics.registerMetrics(requestId, orgId, appId, userId, httpHeaders.get("servicename"),
+                    CommonUtils.getCurrentUTC(),
+                    new Long(request.getBytes().length)
+            );
+        } else {
+            customEndpointMetrics.registerMetrics(requestId, orgId, CommonUtils.getCurrentUTC(), appId, httpHeaders.get("servicename"),
+                    new Long(request.getBytes().length)
+            );
         }
     }
 }
