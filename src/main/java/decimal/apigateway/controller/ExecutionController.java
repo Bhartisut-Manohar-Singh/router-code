@@ -1,7 +1,8 @@
 package decimal.apigateway.controller;
 
 import decimal.apigateway.service.ExecutionService;
-import exception.RouterException;
+import decimal.apigateway.exception.RouterException;
+import io.micrometer.core.annotation.Timed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,11 +17,13 @@ public class ExecutionController
     @Autowired
     ExecutionService executionService;
 
+    @Timed("gatewayProcessor")
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException {
         return executionService.executePlainRequest(request, httpHeaders);
     }
 
+    @Timed("execute")
     @PostMapping("execute/{orgId}/{appId}/{serviceName}/{version}")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String orgId,
                                       @PathVariable String appId, @PathVariable String serviceName, @PathVariable String version) throws RouterException
@@ -33,6 +36,7 @@ public class ExecutionController
         return executionService.executePlainRequest(request, httpHeaders);
     }
 
+    @Timed("gateway")
     @PostMapping("gateway")
     public Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         return executionService.executeRequest(request, httpHeaders);

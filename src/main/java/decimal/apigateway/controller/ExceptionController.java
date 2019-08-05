@@ -1,17 +1,12 @@
 package decimal.apigateway.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import decimal.apigateway.commons.Constant;
-import exception.RouterException;
+import decimal.apigateway.exception.RouterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
 
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
 

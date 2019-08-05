@@ -6,7 +6,7 @@ import decimal.apigateway.enums.RequestValidationTypes;
 import decimal.apigateway.model.LogsData;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.SecurityClient;
-import exception.RouterException;
+import decimal.apigateway.exception.RouterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

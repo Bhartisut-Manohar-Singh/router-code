@@ -7,7 +7,7 @@ import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.EsbClient;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.apigateway.service.validator.RequestValidator;
-import exception.RouterException;
+import decimal.apigateway.exception.RouterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
