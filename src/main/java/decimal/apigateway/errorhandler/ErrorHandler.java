@@ -1,6 +1,6 @@
 package decimal.apigateway.errorhandler;
 
-import exception.RouterException;
+import decimal.apigateway.exception.RouterException;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import org.apache.commons.io.IOUtils;

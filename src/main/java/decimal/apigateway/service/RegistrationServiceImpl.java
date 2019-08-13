@@ -10,7 +10,7 @@ import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.AuthenticationClient;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.apigateway.service.validator.RequestValidator;
-import exception.RouterException;
+import decimal.apigateway.exception.RouterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -90,7 +90,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    public Object authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+    public Object  authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
         MicroserviceResponse microserviceResponse = requestValidator.validateAuthentication(request, httpHeaders);
 

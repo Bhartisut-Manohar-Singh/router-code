@@ -1,4 +1,4 @@
-package exception;
+package decimal.apigateway.exception;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

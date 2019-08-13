@@ -5,7 +5,7 @@ import decimal.apigateway.model.EndpointDetails;
 import decimal.apigateway.model.LogsData;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.LogService;
-import exception.RouterException;
+import decimal.apigateway.exception.RouterException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -17,8 +17,7 @@ import java.util.Map;
 
 @Component
 @Aspect
-public class AuthenticationClientAspects
-{
+public class AuthenticationClientAspects {
     @Autowired
     LogsData logsData;
 
