@@ -17,13 +17,13 @@ public class ExecutionController
     @Autowired
     ExecutionService executionService;
 
-    @Timed("gatewayProcessor")
+    @Timed("apigateway_gatewayProcessor")
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException {
         return executionService.executePlainRequest(request, httpHeaders);
     }
 
-    @Timed("execute")
+    @Timed("apigateway_execute")
     @PostMapping("execute/{orgId}/{appId}/{serviceName}/{version}")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String orgId,
                                       @PathVariable String appId, @PathVariable String serviceName, @PathVariable String version) throws RouterException
@@ -36,7 +36,7 @@ public class ExecutionController
         return executionService.executePlainRequest(request, httpHeaders);
     }
 
-    @Timed("gateway")
+    @Timed("apigateway_gateway")
     @PostMapping("gateway")
     public Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         return executionService.executeRequest(request, httpHeaders);
