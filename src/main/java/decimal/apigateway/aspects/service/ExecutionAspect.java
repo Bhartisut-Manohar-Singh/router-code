@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.service.LogService;
 import decimal.common.micrometer.ConstantUtil;
-import decimal.common.micrometer.CustomEndpointMetrics;
+import decimal.common.micrometer.VahanaKPIMetrics;
 import decimal.common.utils.CommonUtils;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -25,7 +25,7 @@ public class ExecutionAspect {
     private final LogService logService;
 
     @Autowired
-    private CustomEndpointMetrics customEndpointMetrics;
+    private VahanaKPIMetrics vahanaKpiMetrics;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -42,51 +42,27 @@ public class ExecutionAspect {
     @Before(value = "beforeMethod(request, httpHeaders)", argNames = "request, httpHeaders")
     public void initializeLogs(String request, Map<String, String> httpHeaders) {
         logService.initiateLogsData(request, httpHeaders);
+        // Register Vahana Metrics
+        try {
+            this.registerMetrics(request, httpHeaders);
+        } catch (Exception e) {
+            logger.error(e.getMessage() , e);
+        }
     }
 
     @AfterReturning(value = "execution(* decimal.apigateway.service.ExecutionServiceImpl.*(..))", returning = "response")
     public void updateLogs(Object response) {
         logService.updateLogsData(response, HttpStatus.OK.toString(), Constant.SUCCESS_STATUS);
         try {
-            this.customEndpointMetrics.persistMetrics(ConstantUtil.SUCCESS_STATUS, CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response).getBytes().length));
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-    }
-
-    @Before(value = "execution(* decimal.apigateway.service.ExecutionServiceImpl.executePlainRequest(..)) && args(request, httpHeaders)")
-    public void registerGatewayProcessorMetrics(String request, Map<String, String> httpHeaders) {
-        try {
-            this.registerMetrics(request,  httpHeaders);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-    }
-
-    @Before(value = "execution(* decimal.apigateway.service.ExecutionServiceImpl.executePlainRequest(..)) && args(request, httpHeaders, orgId, appId, serviceName, version)")
-    public void registerExecuterMetrics(String request, Map<String, String> httpHeaders, String orgId,
-                                        String appId, String serviceName, String version) {
-        try {
-            this.registerMetrics(request,  httpHeaders);
-
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-    }
-
-    @Before(value = "execution(* decimal.apigateway.service.ExecutionServiceImpl.executeRequest(..)) && args(request, httpHeaders)")
-    public void registerExecuteRequestMetrics(String request, Map<String, String> httpHeaders) {
-        try {
-            this.registerMetrics(request,  httpHeaders);
+            // Persist Vahana HTTP Metrics
+            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.SUCCESS_STATUS, CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response).getBytes().length));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
     }
 
     private void registerMetrics(String request, Map<String, String> httpHeaders) throws ParseException {
-        String requestId = httpHeaders.get("requestid");
         String clientId = httpHeaders.get("clientid");
-
         String orgId = clientId.split(Constant.TILD_SPLITTER)[0];//orgID
         String appId = clientId.split(Constant.TILD_SPLITTER)[1];//appID
         String userId = null;
@@ -100,14 +76,9 @@ public class ExecutionAspect {
         }
 
         if (userId != null) {
-            customEndpointMetrics.registerMetrics(requestId, orgId, appId, userId, httpHeaders.get("servicename"),
-                    CommonUtils.getCurrentUTC(),
-                    new Long(request.getBytes().length)
-            );
+            this.vahanaKpiMetrics.persistVahanaUserKpiCounterMetrics(orgId, appId, userId);
         } else {
-            customEndpointMetrics.registerMetrics(requestId, orgId, CommonUtils.getCurrentUTC(), appId, httpHeaders.get("servicename"),
-                    new Long(request.getBytes().length)
-            );
+            this.vahanaKpiMetrics.registerVahanaHttpKpiMetrics(orgId, appId, httpHeaders.get("servicename"),   new Long(request.getBytes().length), CommonUtils.getCurrentUTC());
         }
     }
 }
