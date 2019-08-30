@@ -55,7 +55,8 @@ public class RegistrationAspect {
     public void updateLogs(Object response) {
         logService.updateLogsData(response, HttpStatus.OK.toString(), Constant.SUCCESS_STATUS);
         try {
-            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.SUCCESS_STATUS, CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response).getBytes().length));
+//            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.SUCCESS_STATUS, CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response).getBytes().length));
+            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.SUCCESS_STATUS, System.currentTimeMillis(), new Long(mapper.writeValueAsString(response).getBytes().length));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -80,8 +81,10 @@ public class RegistrationAspect {
         if (userId != null) {
             this.vahanaKpiMetrics.persistVahanaUserKpiCounterMetrics(orgId, appId, userId);
         } else {
+//            this.vahanaKpiMetrics.registerVahanaHttpKpiMetrics(orgId, appId, httpHeaders.get("servicename"),
+//                    new Long(request.getBytes().length),CommonUtils.getCurrentUTC() );
             this.vahanaKpiMetrics.registerVahanaHttpKpiMetrics(orgId, appId, httpHeaders.get("servicename"),
-                    new Long(request.getBytes().length),CommonUtils.getCurrentUTC() );
+                    new Long(request.getBytes().length), System.currentTimeMillis());
         }
     }
 }
