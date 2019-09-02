@@ -5,6 +5,7 @@ import decimal.apigateway.commons.Jackson;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.model.EndpointDetails;
 import decimal.apigateway.model.LogsData;
+import decimal.logs.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -31,6 +33,12 @@ public class LogService
 
     @Autowired
     LogsWriter logsWriter;
+
+    @Autowired
+    AuditPayload auditPayload;
+
+    @Autowired
+    Payload payload;
 
     public EndpointDetails initiateEndpoint(String type, String request, Map<String, String> httpHeaders)
     {
@@ -66,8 +74,19 @@ public class LogService
             clientId.add(httpHeaders.get("appid"));
         }
 
+        RequestPayload requestPayload = new RequestPayload();
+
         logsData.setOrgId(clientId.get(0));
         logsData.setAppId(clientId.get(1));
+
+        auditPayload.setOrgId(clientId.get(0));
+        auditPayload.setAppId(clientId.get(1));
+        auditPayload.setRequestTimestamp(new Date());
+        auditPayload.setArn(httpHeaders.get("servicename"));
+        auditPayload.setLogType(LogType.BUSINESS);
+        auditPayload.setTransId(httpHeaders.get("requestid"));
+        auditPayload.setSystemName("API_GATEWAY");
+
         logsData.setEndpointDetails(new ArrayList<>());
         logsData.setResourceName(httpHeaders.get("servicename"));
         logsData.setResourceVersion(httpHeaders.get("version"));
@@ -77,6 +96,10 @@ public class LogService
         logsData.setRequest(jackson.objectToObjectNode(request));
         logsData.setRequestHeaders(jackson.objectToObjectNode(httpHeaders));
 
+        requestPayload.setRequest(request);
+        requestPayload.setHeaders(jackson.objectToString(httpHeaders));
+        requestPayload.setRequestTimestamp(new Date());
+
 
         try {
             logsData.setProcessedByServer(InetAddress.getLocalHost().getHostAddress());
@@ -84,6 +107,8 @@ public class LogService
             ERROR_LOGGER.error("Not able to find IP address of machine.", logsData.getRequestId(), e);
             logsData.setProcessedByServer("Not able to find IP address of machine.Error:" + e.getMessage());
         }
+
+        payload.setRequestPayload(requestPayload);
     }
 
     public void updateLogsData(Object response, String statusCode, String status)
@@ -94,6 +119,19 @@ public class LogService
         logsData.setResponseCode(statusCode);
         logsData.setResponseStatus(status);
 
-        logsWriter.writeLogs(new LogsData(logsData));
+        auditPayload.setStatus(status);
+        auditPayload.setMessage("Data has been updated successfully");
+        auditPayload.setResponseTimestamp(new Date());
+
+        ResponsePayload responsePayload = new ResponsePayload();
+        responsePayload.setResponse(jackson.objectToString(response));
+        responsePayload.setResponseCode(statusCode);
+        responsePayload.setResponseMessage(statusCode);
+
+        payload.setResponsePayload(responsePayload);
+        payload.setAuditPayload(new AuditPayload(auditPayload));
+
+        logsWriter.writeAuditPayload(auditPayload, auditPayload.getTransId(), auditPayload.getSystemName());
+        logsWriter.writeSystemPayload(payload, auditPayload.getTransId(), auditPayload.getSystemName());
     }
 }
