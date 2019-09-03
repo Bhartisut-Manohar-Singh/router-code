@@ -6,6 +6,7 @@ import decimal.apigateway.model.LogsData;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.LogService;
 import decimal.apigateway.exception.RouterException;
+import decimal.logs.model.Payload;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -32,28 +33,29 @@ public class SecurityClientAspects
     @Around("feignClients1(requestBody, httpHeaders)")
     public MicroserviceResponse initiateEndpointForSecurity(ProceedingJoinPoint proceedingJoinPoint, String requestBody, Map<String, String> httpHeaders) throws Throwable
     {
-        EndpointDetails endpointDetails = logService.initiateEndpoint(Constant.API_SECURITY_MICRO_SERVICE, requestBody, httpHeaders);
-
+        //EndpointDetails endpointDetails = logService.initiateEndpoint(Constant.API_SECURITY_MICRO_SERVICE, requestBody, httpHeaders);
+        Payload payload=logService.initEndpoint(Constant.API_SECURITY_MICRO_SERVICE,requestBody,httpHeaders);
         MicroserviceResponse response = (MicroserviceResponse) proceedingJoinPoint.proceed();
 
         String status = response.getStatus();
 
-        logService.updateEndpointDetails(response, status, endpointDetails);
-
+       // logService.updateEndpointDetails(response, status, endpointDetails);
+        logService.updateEndpoint(response,status,payload);
         String name = proceedingJoinPoint.getArgs().length > 2 ? proceedingJoinPoint.getSignature().getName() + ":" + proceedingJoinPoint.getArgs()[2] : proceedingJoinPoint.getSignature().getName();
 
         if (!Constant.SUCCESS_STATUS.equalsIgnoreCase(status))
         {
-            endpointDetails.setOtherInfo("Error in executing request for " + name + " in " + Constant.API_SECURITY_MICRO_SERVICE);
+           /// endpointDetails.setOtherInfo("Error in executing request for " + name + " in " + Constant.API_SECURITY_MICRO_SERVICE);
+                payload.getResponsePayload().setResponseMessage("Error in executing request for " + name + " in " + Constant.API_SECURITY_MICRO_SERVICE);
+//            logsData.getEndpointDetails().add(endpointDetails);
 
-            logsData.getEndpointDetails().add(endpointDetails);
 
             throw new RouterException(response.getResponse());
         }
 
-        endpointDetails.setOtherInfo("Successfully executed request for " + name +" in " + Constant.API_SECURITY_MICRO_SERVICE);
-
-        logsData.getEndpointDetails().add(endpointDetails);
+      ///  endpointDetails.setOtherInfo("Successfully executed request for " + name +" in " + Constant.API_SECURITY_MICRO_SERVICE);
+payload.getResponsePayload().setResponseMessage("Successfully executed request for " + name +" in " + Constant.API_SECURITY_MICRO_SERVICE);
+       /// logsData.getEndpointDetails().add(endpointDetails);
 
         return response;
     }

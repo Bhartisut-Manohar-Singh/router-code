@@ -6,6 +6,8 @@ import decimal.apigateway.service.LogService;
 import decimal.common.micrometer.ConstantUtil;
 import decimal.common.micrometer.CustomEndpointMetrics;
 import decimal.common.utils.CommonUtils;
+import decimal.logs.model.BusinessError;
+import decimal.logs.model.ErrorPayload;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
@@ -31,10 +33,21 @@ public class ExceptionAspect {
         this.logService = logService;
     }
 
+    @Autowired
+    ErrorPayload errorPayload;
+
     @AfterReturning(value = "execution(* decimal.apigateway.controller.ExceptionController.*(..))", returning = "response")
     public void exceptionHandler(ResponseEntity<Object> response)
     {
+
+        BusinessError businessError = new BusinessError();
+        businessError.setErrorCode(response.getStatusCode().toString());
+        businessError.setDetailedError(String.valueOf(response.getBody()));
+
+        errorPayload.setBusinessError(businessError);
+
         logService.updateLogsData(response.getBody(), response.getStatusCode().toString(), Constant.FAILURE_STATUS);
+        logService.updateErrorObject(errorPayload);
 
         try {
             this.customEndpointMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS,response.getStatusCode().toString() ,  CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response.getBody()).getBytes().length));

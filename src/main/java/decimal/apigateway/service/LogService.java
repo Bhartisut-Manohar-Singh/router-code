@@ -61,6 +61,28 @@ public class LogService
         endpointDetails.setResponseStatus(status);
     }
 
+    public Payload initEndpoint(String type,String request, Map<String,String> httpHeaders)
+    {
+        RequestPayload requestPayload=new RequestPayload();
+        requestPayload.setHeaders(jackson.objectToObjectNode(request).toString());
+        requestPayload.setRequest(request);
+        requestPayload.setRequestTimestamp(CURRENT_TIME_STAMP.get());
+        payload.setRequestPayload(requestPayload);
+        return payload;
+    }
+
+    public void updateEndpoint(Object response, String status, Payload payload1)
+    {
+    ResponsePayload responsePayload=new ResponsePayload();
+    responsePayload.setResponse(response.toString());
+    responsePayload.setResponseTimestamp(CURRENT_TIME_STAMP.get());
+    responsePayload.setResponseCode(responsePayload.getResponseCode());
+    responsePayload.setResponseHeaders(jackson.objectToObjectNode(response).toString());
+    payload.setResponsePayload(responsePayload);
+    payload.setAuditPayload(new AuditPayload(auditPayload));
+    logsWriter.writeEndpointPayload(auditPayload.getTransId(),auditPayload.getSystemName(),payload);
+    }
+
     public void initiateLogsData(String request, Map<String, String> httpHeaders) {
         List<String> clientId;
         try {
@@ -76,9 +98,6 @@ public class LogService
 
         RequestPayload requestPayload = new RequestPayload();
 
-        logsData.setOrgId(clientId.get(0));
-        logsData.setAppId(clientId.get(1));
-
         auditPayload.setOrgId(clientId.get(0));
         auditPayload.setAppId(clientId.get(1));
         auditPayload.setRequestTimestamp(new Date());
@@ -87,19 +106,9 @@ public class LogService
         auditPayload.setTransId(httpHeaders.get("requestid"));
         auditPayload.setSystemName("API_GATEWAY");
 
-        logsData.setEndpointDetails(new ArrayList<>());
-        logsData.setResourceName(httpHeaders.get("servicename"));
-        logsData.setResourceVersion(httpHeaders.get("version"));
-        logsData.setRequestTimeStamp(CURRENT_TIME_STAMP.get().toLocalDateTime());
-        logsData.setRequestId(httpHeaders.get("requestid"));
-
-        logsData.setRequest(jackson.objectToObjectNode(request));
-        logsData.setRequestHeaders(jackson.objectToObjectNode(httpHeaders));
-
         requestPayload.setRequest(request);
         requestPayload.setHeaders(jackson.objectToString(httpHeaders));
         requestPayload.setRequestTimestamp(new Date());
-
 
         try {
             logsData.setProcessedByServer(InetAddress.getLocalHost().getHostAddress());
@@ -113,11 +122,6 @@ public class LogService
 
     public void updateLogsData(Object response, String statusCode, String status)
     {
-        logsData.setResponseTimeStamp(CURRENT_TIME_STAMP.get().toLocalDateTime());
-        logsData.setExecutionTimeMs(logsData.getResponseTimeStamp().getSecond()*1000 - logsData.getRequestTimeStamp().getSecond()*1000);
-        logsData.setResponse(jackson.objectToObjectNode(response));
-        logsData.setResponseCode(statusCode);
-        logsData.setResponseStatus(status);
 
         auditPayload.setStatus(status);
         auditPayload.setMessage("Data has been updated successfully");
@@ -133,5 +137,10 @@ public class LogService
 
         logsWriter.writeAuditPayload(auditPayload, auditPayload.getTransId(), auditPayload.getSystemName());
         logsWriter.writeSystemPayload(payload, auditPayload.getTransId(), auditPayload.getSystemName());
+    }
+
+    public void updateErrorObject(ErrorPayload errorPayload) {
+        errorPayload.setAuditPayload(new AuditPayload(auditPayload));
+        logsWriter.writeErrorPayload(new ErrorPayload(errorPayload), auditPayload.getTransId(), auditPayload.getSystemName());
     }
 }
