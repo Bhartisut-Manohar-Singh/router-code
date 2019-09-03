@@ -2,6 +2,10 @@ package decimal.apigateway.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.exception.RouterException;
+import decimal.common.micrometer.ConstantUtil;
+import decimal.common.micrometer.VahanaKPIMetrics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,12 +18,25 @@ import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
 public class ExceptionController {
 
     @Autowired
-    ObjectMapper objectMapper;
+    ObjectMapper mapper;
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private VahanaKPIMetrics vahanaKpiMetrics;
 
     @ExceptionHandler(value = RouterException.class)
     public ResponseEntity<Object> handleRouterException(RouterException ex) {
 
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
+
+        try {
+            String errorMsg = ex.getErrorMessage() != null && !ex.getErrorMessage().equals("") ? ex.getErrorMessage() : "Generic Error Msg";
+            String errorCode = ex.getErrorCode() != null && !ex.getErrorCode().equals("") ? ex.getErrorCode() : "Generic ErrorCode";
+            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS, errorCode ,errorMsg ,  System.currentTimeMillis(), new Long(mapper.writeValueAsString(ex).getBytes().length));
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
 
        return new ResponseEntity<>(ex.getResponse(), HttpStatus.BAD_REQUEST);
     }
