@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.service.LogService;
 import decimal.common.micrometer.ConstantUtil;
-import decimal.common.micrometer.CustomEndpointMetrics;
+import decimal.common.micrometer.VahanaKPIMetrics;
 import decimal.common.utils.CommonUtils;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -22,10 +22,11 @@ import java.util.Map;
 @Component
 @Aspect
 public class RegistrationAspect {
+
     private final LogService logService;
 
     @Autowired
-    private CustomEndpointMetrics customEndpointMetrics;
+    private VahanaKPIMetrics vahanaKpiMetrics;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -41,20 +42,21 @@ public class RegistrationAspect {
 
     @Before(value = "beforeMethod(request, httpHeaders, response)", argNames = "request, httpHeaders, response")
     public void initializeLogs(String request, Map<String, String> httpHeaders, HttpServletResponse response) {
+        logService.initiateLogsData(request, httpHeaders);
+        // Register Vahana Metrics
         try {
             this.registerMetrics(request,  httpHeaders);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
-        logService.initiateLogsData(request, httpHeaders);
-
     }
 
     @AfterReturning(value = "execution(* decimal.apigateway.service.RegistrationServiceImpl.*(..))", returning = "response")
     public void updateLogs(Object response) {
         logService.updateLogsData(response, HttpStatus.OK.toString(), Constant.SUCCESS_STATUS);
         try {
-            this.customEndpointMetrics.persistMetrics(ConstantUtil.SUCCESS_STATUS, CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response).getBytes().length));
+//            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.SUCCESS_STATUS, CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response).getBytes().length));
+            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.SUCCESS_STATUS, System.currentTimeMillis(), new Long(mapper.writeValueAsString(response).getBytes().length));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -77,14 +79,12 @@ public class RegistrationAspect {
         }
 
         if (userId != null) {
-            customEndpointMetrics.registerMetrics(requestId, orgId, appId, userId, httpHeaders.get("servicename"),
-                    CommonUtils.getCurrentUTC(),
-                    new Long(request.getBytes().length)
-            );
+            this.vahanaKpiMetrics.persistVahanaUserKpiCounterMetrics(orgId, appId, userId);
         } else {
-            customEndpointMetrics.registerMetrics(requestId, orgId, CommonUtils.getCurrentUTC(), appId, httpHeaders.get("servicename"),
-                    new Long(request.getBytes().length)
-            );
+//            this.vahanaKpiMetrics.registerVahanaHttpKpiMetrics(orgId, appId, httpHeaders.get("servicename"),
+//                    new Long(request.getBytes().length),CommonUtils.getCurrentUTC() );
+            this.vahanaKpiMetrics.registerVahanaHttpKpiMetrics(orgId, appId, httpHeaders.get("servicename"),
+                    new Long(request.getBytes().length), System.currentTimeMillis());
         }
     }
 }
