@@ -1,5 +1,6 @@
 package decimal.apigateway.configuration;
 
+import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.ErrorPayload;
 import decimal.logs.model.LogEntry;
@@ -13,25 +14,30 @@ public class LogsManagementConfiguration {
 
     @Bean
     @RequestScope
-    public AuditPayload auditPayload(){
+    public AuditPayload auditPayload() {
         return new AuditPayload();
     }
 
     @Bean
     @RequestScope
-    public LogEntry logEntry(){
+    public LogEntry logEntry() {
         return new LogEntry();
     }
 
     @Bean
     @RequestScope
-    public Payload payload(){
+    public Payload payload() {
         return new Payload();
     }
 
     @Bean
     @RequestScope
-    public ErrorPayload errorPayload(){
+    public ErrorPayload errorPayload() {
         return new ErrorPayload();
+    }
+
+    @Bean
+    public AuditTraceFilter auditTraceFilter() {
+        return new AuditTraceFilter("API-GATEWAY");
     }
 }

@@ -1,7 +1,7 @@
 package decimal.apigateway.controller;
 
-import decimal.apigateway.service.RegistrationService;
 import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.service.RegistrationService;
 import io.micrometer.core.annotation.Timed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

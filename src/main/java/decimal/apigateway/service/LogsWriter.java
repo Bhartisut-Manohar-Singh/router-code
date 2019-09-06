@@ -1,9 +1,11 @@
 package decimal.apigateway.service;
 
 import decimal.logs.connector.LogsConnector;
-import decimal.logs.model.AuditPayload;
+import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.ErrorPayload;
 import decimal.logs.model.Payload;
+import decimal.logs.model.RequestIdentifier;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,17 +13,20 @@ public class LogsWriter
 {
     private LogsConnector logsConnector = LogsConnector.newInstance();
 
-    public void writeSystemPayload(Payload payload1, String transId, String systemName) {
-        logsConnector.system(transId, systemName, new Payload(payload1));
+    @Autowired
+    AuditTraceFilter auditTraceFilter;
+
+    public void writeSystemPayload(Payload payload) {
+        RequestIdentifier requestIdentifier = auditTraceFilter.requestIdentifier;
+
+        logsConnector.system(requestIdentifier.getRequestId(), requestIdentifier.getSystemName(), new Payload(payload));
     }
 
-    public void writeAuditPayload(AuditPayload auditPayload1, String transId, String systemName) {
-       logsConnector.audit(transId, systemName, new AuditPayload(auditPayload1));
-    }
-
-    public void writeErrorPayload(ErrorPayload errorPayload1,String transId, String systemName)
+    public void writeErrorPayload(ErrorPayload errorPayload)
     {
-        logsConnector.error(transId,systemName, errorPayload1);
+        errorPayload.setRequestIdentifier(auditTraceFilter.requestIdentifier);
+
+        logsConnector.error(auditTraceFilter.requestIdentifier.getRequestId(), auditTraceFilter.requestIdentifier.getSystemName(), new ErrorPayload(errorPayload));
     }
 
     public void writeEndpointPayload(String transId, String systemName, Payload payload)
