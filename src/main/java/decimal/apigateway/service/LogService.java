@@ -82,7 +82,7 @@ public class LogService {
 
         payload.setResponse(responsePayload);
 
-        logsWriter.writeEndpointPayload(auditTraceFilter.requestIdentifier.getRequestId(), auditTraceFilter.requestIdentifier.getSystemName(), payload);
+        logsWriter.writeEndpointPayload(auditTraceFilter.requestIdentifier.getTraceId(), auditTraceFilter.requestIdentifier.getSystemName(), payload);
     }
 
     public void initiateLogsData(String request, Map<String, String> httpHeaders) {

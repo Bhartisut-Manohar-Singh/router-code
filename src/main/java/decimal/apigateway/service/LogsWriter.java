@@ -9,28 +9,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LogsWriter
-{
+public class LogsWriter {
     private LogsConnector logsConnector = LogsConnector.newInstance();
 
     @Autowired
     AuditTraceFilter auditTraceFilter;
 
     public void writeSystemPayload(Payload payload) {
-        RequestIdentifier requestIdentifier = auditTraceFilter.requestIdentifier;
-
-        logsConnector.system(requestIdentifier.getRequestId(), requestIdentifier.getSystemName(), new Payload(payload));
+        payload.setRequestIdentifier(auditTraceFilter.requestIdentifier);
+        logsConnector.system(new Payload(payload));
     }
 
-    public void writeErrorPayload(ErrorPayload errorPayload)
-    {
+    public void writeErrorPayload(ErrorPayload errorPayload) {
         errorPayload.setRequestIdentifier(auditTraceFilter.requestIdentifier);
 
-        logsConnector.error(auditTraceFilter.requestIdentifier.getRequestId(), auditTraceFilter.requestIdentifier.getSystemName(), new ErrorPayload(errorPayload));
+        logsConnector.error(new ErrorPayload(errorPayload));
     }
 
-    public void writeEndpointPayload(String transId, String systemName, Payload payload)
-    {
-        logsConnector.endpoint(transId,systemName,new Payload(payload));
+    public void writeEndpointPayload(String transId, String systemName, Payload payload) {
+        logsConnector.endpoint(new Payload(payload));
     }
 }
