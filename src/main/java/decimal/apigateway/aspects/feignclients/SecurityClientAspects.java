@@ -33,14 +33,20 @@ public class SecurityClientAspects {
     @Around("feignClients1(requestBody, httpHeaders)")
     public MicroserviceResponse initiateEndpointForSecurity(ProceedingJoinPoint proceedingJoinPoint, String requestBody, Map<String, String> httpHeaders) throws Throwable {
         EndpointDetails endpointDetails = logService.initiateEndpoint(Constant.API_SECURITY_MICRO_SERVICE, requestBody, httpHeaders);
+        Payload payload = logService.initEndpoint(Constant.API_SECURITY_MICRO_SERVICE, requestBody, httpHeaders);
+
         MicroserviceResponse response = (MicroserviceResponse) proceedingJoinPoint.proceed();
 
         String status = response.getStatus();
 
         logService.updateEndpointDetails(response, status, endpointDetails);
+
+        logService.updateEndpoint(response, status, payload);
+
         String name = proceedingJoinPoint.getArgs().length > 2 ? proceedingJoinPoint.getSignature().getName() + ":" + proceedingJoinPoint.getArgs()[2] : proceedingJoinPoint.getSignature().getName();
 
         if (!Constant.SUCCESS_STATUS.equalsIgnoreCase(status)) {
+            payload.getResponse().setMessage("Error in executing request for " + name + " in " + Constant.API_SECURITY_MICRO_SERVICE);
             endpointDetails.setOtherInfo("Error in executing request for " + name + " in " + Constant.API_SECURITY_MICRO_SERVICE);
             logsData.getEndpointDetails().add(endpointDetails);
 
@@ -48,6 +54,7 @@ public class SecurityClientAspects {
             throw new RouterException(response.getResponse());
         }
 
+        payload.getResponse().setMessage("Successfully executed request for " + name + " in " + Constant.API_SECURITY_MICRO_SERVICE);
         endpointDetails.setOtherInfo("Successfully executed request for " + name + " in " + Constant.API_SECURITY_MICRO_SERVICE);
         logsData.getEndpointDetails().add(endpointDetails);
 

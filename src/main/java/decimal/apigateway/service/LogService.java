@@ -6,10 +6,7 @@ import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.model.EndpointDetails;
 import decimal.apigateway.model.LogsData;
 import decimal.logs.filters.AuditTraceFilter;
-import decimal.logs.model.ErrorPayload;
-import decimal.logs.model.Payload;
-import decimal.logs.model.Request;
-import decimal.logs.model.Response;
+import decimal.logs.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -106,13 +103,16 @@ public class LogService {
         }
     }
 
-    public void updateLogsData(Object response, String statusCode, String status) {
+    public void createErrorPayload(Object response, String statusCode, String status) {
 
-    }
+        ErrorPayload errorPayload = new ErrorPayload();
 
-    public void updateErrorObject(ErrorPayload errorPayload) {
+        BusinessError businessError = new BusinessError();
+        businessError.setDetailedError(String.valueOf(response));
+        businessError.setErrorCode(statusCode);
+        businessError.setErrorMessage(status);
 
-        errorPayload.setRequestIdentifier(auditTraceFilter.requestIdentifier);
+        errorPayload.setBusinessError(businessError);
 
         logsWriter.writeErrorPayload(errorPayload);
     }

@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.service.LogService;
 import decimal.common.micrometer.ConstantUtil;
-import decimal.common.micrometer.CustomEndpointMetrics;
-import decimal.common.utils.CommonUtils;
-import decimal.logs.model.BusinessError;
+import decimal.common.micrometer.VahanaKPIMetrics;
 import decimal.logs.model.ErrorPayload;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -25,7 +23,10 @@ public class ExceptionAspect {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private CustomEndpointMetrics customEndpointMetrics;
+    private VahanaKPIMetrics vahanaKpiMetrics;
+
+    @Autowired
+    ErrorPayload errorPayload;
 
     private final static ObjectMapper mapper = new ObjectMapper();
 
@@ -33,25 +34,26 @@ public class ExceptionAspect {
         this.logService = logService;
     }
 
-    @Autowired
-    ErrorPayload errorPayload;
-
     @AfterReturning(value = "execution(* decimal.apigateway.controller.ExceptionController.*(..))", returning = "response")
-    public void exceptionHandler(ResponseEntity<Object> response)
-    {
-
-        BusinessError businessError = new BusinessError();
-        businessError.setErrorCode(response.getStatusCode().toString());
-        businessError.setDetailedError(String.valueOf(response.getBody()));
-
-        errorPayload.setBusinessError(businessError);
-
-        logService.updateLogsData(response.getBody(), response.getStatusCode().toString(), Constant.FAILURE_STATUS);
-        logService.updateErrorObject(errorPayload);
-
+    public void exceptionHandler(ResponseEntity<Object> response) {
+        logService.createErrorPayload(response.getBody(), response.getStatusCode().toString(), Constant.FAILURE_STATUS);
         try {
-            this.customEndpointMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS,response.getStatusCode().toString() ,  CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response.getBody()).getBytes().length));
+            String errorMsg = response.getStatusCode().toString()!= null && !response.getStatusCode().toString().equals("") ? response.getStatusCode().toString() : "Generic Error Msg";
+            String errorCode = response.getStatusCodeValue() != 0 ? Integer.toString(response.getStatusCodeValue()) : "Generic ErrorCode";
+//            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS, errorCode ,errorMsg ,  CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response.getBody()).getBytes().length));
+            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS, errorCode ,errorMsg ,  System.currentTimeMillis(), new Long(mapper.writeValueAsString(response.getBody()).getBytes().length));
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
 
+    @AfterReturning(value = "execution(* decimal.apigateway.controller.RegistrationController.*(..))", returning = "response")
+    public void registerExceptionHandler(ResponseEntity<Object> response) {
+        try {
+            String errorMsg = response.getStatusCode().toString()!= null && !response.getStatusCode().toString().equals("") ? response.getStatusCode().toString() : "Generic Error Msg";
+            String errorCode = response.getStatusCodeValue() != 0 ? Integer.toString(response.getStatusCodeValue()) : "Generic ErrorCode";
+            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS, errorCode , errorMsg ,  System.currentTimeMillis(), new Long(mapper.writeValueAsString(response.getBody()).getBytes().length));
+//            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS, errorCode , errorMsg ,  CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response.getBody()).getBytes().length));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
