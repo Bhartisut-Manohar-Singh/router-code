@@ -3,11 +3,9 @@ package decimal.apigateway.service.validator;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.enums.RequestValidationTypes;
-import decimal.apigateway.model.LogsData;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.SecurityClient;
-import decimal.apigateway.exception.RouterException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -19,9 +17,6 @@ public class RequestValidator {
 
     private final
     SecurityClient securityClient;
-
-    @Autowired
-    LogsData logsData;
 
     public RequestValidator(SecurityClient securityClient) {
         this.securityClient = securityClient;
@@ -59,7 +54,6 @@ public class RequestValidator {
 
         httpHeaders.put("username", userName);
 
-        logsData.setLoginId(userName);
         httpHeaders.put("scopeToCheck", size > 3 ? "SECURE" : "OPEN");
 
         response = securityClient.validateExecutionRequest(request, httpHeaders);

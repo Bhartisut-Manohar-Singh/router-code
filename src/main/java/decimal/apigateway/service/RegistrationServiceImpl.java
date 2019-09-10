@@ -5,12 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.ResponseOperations;
-import decimal.apigateway.model.LogsData;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.AuthenticationClient;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.apigateway.service.validator.RequestValidator;
-import decimal.apigateway.exception.RouterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,9 +38,6 @@ public class RegistrationServiceImpl implements RegistrationService {
     RequestValidator requestValidator;
 
     @Autowired
-    LogsData logsData;
-
-    @Autowired
     public RegistrationServiceImpl(SecurityClient securityClient, AuthenticationClient authenticationClient, ObjectMapper objectMapper) {
         this.securityClient = securityClient;
         this.authenticationClient = authenticationClient;
@@ -56,8 +52,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         String userName = jsonNodes.get("username").asText();
 
         httpHeaders.put("username", userName);
-
-        logsData.setLoginId(userName);
 
         MicroserviceResponse registerResponse = authenticationClient.register(request, httpHeaders);
 
@@ -84,8 +78,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         response.addHeader("hash", responseHash.getMessage());
         node.put("hash", responseHash.getMessage());
 
-        logsData.setResponseHeaders(node);
-
         return finalResponse;
     }
 
@@ -95,8 +87,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         MicroserviceResponse microserviceResponse = requestValidator.validateAuthentication(request, httpHeaders);
 
         httpHeaders.put("username", microserviceResponse.getMessage());
-
-        logsData.setLoginId(microserviceResponse.getMessage());
 
         Object plainRequest = microserviceResponse.getResponse();
 
