@@ -19,6 +19,7 @@ ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
 ARG AWS_REGION=ap-south-1
 ARG build_name
+echo build_name
 RUN aws s3 cp s3://vconnect-builds/${PROJECT_NAME}/${build_name}.jar ${PROJECT_HOME}/
 RUN ls -la ${PROJECT_HOME}/
 ARG JAR=${build_name}.jar
