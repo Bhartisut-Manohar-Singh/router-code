@@ -36,7 +36,6 @@ public class ExceptionAspect {
         try {
             String errorMsg = response.getStatusCode().toString()!= null && !response.getStatusCode().toString().equals("") ? response.getStatusCode().toString() : "Generic Error Msg";
             String errorCode = response.getStatusCodeValue() != 0 ? Integer.toString(response.getStatusCodeValue()) : "Generic ErrorCode";
-//            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS, errorCode ,errorMsg ,  CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response.getBody()).getBytes().length));
             this.vahanaKpiMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS, errorCode ,errorMsg ,  System.currentTimeMillis(), new Long(mapper.writeValueAsString(response.getBody()).getBytes().length));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -49,7 +48,6 @@ public class ExceptionAspect {
             String errorMsg = response.getStatusCode().toString()!= null && !response.getStatusCode().toString().equals("") ? response.getStatusCode().toString() : "Generic Error Msg";
             String errorCode = response.getStatusCodeValue() != 0 ? Integer.toString(response.getStatusCodeValue()) : "Generic ErrorCode";
             this.vahanaKpiMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS, errorCode , errorMsg ,  System.currentTimeMillis(), new Long(mapper.writeValueAsString(response.getBody()).getBytes().length));
-//            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS, errorCode , errorMsg ,  CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response.getBody()).getBytes().length));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
