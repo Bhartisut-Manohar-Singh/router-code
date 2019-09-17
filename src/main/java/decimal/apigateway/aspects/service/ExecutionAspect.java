@@ -45,9 +45,7 @@ public class ExecutionAspect {
     public void updateLogs(Object response) {
         try {
             // Persist Vahana HTTP Metrics
-//            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.SUCCESS_STATUS, CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response).getBytes().length));
             this.vahanaKpiMetrics.persistMetrics(ConstantUtil.SUCCESS_STATUS, System.currentTimeMillis(), new Long(mapper.writeValueAsString(response).getBytes().length));
-
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -61,6 +59,7 @@ public class ExecutionAspect {
 
         if (httpHeaders.containsValue("username")) {
             String userName = httpHeaders.get("username");
+            System.out.println(">>>>>>>>>>>> username ="+userName);
             String[] userArr = httpHeaders.get("username").split(Constant.TILD_SPLITTER);
             if (userArr.length == 4) {
                 userId = userArr[2];
@@ -69,9 +68,7 @@ public class ExecutionAspect {
 
         if (userId != null) {
             this.vahanaKpiMetrics.persistVahanaUserKpiCounterMetrics(orgId, appId, userId);
-        } else {
-//            this.vahanaKpiMetrics.registerVahanaHttpKpiMetrics(orgId, appId, httpHeaders.get("servicename"),   new Long(request.getBytes().length), CommonUtils.getCurrentUTC());
-            this.vahanaKpiMetrics.registerVahanaHttpKpiMetrics(orgId, appId, httpHeaders.get("servicename"),   new Long(request.getBytes().length), System.currentTimeMillis());
         }
+        this.vahanaKpiMetrics.registerVahanaHttpKpiMetrics(orgId, appId, httpHeaders.get("servicename"),   new Long(request.getBytes().length), System.currentTimeMillis());
     }
 }
