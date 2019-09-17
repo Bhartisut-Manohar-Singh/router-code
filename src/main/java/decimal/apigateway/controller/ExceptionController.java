@@ -47,7 +47,7 @@ public class ExceptionController {
        return new ResponseEntity<>(ex.getResponse(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = Exception.class)
+   /* @ExceptionHandler(value = Exception.class)
     public ResponseEntity<Object> handleException(Exception ex, HttpServletRequest req)
     {
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
@@ -59,5 +59,5 @@ public class ExceptionController {
         errorResponse.put("errorHint", "See system logs for more detail");
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
+    }*/
 }
