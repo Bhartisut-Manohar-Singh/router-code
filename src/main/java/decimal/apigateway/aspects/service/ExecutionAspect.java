@@ -75,10 +75,15 @@ public class ExecutionAspect {
                 userId = userArr[2];
             }
         }
-
+        logger.info("going to generate user metrics");
         if (userId != null) {
+            logger.info("inside if loop");
+
             this.vahanaKpiMetrics.persistVahanaUserKpiCounterMetrics(orgId, appId, userId);
+            logger.info("user metrics generated");
+
         }
+
         this.vahanaKpiMetrics.registerVahanaHttpKpiMetrics(orgId, appId, httpHeaders.get("servicename"),   new Long(request.getBytes().length), System.currentTimeMillis());
     }
 }
