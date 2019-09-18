@@ -5,12 +5,17 @@ import decimal.logs.model.AuditPayload;
 import decimal.logs.model.ErrorPayload;
 import decimal.logs.model.LogEntry;
 import decimal.logs.model.Payload;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.annotation.RequestScope;
 
 @Configuration
 public class LogsManagementConfiguration {
+
+
+    @Value("${isHttpTracingEnabled}")
+    boolean isHttpTracingEnabled;
 
     @Bean
     @RequestScope
@@ -38,6 +43,6 @@ public class LogsManagementConfiguration {
 
     @Bean
     public AuditTraceFilter auditTraceFilter() {
-        return new AuditTraceFilter("API-GATEWAY");
+        return new AuditTraceFilter("API-GATEWAY", isHttpTracingEnabled);
     }
 }
