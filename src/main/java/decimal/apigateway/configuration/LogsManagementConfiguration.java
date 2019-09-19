@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.annotation.RequestScope;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Configuration
 public class LogsManagementConfiguration {
 
@@ -43,6 +46,15 @@ public class LogsManagementConfiguration {
 
     @Bean
     public AuditTraceFilter auditTraceFilter() {
-        return new AuditTraceFilter("API-GATEWAY", isHttpTracingEnabled);
+        List<String> registeredUrls = new ArrayList<>();
+        registeredUrls.add("register");
+        registeredUrls.add("gateway");
+        registeredUrls.add("gatewayProcessor");
+        registeredUrls.add("execute");
+        registeredUrls.add("logout");
+        registeredUrls.add("forceLogout");
+
+
+        return new AuditTraceFilter("API-GATEWAY", isHttpTracingEnabled, registeredUrls);
     }
 }
