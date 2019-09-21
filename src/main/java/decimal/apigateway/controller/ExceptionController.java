@@ -6,6 +6,7 @@ import decimal.apigateway.exception.RouterException;
 import decimal.common.micrometer.ConstantUtil;
 import decimal.common.micrometer.VahanaKPIMetrics;
 import decimal.logs.connector.LogsConnector;
+import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.ErrorPayload;
 import decimal.logs.model.SystemError;
 import org.slf4j.Logger;
@@ -52,6 +53,9 @@ public class ExceptionController {
        return new ResponseEntity<>(ex.getResponse(), HttpStatus.BAD_REQUEST);
     }
 
+    @Autowired
+    AuditTraceFilter auditTraceFilter;
+
     private void createErrorPayload(Exception ex) {
 
         SystemError systemError = new SystemError();
@@ -72,6 +76,8 @@ public class ExceptionController {
         ErrorPayload errorPayload = new ErrorPayload();
         errorPayload.setSystemError(systemError);
         errorPayload.setTimestamp(Instant.now());
+
+        errorPayload.setRequestIdentifier(auditTraceFilter.requestIdentifier);
 
         LogsConnector.newInstance().error(errorPayload, ex);
     }
