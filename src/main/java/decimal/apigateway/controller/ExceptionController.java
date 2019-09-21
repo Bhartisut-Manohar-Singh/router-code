@@ -5,6 +5,9 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.common.micrometer.ConstantUtil;
 import decimal.common.micrometer.VahanaKPIMetrics;
+import decimal.logs.connector.LogsConnector;
+import decimal.logs.model.ErrorPayload;
+import decimal.logs.model.SystemError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +17,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.servlet.http.HttpServletRequest;
-
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,10 +47,36 @@ public class ExceptionController {
             logger.error(e.getMessage(), e);
         }
 
+        createErrorPayload(ex);
+
        return new ResponseEntity<>(ex.getResponse(), HttpStatus.BAD_REQUEST);
     }
 
-   /* @ExceptionHandler(value = Exception.class)
+    private void createErrorPayload(Exception ex) {
+
+        SystemError systemError = new SystemError();
+
+        if(ex instanceof RouterException){
+            RouterException exception = (RouterException) ex;
+            systemError.setErrorCode(exception.getErrorCode());
+            systemError.setMessage(exception.getMessage());
+            systemError.setDetailedError(exception.getErrorHint());
+        }
+
+        else {
+            systemError.setErrorCode(HttpStatus.BAD_REQUEST.toString());
+            systemError.setMessage("Some error occurred when executing request " + ex.getMessage());
+        }
+
+
+        ErrorPayload errorPayload = new ErrorPayload();
+        errorPayload.setSystemError(systemError);
+        errorPayload.setTimestamp(Instant.now());
+
+        LogsConnector.newInstance().error(errorPayload, ex);
+    }
+
+    @ExceptionHandler(value = Exception.class)
     public ResponseEntity<Object> handleException(Exception ex, HttpServletRequest req)
     {
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
@@ -58,6 +87,8 @@ public class ExceptionController {
         errorResponse.put("errorType", "SYSTEM");
         errorResponse.put("errorHint", "See system logs for more detail");
 
+        createErrorPayload(ex);
+
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }*/
+    }
 }

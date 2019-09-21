@@ -1,10 +1,10 @@
 package decimal.apigateway.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Jackson;
 import decimal.logs.filters.AuditTraceFilter;
-import decimal.logs.model.*;
+import decimal.logs.model.Payload;
+import decimal.logs.model.Request;
+import decimal.logs.model.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,30 +50,5 @@ public class LogService {
         payload.setResponse(responsePayload);
 
         logsWriter.writeEndpointPayload(auditTraceFilter.requestIdentifier.getTraceId(), auditTraceFilter.requestIdentifier.getSystemName(), payload);
-    }
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    public void createErrorPayload(Object response, String statusCode, String status) {
-
-        ErrorPayload errorPayload = new ErrorPayload();
-        errorPayload.setTimestamp(Instant.now());
-
-        BusinessError businessError = new BusinessError();
-
-        ObjectNode jsonNodes = objectMapper.convertValue(response, ObjectNode.class);
-
-        statusCode = jsonNodes.get("status") != null ? jsonNodes.get("status").asText() : statusCode;
-
-        String message = jsonNodes.get("message") !=null ? jsonNodes.get("message").asText() : status;
-
-        businessError.setDetailedError(jsonNodes.toString());
-        businessError.setErrorCode(statusCode);
-        businessError.setErrorMessage(message);
-
-        errorPayload.setBusinessError(businessError);
-
-        logsWriter.writeErrorPayload(errorPayload);
     }
 }
