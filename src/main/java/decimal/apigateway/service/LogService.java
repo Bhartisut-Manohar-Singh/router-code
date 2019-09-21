@@ -8,6 +8,7 @@ import decimal.logs.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 
@@ -44,6 +45,8 @@ public class LogService {
         responsePayload.setStatusCode(responsePayload.getStatusCode());
         responsePayload.setStatus(status);
 
+        payload.setTimeTaken(Duration.between(responsePayload.getTimestamp(),payload.getRequest().getTimestamp()).getSeconds() *1000);
+
         payload.setResponse(responsePayload);
 
         logsWriter.writeEndpointPayload(auditTraceFilter.requestIdentifier.getTraceId(), auditTraceFilter.requestIdentifier.getSystemName(), payload);
@@ -55,6 +58,7 @@ public class LogService {
     public void createErrorPayload(Object response, String statusCode, String status) {
 
         ErrorPayload errorPayload = new ErrorPayload();
+        errorPayload.setTimestamp(Instant.now());
 
         BusinessError businessError = new BusinessError();
 
