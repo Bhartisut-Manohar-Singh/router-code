@@ -82,7 +82,7 @@ public class ExceptionController {
         LogsConnector.newInstance().error(errorPayload, ex);
     }
 
-    @ExceptionHandler(value = Exception.class)
+  /*  @ExceptionHandler(value = Exception.class)
     public ResponseEntity<Object> handleException(Exception ex, HttpServletRequest req)
     {
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
@@ -96,5 +96,5 @@ public class ExceptionController {
         createErrorPayload(ex);
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
+    }*/
 }
