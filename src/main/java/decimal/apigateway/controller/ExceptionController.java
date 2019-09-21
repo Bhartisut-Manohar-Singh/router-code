@@ -1,7 +1,7 @@
 package decimal.apigateway.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import decimal.apigateway.commons.Constant;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.exception.RouterException;
 import decimal.common.micrometer.ConstantUtil;
 import decimal.common.micrometer.VahanaKPIMetrics;
@@ -17,10 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
 
@@ -60,18 +57,33 @@ public class ExceptionController {
 
         SystemError systemError = new SystemError();
 
-        if(ex instanceof RouterException){
+        if(ex instanceof RouterException)
+        {
             RouterException exception = (RouterException) ex;
-            systemError.setErrorCode(exception.getErrorCode());
-            systemError.setMessage(exception.getMessage());
-            systemError.setDetailedError(exception.getErrorHint());
-        }
 
+            Object response = exception.getResponse();
+
+            if(response != null){
+                ObjectNode jsonNodes = mapper.convertValue(response, ObjectNode.class);
+
+                String statusCode = jsonNodes.get("status") != null ? jsonNodes.get("status").asText() : HttpStatus.BAD_REQUEST.toString();
+
+                String message = jsonNodes.get("message") !=null ? jsonNodes.get("message").asText() : "Some error occurred when executing request";
+                systemError.setErrorCode(statusCode);
+                systemError.setMessage(message);
+                systemError.setDetailedError(jsonNodes.toString());
+
+            }else {
+
+                systemError.setErrorCode(exception.getErrorCode() == null || exception.getErrorCode().isEmpty() ? HttpStatus.BAD_REQUEST.toString() : exception.getErrorCode());
+                systemError.setMessage(exception.getMessage());
+                systemError.setDetailedError(exception.getErrorHint());
+            }
+        }
         else {
             systemError.setErrorCode(HttpStatus.BAD_REQUEST.toString());
             systemError.setMessage("Some error occurred when executing request " + ex.getMessage());
         }
-
 
         ErrorPayload errorPayload = new ErrorPayload();
         errorPayload.setSystemError(systemError);
