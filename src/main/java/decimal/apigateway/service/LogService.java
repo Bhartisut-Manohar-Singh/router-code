@@ -8,7 +8,6 @@ import decimal.logs.model.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 
@@ -45,7 +44,7 @@ public class LogService {
         responsePayload.setStatusCode(responsePayload.getStatusCode());
         responsePayload.setStatus(status);
 
-        payload.setTimeTaken(Duration.between(responsePayload.getTimestamp(),payload.getRequest().getTimestamp()).getSeconds() *1000);
+        payload.setTimeTaken(responsePayload.getTimestamp().toEpochMilli() -payload.getRequest().getTimestamp().toEpochMilli());
 
         payload.setResponse(responsePayload);
 
