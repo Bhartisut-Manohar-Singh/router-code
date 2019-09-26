@@ -3,10 +3,10 @@ package decimal.apigateway.service.validator;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.enums.RequestValidationTypes;
-import decimal.apigateway.model.LogsData;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.SecurityClient;
-import decimal.apigateway.exception.RouterException;
+import decimal.logs.filters.AuditTraceFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +19,6 @@ public class RequestValidator {
 
     private final
     SecurityClient securityClient;
-
-    @Autowired
-    LogsData logsData;
 
     public RequestValidator(SecurityClient securityClient) {
         this.securityClient = securityClient;
@@ -45,6 +42,9 @@ public class RequestValidator {
         }
     }
 
+    @Autowired
+    AuditTraceFilter auditTraceFilter;
+
     public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders) throws RouterException {
         String clientId = httpHeaders.get("clientid");
 
@@ -59,13 +59,14 @@ public class RequestValidator {
 
         httpHeaders.put("username", userName);
 
-        logsData.setLoginId(userName);
         httpHeaders.put("scopeToCheck", size > 3 ? "SECURE" : "OPEN");
 
         response = securityClient.validateExecutionRequest(request, httpHeaders);
 
         httpHeaders.put("loginid", userName.split(Constant.TILD_SPLITTER)[2]);
         httpHeaders.put("logsrequired", response.getResponse().toString());
+
+        auditTraceFilter.requestIdentifier.setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
 
         return httpHeaders;
     }

@@ -1,9 +1,14 @@
 package decimal.apigateway.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.exception.RouterException;
 import decimal.common.micrometer.ConstantUtil;
 import decimal.common.micrometer.VahanaKPIMetrics;
+import decimal.logs.connector.LogsConnector;
+import decimal.logs.filters.AuditTraceFilter;
+import decimal.logs.model.ErrorPayload;
+import decimal.logs.model.SystemError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.Instant;
 
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
 
@@ -38,7 +45,53 @@ public class ExceptionController {
             logger.error(e.getMessage(), e);
         }
 
+        createErrorPayload(ex);
+
        return new ResponseEntity<>(ex.getResponse(), HttpStatus.BAD_REQUEST);
+    }
+
+    @Autowired
+    AuditTraceFilter auditTraceFilter;
+
+    private void createErrorPayload(Exception ex) {
+
+        SystemError systemError = new SystemError();
+
+        if(ex instanceof RouterException)
+        {
+            RouterException exception = (RouterException) ex;
+
+            Object response = exception.getResponse();
+
+            if(response != null){
+                ObjectNode jsonNodes = mapper.convertValue(response, ObjectNode.class);
+
+                String statusCode = jsonNodes.get("status") != null ? jsonNodes.get("status").asText() : HttpStatus.BAD_REQUEST.toString();
+
+                String message = jsonNodes.get("message") !=null ? jsonNodes.get("message").asText() : "Some error occurred when executing request";
+                systemError.setErrorCode(statusCode);
+                systemError.setMessage(message);
+                systemError.setDetailedError(jsonNodes.toString());
+
+            }else {
+
+                systemError.setErrorCode(exception.getErrorCode() == null || exception.getErrorCode().isEmpty() ? HttpStatus.BAD_REQUEST.toString() : exception.getErrorCode());
+                systemError.setMessage(exception.getMessage());
+                systemError.setDetailedError(exception.getErrorHint());
+            }
+        }
+        else {
+            systemError.setErrorCode(HttpStatus.BAD_REQUEST.toString());
+            systemError.setMessage("Some error occurred when executing request " + ex.getMessage());
+        }
+
+        ErrorPayload errorPayload = new ErrorPayload();
+        errorPayload.setSystemError(systemError);
+        errorPayload.setTimestamp(Instant.now());
+
+        errorPayload.setRequestIdentifier(auditTraceFilter.requestIdentifier);
+
+        LogsConnector.newInstance().error(errorPayload, ex);
     }
 
   /*  @ExceptionHandler(value = Exception.class)
@@ -51,6 +104,8 @@ public class ExceptionController {
         errorResponse.put("message", "Some error occurred on router. Error is: " + ex.getMessage());
         errorResponse.put("errorType", "SYSTEM");
         errorResponse.put("errorHint", "See system logs for more detail");
+
+        createErrorPayload(ex);
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }*/

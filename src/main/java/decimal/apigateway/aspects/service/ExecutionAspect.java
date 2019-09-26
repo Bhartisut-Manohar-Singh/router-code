@@ -2,10 +2,8 @@ package decimal.apigateway.aspects.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
-import decimal.apigateway.service.LogService;
 import decimal.common.micrometer.ConstantUtil;
 import decimal.common.micrometer.VahanaKPIMetrics;
-import decimal.common.utils.CommonUtils;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -13,16 +11,14 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+
 import java.text.ParseException;
 import java.util.Map;
 
 @Aspect
 @Component
 public class ExecutionAspect {
-
-    private final LogService logService;
 
     @Autowired
     private VahanaKPIMetrics vahanaKpiMetrics;
@@ -31,17 +27,12 @@ public class ExecutionAspect {
 
     private final static ObjectMapper mapper = new ObjectMapper();
 
-    public ExecutionAspect(LogService logService) {
-        this.logService = logService;
-    }
-
     @Pointcut(value = "execution(* decimal.apigateway.service.ExecutionServiceImpl.*(..)) && args(request, httpHeaders)", argNames = "request, httpHeaders")
     public void beforeMethod(String request, Map<String, String> httpHeaders) {
     }
 
     @Before(value = "beforeMethod(request, httpHeaders)", argNames = "request, httpHeaders")
     public void initializeLogs(String request, Map<String, String> httpHeaders) {
-        logService.initiateLogsData(request, httpHeaders);
         // Register Vahana Metrics
         try {
             this.registerMetrics(request, httpHeaders);
@@ -52,7 +43,6 @@ public class ExecutionAspect {
 
     @AfterReturning(value = "execution(* decimal.apigateway.service.ExecutionServiceImpl.*(..))", returning = "response")
     public void updateLogs(Object response) {
-        logService.updateLogsData(response, HttpStatus.OK.toString(), Constant.SUCCESS_STATUS);
         try {
             // Persist Vahana HTTP Metrics
             this.vahanaKpiMetrics.persistMetrics(ConstantUtil.SUCCESS_STATUS, System.currentTimeMillis(), new Long(mapper.writeValueAsString(response).getBytes().length));

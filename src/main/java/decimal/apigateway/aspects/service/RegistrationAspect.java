@@ -5,7 +5,6 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.service.LogService;
 import decimal.common.micrometer.ConstantUtil;
 import decimal.common.micrometer.VahanaKPIMetrics;
-import decimal.common.utils.CommonUtils;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -13,8 +12,8 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+
 import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
 import java.util.Map;
@@ -42,7 +41,6 @@ public class RegistrationAspect {
 
     @Before(value = "beforeMethod(request, httpHeaders, response)", argNames = "request, httpHeaders, response")
     public void initializeLogs(String request, Map<String, String> httpHeaders, HttpServletResponse response) {
-        logService.initiateLogsData(request, httpHeaders);
         // Register Vahana Metrics
         try {
             this.registerMetrics(request,  httpHeaders);
@@ -53,7 +51,6 @@ public class RegistrationAspect {
 
     @AfterReturning(value = "execution(* decimal.apigateway.service.RegistrationServiceImpl.*(..))", returning = "response")
     public void updateLogs(Object response) {
-        logService.updateLogsData(response, HttpStatus.OK.toString(), Constant.SUCCESS_STATUS);
         try {
             this.vahanaKpiMetrics.persistMetrics(ConstantUtil.SUCCESS_STATUS, System.currentTimeMillis(), new Long(mapper.writeValueAsString(response).getBytes().length));
         } catch (Exception e) {
