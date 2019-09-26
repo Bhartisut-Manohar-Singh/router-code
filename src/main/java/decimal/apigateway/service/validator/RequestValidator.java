@@ -71,6 +71,28 @@ public class RequestValidator {
         return httpHeaders;
     }
 
+    public Map<String, String> validateDynamicRequest(String request, Map<String, String> httpHeaders){
+
+        String clientId = httpHeaders.get("clientid");
+
+        httpHeaders.put("orgid", clientId.split(Constant.TILD_SPLITTER)[0]);
+        httpHeaders.put("appid", clientId.split(Constant.TILD_SPLITTER)[1]);
+
+        MicroserviceResponse response = securityClient.validate(request, httpHeaders, RequestValidationTypes.REQUEST.name());
+
+        String userName = response.getResponse().toString();
+
+        httpHeaders.put("username", userName);
+
+        RequestValidationTypes[] requestValidationTypesArr = {APPLICATION, INACTIVE_SESSION, SESSION, IP, TXN_KEY, HASH};
+
+        for (RequestValidationTypes requestValidationTypes : requestValidationTypesArr) {
+            securityClient.validate(request, httpHeaders, requestValidationTypes.name());
+        }
+
+        return httpHeaders;
+    }
+
     public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterException {
         return securityClient.validateAuthentication(request, httpHeaders);
     }
