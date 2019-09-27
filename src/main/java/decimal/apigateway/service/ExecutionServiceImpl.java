@@ -89,6 +89,8 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
+        System.out.println("Decrypted request is: " + node.toString());
+
         MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), updateHttpHeaders);
 
         String requestURI = httpServletRequest.getRequestURI();
@@ -107,7 +109,11 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.GET, requestEntity, Object.class);
 
-        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(exchange.getBody(), updateHttpHeaders);
+        MicroserviceResponse dynamicResponse = new MicroserviceResponse();
+        dynamicResponse.setStatus(Constant.SUCCESS_STATUS);
+        dynamicResponse.setResponse(exchange.getBody());
+
+        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
         if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus()))
         {
