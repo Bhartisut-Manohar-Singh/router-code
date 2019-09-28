@@ -85,29 +85,35 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     @Override
     public Object executeDynamicRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
+
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
-
-        System.out.println("Decrypted request is: " + node.toString());
 
         MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), updateHttpHeaders);
 
         String requestURI = httpServletRequest.getRequestURI();
 
-        String basePath = path + "/dynamic-router/" + serviceName;
+        String basePath = path + "/engine/v1/dynamic-router/" + serviceName;
 
         HttpHeaders httpHeaders1 = new HttpHeaders();
 
         updateHttpHeaders.forEach(httpHeaders1::add);
 
-        HttpEntity<String> requestEntity = new HttpEntity<>(decryptedResponse.getResponse().toString(), httpHeaders1);
+        JsonNode jsonNode = objectMapper.readValue(decryptedResponse.getResponse().toString(), JsonNode.class);
+
+        String actualRequest = jsonNode.get("requestData").toString();
+
+        System.out.println("Actual request is: " + actualRequest);
+        HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
 
         String mapping = requestURI.replaceAll(basePath, "");
 
         String serviceUrl = "http://" + serviceName + getContextPath(serviceName) + mapping;
 
-        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.GET, requestEntity, Object.class);
+        System.out.println("Final Url to be called is: " + serviceUrl);
+
+        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         dynamicResponse.setStatus(Constant.SUCCESS_STATUS);
@@ -128,19 +134,28 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     private String getContextPath(String serviceName) throws RouterException {
+
+        System.out.println("Service name is: " + serviceName.toLowerCase());
         String contextPath="";
 
-        List<ServiceInstance> instances = discoveryClient.getInstances(serviceName);
+        List<String> services = discoveryClient.getServices();
+
+        services.forEach(System.out::println);
+
+        List<ServiceInstance> instances = discoveryClient.getInstances(serviceName.toLowerCase());
+
 
         if(instances.isEmpty()){
             throw new RouterException(Constant.FAILURE_STATUS, "Service with name: " + serviceName + " is not registered with discovery server", null);
         }
+
+        System.out.println("Number of Instances found are: " + instances.size());
 
         for (ServiceInstance serviceInstance : instances) {
             Map<String, String> metadata = serviceInstance.getMetadata();
             contextPath = metadata.get("context-path");
         }
 
-        return contextPath;
+        return contextPath == null ? "" : contextPath;
     }
 }

@@ -20,7 +20,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpServerErrorException;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
 
@@ -63,7 +66,7 @@ public class ExceptionController {
         MicroserviceResponse microserviceResponse = new MicroserviceResponse(status, message, errorResponse);
 
         createErrorPayload(exception);
-        
+
         return new ResponseEntity<>(microserviceResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -111,7 +114,7 @@ public class ExceptionController {
         LogsConnector.newInstance().error(errorPayload, ex);
     }
 
-  /*  @ExceptionHandler(value = Exception.class)
+    @ExceptionHandler(value = Exception.class)
     public ResponseEntity<Object> handleException(Exception ex, HttpServletRequest req)
     {
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
@@ -125,5 +128,5 @@ public class ExceptionController {
         createErrorPayload(ex);
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }*/
+    }
 }
