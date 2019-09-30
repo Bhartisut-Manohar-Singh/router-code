@@ -53,6 +53,7 @@ public class LogsManagementConfiguration {
         registeredUrls.add("execute");
         registeredUrls.add("logout");
         registeredUrls.add("forceLogout");
+        registeredUrls.add("dynamic-router");
 
 
         return new AuditTraceFilter("API-GATEWAY", isHttpTracingEnabled, registeredUrls);
