@@ -1,9 +1,19 @@
 package decimal.apigateway.controller;
 
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionService;
+import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
+import decimal.apigateway.service.multipart.MultipartSerive;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
@@ -15,6 +25,10 @@ public class ExecutionController
 {
     @Autowired
     ExecutionService executionService;
+
+
+    @Autowired
+    MultipartSerive multipartSerive;
 
 //    @Timed("apigateway_gatewayProcessor")
     @PostMapping("gatewayProcessor")
