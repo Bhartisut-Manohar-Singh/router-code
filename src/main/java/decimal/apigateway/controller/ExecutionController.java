@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
 
@@ -53,5 +54,11 @@ public class ExecutionController
     @PostMapping("gateway")
     public Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         return executionService.executeRequest(request, httpHeaders);
+    }
+
+    @PostMapping(value = "dynamic-router/{serviceName}/**")
+    public Object executeService(@RequestBody String request, HttpServletRequest httpServletRequest, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName) throws IOException, RouterException {
+
+        return executionService.executeDynamicRequest(httpServletRequest, request, httpHeaders, serviceName);
     }
 }

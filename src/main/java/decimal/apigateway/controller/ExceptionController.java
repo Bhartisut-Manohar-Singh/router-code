@@ -2,7 +2,9 @@ package decimal.apigateway.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.model.MicroserviceResponse;
 import decimal.common.micrometer.ConstantUtil;
 import decimal.common.micrometer.VahanaKPIMetrics;
 import decimal.logs.connector.LogsConnector;
@@ -16,8 +18,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpServerErrorException;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
 
@@ -48,6 +54,20 @@ public class ExceptionController {
         createErrorPayload(ex);
 
        return new ResponseEntity<>(ex.getResponse(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value =  HttpServerErrorException.class)
+    public ResponseEntity<Object> handleHttpServerErrorException(HttpServerErrorException exception){
+        String errorResponse = exception.getResponseBodyAsString();
+
+        String message = "Some error occurred when executing request";
+        String status = Constant.FAILURE_STATUS;
+
+        MicroserviceResponse microserviceResponse = new MicroserviceResponse(status, message, errorResponse);
+
+        createErrorPayload(exception);
+
+        return new ResponseEntity<>(microserviceResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Autowired
@@ -93,7 +113,7 @@ public class ExceptionController {
         LogsConnector.newInstance().error(errorPayload, ex);
     }
 
-  /*  @ExceptionHandler(value = Exception.class)
+    @ExceptionHandler(value = Exception.class)
     public ResponseEntity<Object> handleException(Exception ex, HttpServletRequest req)
     {
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
@@ -107,5 +127,5 @@ public class ExceptionController {
         createErrorPayload(ex);
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }*/
+    }
 }
