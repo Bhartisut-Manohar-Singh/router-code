@@ -3,14 +3,14 @@ kind: Service
 metadata:
   name: api-gateway
   annotations:
-    alb.ingress.kubernetes.io/healthcheck-path: /admin-server
+    alb.ingress.kubernetes.io/healthcheck-path: /api-gateway
   labels:
     app: api-gateway
 spec:
   type: NodePort
   ports:
-  - nodePort: 31797
-    port: 9015
+  - nodePort: 31798
+    port: 9000
     targetPort: 80
     protocol: TCP
   selector:
@@ -120,7 +120,7 @@ spec:
       - name: api-gateway-test
         image: 712693083859.dkr.ecr.ap-south-1.amazonaws.com/tpg-admin-server:jenkins-build-1.0.58
         ports:
-        - containerPort: 9015
+        - containerPort: 9000
         imagePullPolicy: Always
         resources:
           requests:
