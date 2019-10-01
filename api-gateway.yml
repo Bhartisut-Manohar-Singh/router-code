@@ -25,75 +25,75 @@ metadata:
   namespace: default
 data:
   application.properties: |-
-spring.application.name:router
+    spring.application.name: router
 
-server.port:9000
+    server.port: 9000
 
-server.compression.enabled:true
-server.compression.min-response-size:1KB
-server.compression.mime-types:application/json,application/xml,text/html,text/xml,text/plain
+    server.compression.enabled: true
+    server.compression.min-response-size: 1KB
+    server.compression.mime-types: application/json,application/xml,text/html,text/xml,text/plain
 
-server.servlet.context-path:/router
+    server.servlet.context-path: /router
 
-eureka.client.service-url.defaultZone:http://localhost:8761/eureka
-eureka.instance.prefer-ip-address:true
-eureka.instance.lease-renewal-interval-in-seconds:2
-eureka.instance.lease-expiration-duration-in-seconds:5
-eureka.client.registry-fetch-interval-seconds:5
+    eureka.client.service-url.defaultZone: http://localhost:8761/eureka
+    eureka.instance.prefer-ip-address: true
+    eureka.instance.lease-renewal-interval-in-seconds: 2
+    eureka.instance.lease-expiration-duration-in-seconds: 5
+    eureka.client.registry-fetch-interval-seconds: 5
 
-info.app.name:Api Gateway
-info.app.description:An Api gateway which will handle all the request coming to vahana
-info.app.version:1.0
+    info.app.name: Api Gateway
+    info.app.description: An Api gateway which will handle all the request coming to vahana
+    info.app.version: 1.0
 
-feign.client.config.default.connectTimeout: 160000000
-feign.client.config.default.readTimeout: 160000000
+    feign.client.config.default.connectTimeout: 160000000
+    feign.client.config.default.readTimeout: 160000000
 
-feign.client.config.default.logger-level:FULL
+    feign.client.config.default.logger-level: FULL
 
-isLogEnabled:false
+    isLogEnabled: false
 
-tempLogsPath:E:\\logs
-kafka.integration.url : 10.20.1.103:9092
+    tempLogsPath: E:\\logs
+    kafka.integration.url: 10.20.1.103:9092
 
-keys_to_mask:
-microServiceLogs:OFF
+    keys_to_mask:
+    microServiceLogs: OFF
 
 
-corePoolSize:20
-maxPoolSize:50
-queueCapacity:50
-timeToLive:10
+    corePoolSize: 20
+    maxPoolSize: 50
+    queueCapacity: 50
+    timeToLive: 10
 
 #management.endpoints.web.exposure.include=info, health,heapdump,features,threaddump,metrics,loggers,logfile
 #management.endpoint.health.show-details=always
 
-spring.boot.admin.client.instance.management-base-url:http://127.0.0.1:9000/router
-spring.boot.admin.client.instance.service-url:http://127.0.0.1:9000/router
-spring.boot.admin.client.instance.name:router
-spring.boot.admin.client.instance.prefer-ip:true
-spring.boot.admin.client.url:http://localhost:9015
+    spring.boot.admin.client.instance.management-base-url: http://127.0.0.1:9000/router
+    spring.boot.admin.client.instance.service-url: http://127.0.0.1:9000/router
+    spring.boot.admin.client.instance.name: router
+    spring.boot.admin.client.instance.prefer-ip: true
+    spring.boot.admin.client.url: http://localhost:9015
 
-spring.boot.admin.client.username:admin
-spring.boot.admin.client.password:admin
+    spring.boot.admin.client.username: admin
+    spring.boot.admin.client.password: admin
 
-spring.boot.admin.client.instance.metadata.tags.environment:DEV
-info.tags.name:VAHANA
+    spring.boot.admin.client.instance.metadata.tags.environment: DEV
+    info.tags.name: VAHANA
 
 #logging.file=/deployment/logs/vconnect/api-gateway/general.log
 #logging.config=/deployment/vahana-services/api-gateway/resources/log4j2.xml
 # Add Micrometer Config
-management.endpoint.metrics.enabled:true
-management.endpoints.web.exposure.include:*
-management.endpoint.prometheus.enabled:true
-management.endpoint.health.show-details:always
-management.metrices.export.prometheus.enabled:true
+    management.endpoint.metrics.enabled: true
+    management.endpoints.web.exposure.include: *
+    management.endpoint.prometheus.enabled: true
+    management.endpoint.health.show-details: always
+    management.metrices.export.prometheus.enabled: true
 
 #metricsName=api-gateway
 
-isHttpTracingEnabled:true
-host:172.30.0.215
-service:api-gateway
-region:dev
+    isHttpTracingEnabled: true
+    host: 172.30.0.215
+    service: api-gateway
+    region: dev
 
 
 ---
