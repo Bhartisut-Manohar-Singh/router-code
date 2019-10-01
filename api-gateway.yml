@@ -130,7 +130,7 @@ spec:
           name: api-gateway-volume    
       restartPolicy: Always
       imagePullSecrets:
-      - name: aws-ecr-4
+      - name: aws-ecr-5
         
       
       volumes:
