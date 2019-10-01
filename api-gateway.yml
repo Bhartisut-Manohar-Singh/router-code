@@ -64,8 +64,8 @@ data:
     queueCapacity: 50
     timeToLive: 10
 
-#management.endpoints.web.exposure.include=info, health,heapdump,features,threaddump,metrics,loggers,logfile
-#management.endpoint.health.show-details=always
+    #management.endpoints.web.exposure.include=info, health,heapdump,features,threaddump,metrics,loggers,logfile
+    #management.endpoint.health.show-details=always
 
     spring.boot.admin.client.instance.management-base-url: http://127.0.0.1:9000/router
     spring.boot.admin.client.instance.service-url: http://127.0.0.1:9000/router
@@ -79,16 +79,16 @@ data:
     spring.boot.admin.client.instance.metadata.tags.environment: DEV
     info.tags.name: VAHANA
 
-#logging.file=/deployment/logs/vconnect/api-gateway/general.log
-#logging.config=/deployment/vahana-services/api-gateway/resources/log4j2.xml
-# Add Micrometer Config
+    #logging.file=/deployment/logs/vconnect/api-gateway/general.log
+    #logging.config=/deployment/vahana-services/api-gateway/resources/log4j2.xml
+    # Add Micrometer Config
     management.endpoint.metrics.enabled: true
     management.endpoints.web.exposure.include: *
     management.endpoint.prometheus.enabled: true
     management.endpoint.health.show-details: always
     management.metrices.export.prometheus.enabled: true
 
-#metricsName=api-gateway
+    #metricsName=api-gateway
 
     isHttpTracingEnabled: true
     host: 172.30.0.215
