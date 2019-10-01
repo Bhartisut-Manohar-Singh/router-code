@@ -25,33 +25,76 @@ metadata:
   namespace: default
 data:
   application.properties: |-
-    server.port: 9015
-    server.servlet.contextPath: /admin-server
-    spring.application.name: admin-server
+spring.application.name:router
 
-    management.endpoint.health.show-details: always
-    management.endpoints.web.exposure.include: *
+server.port:9000
 
-    spring.mail.host: smtp.gmail.com
-    spring.mail.port: 587
-    spring.boot.admin.notify.mail.to: shubham.sharma@decimal.co.in,vikas.dhillon@decimal.co.in,ashish.kumar@decimal.co.in
-    spring.boot.admin.notify.mail.enabled: false
-    spring.boot.admin.notify.mail.from: VAHANA-DEV<tpg-alerts@decimal.co.in>
-    spring.mail.username: tpg-alerts@decimal.co.in
-    spring.mail.password: decimal@123
+server.compression.enabled:true
+server.compression.min-response-size:1KB
+server.compression.mime-types:application/json,application/xml,text/html,text/xml,text/plain
 
-    spring.mail.protocol: smtp
-    spring.mail.test-connection: false
-    spring.mail.properties.mail.smtp.starttls.enable: true
-    spring.mail.smtp.auth: false
-    #spring.mail.properties.timeout=1000
+server.servlet.context-path:/router
 
-    spring.security.user.name: admin
-    spring.security.user.password: admin
+eureka.client.service-url.defaultZone:http://localhost:8761/eureka
+eureka.instance.prefer-ip-address:true
+eureka.instance.lease-renewal-interval-in-seconds:2
+eureka.instance.lease-expiration-duration-in-seconds:5
+eureka.client.registry-fetch-interval-seconds:5
 
-    spring.boot.admin.notify.slack.enabled: true
-    spring.boot.admin.notify.slack.webhook-url: https://hooks.slack.com/services/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
-    spring.boot.admin.notify.slack.message: *#{instance.registration.name}* (#{instance.id}) is *#{event.statusInfo.status}*. Instance management URL is: *#{instance.registration.managementUrl}* and Health Url is: *#{instance.registration.healthUrl}* for environment *#{instance.tags.values.environment}* and client *#{instance.tags.values.client}*
+info.app.name:Api Gateway
+info.app.description:An Api gateway which will handle all the request coming to vahana
+info.app.version:1.0
+
+feign.client.config.default.connectTimeout: 160000000
+feign.client.config.default.readTimeout: 160000000
+
+feign.client.config.default.logger-level:FULL
+
+isLogEnabled:false
+
+tempLogsPath:E:\\logs
+kafka.integration.url : 10.20.1.103:9092
+
+keys_to_mask:
+microServiceLogs:OFF
+
+
+corePoolSize:20
+maxPoolSize:50
+queueCapacity:50
+timeToLive:10
+
+#management.endpoints.web.exposure.include=info, health,heapdump,features,threaddump,metrics,loggers,logfile
+#management.endpoint.health.show-details=always
+
+spring.boot.admin.client.instance.management-base-url:http://127.0.0.1:9000/router
+spring.boot.admin.client.instance.service-url:http://127.0.0.1:9000/router
+spring.boot.admin.client.instance.name:router
+spring.boot.admin.client.instance.prefer-ip:true
+spring.boot.admin.client.url:http://localhost:9015
+
+spring.boot.admin.client.username:admin
+spring.boot.admin.client.password:admin
+
+spring.boot.admin.client.instance.metadata.tags.environment:DEV
+info.tags.name:VAHANA
+
+#logging.file=/deployment/logs/vconnect/api-gateway/general.log
+#logging.config=/deployment/vahana-services/api-gateway/resources/log4j2.xml
+# Add Micrometer Config
+management.endpoint.metrics.enabled:true
+management.endpoints.web.exposure.include:*
+management.endpoint.prometheus.enabled:true
+management.endpoint.health.show-details:always
+management.metrices.export.prometheus.enabled:true
+
+#metricsName=api-gateway
+
+isHttpTracingEnabled:true
+host:172.30.0.215
+service:api-gateway
+region:dev
+
 
 ---
 
