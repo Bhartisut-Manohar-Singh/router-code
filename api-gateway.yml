@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: api-gateway
   annotations:
-    alb.ingress.kubernetes.io/healthcheck-path: /api-gateway
+    alb.ingress.kubernetes.io/healthcheck-path: /router
   labels:
     app: api-gateway
 spec:
