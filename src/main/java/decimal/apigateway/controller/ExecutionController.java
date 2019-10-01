@@ -61,4 +61,16 @@ public class ExecutionController
 
         return executionService.executeDynamicRequest(httpServletRequest, request, httpHeaders, serviceName);
     }
+
+    @PostMapping(value = "dynamic-router/upload-gateway/{serviceName}/**",consumes = "multipart/form-data" , produces = "application/json")
+    public Object executeMultipartRequest(
+            @RequestBody String request,
+            HttpServletRequest httpServletRequest,
+            @RequestHeader Map<String, String> httpHeaders,
+            @PathVariable String serviceName,
+            @RequestPart(Constant.MULTIPART_FILES) MultipartFile[] files) throws Exception {
+
+        return executionService.executeMultipartRequest(httpServletRequest,request,httpHeaders,serviceName,files);
+
+    }
 }
