@@ -1,5 +1,6 @@
 package decimal.apigateway.service;
 
+import com.google.gson.Gson;
 import decimal.apigateway.commons.Jackson;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.Payload;
@@ -39,7 +40,7 @@ public class LogService {
 
     public void updateEndpoint(Object response, String status, Payload payload) {
         Response responsePayload = new Response();
-        responsePayload.setResponse(response.toString());
+        responsePayload.setResponse(new Gson().toJson(response));
         responsePayload.setTimestamp(Instant.now());
         responsePayload.setStatusCode(responsePayload.getStatusCode());
         responsePayload.setStatus(status);
