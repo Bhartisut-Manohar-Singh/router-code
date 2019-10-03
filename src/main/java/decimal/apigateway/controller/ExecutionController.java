@@ -3,16 +3,8 @@ package decimal.apigateway.controller;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionService;
-import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
-import decimal.apigateway.service.multipart.MultipartSerive;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.*;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,11 +18,7 @@ public class ExecutionController
 {
     @Autowired
     ExecutionService executionService;
-
-
-    @Autowired
-    MultipartSerive multipartSerive;
-
+    
 //    @Timed("apigateway_gatewayProcessor")
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException {
@@ -65,10 +53,10 @@ public class ExecutionController
     @PostMapping(value = "dynamic-router/upload-gateway/{serviceName}/**",consumes = "multipart/form-data" , produces = "application/json")
     public Object executeMultipartRequest(
             @RequestBody String request,
-            HttpServletRequest httpServletRequest,
             @RequestHeader Map<String, String> httpHeaders,
             @PathVariable String serviceName,
-            @RequestPart(Constant.MULTIPART_FILES) MultipartFile[] files) throws Exception {
+            @RequestPart(Constant.MULTIPART_FILES) MultipartFile[] files,
+            HttpServletRequest httpServletRequest) throws Exception {
 
         return executionService.executeMultipartRequest(httpServletRequest,request,httpHeaders,serviceName,files);
 
