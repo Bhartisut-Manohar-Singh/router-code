@@ -43,6 +43,8 @@ public class ExceptionController {
 
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
 
+        ERROR_LOGGER.error("Error response: " + ex.getResponse());
+
         try {
             String errorMsg = ex.getErrorMessage() != null && !ex.getErrorMessage().equals("") ? ex.getErrorMessage() : "Generic Error Msg";
             String errorCode = ex.getErrorCode() != null && !ex.getErrorCode().equals("") ? ex.getErrorCode() : "Generic ErrorCode";
@@ -113,10 +115,12 @@ public class ExceptionController {
         LogsConnector.newInstance().error(errorPayload, ex);
     }
 
-    @ExceptionHandler(value = Exception.class)
+    /*@ExceptionHandler(value = Exception.class)
     public ResponseEntity<Object> handleException(Exception ex, HttpServletRequest req)
     {
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
+
+        System.out.println("Is instance of RouterException " + (ex instanceof RouterException));
 
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("status", Constant.FAILURE_STATUS);
@@ -127,5 +131,5 @@ public class ExceptionController {
         createErrorPayload(ex);
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
+    }*/
 }
