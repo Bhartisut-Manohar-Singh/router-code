@@ -74,7 +74,6 @@ public class ExceptionController {
 
     @Autowired
     AuditTraceFilter auditTraceFilter;
-
     private void createErrorPayload(Exception ex) {
 
         SystemError systemError = new SystemError();

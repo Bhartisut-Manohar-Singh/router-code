@@ -19,4 +19,7 @@ public class Constant {
     public static final String VALIDATION_TYPE_TXN_KEy = "TXN_KEY";
     public static final String SAVE = "SAVE";
     public static final String LOGS_TOPIC = "LOGS";
+    public static final String MULTIPART_FILES= "files";
+    public static final String MULTIPART_DATA= "data";
+
 }

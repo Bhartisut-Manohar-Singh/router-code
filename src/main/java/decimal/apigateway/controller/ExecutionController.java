@@ -1,9 +1,11 @@
 package decimal.apigateway.controller;
 
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -16,7 +18,7 @@ public class ExecutionController
 {
     @Autowired
     ExecutionService executionService;
-
+    
 //    @Timed("apigateway_gatewayProcessor")
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException {
@@ -46,5 +48,17 @@ public class ExecutionController
     public Object executeService(@RequestBody String request, HttpServletRequest httpServletRequest, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName) throws IOException, RouterException {
 
         return executionService.executeDynamicRequest(httpServletRequest, request, httpHeaders, serviceName);
+    }
+
+    @PostMapping(value = "dynamic-router/upload-gateway/{serviceName}/**",consumes = "multipart/form-data" , produces = "application/json")
+    public Object executeMultipartRequest(
+            @RequestBody String request,
+            @RequestHeader Map<String, String> httpHeaders,
+            @PathVariable String serviceName,
+            @RequestPart(Constant.MULTIPART_FILES) MultipartFile[] files,
+            HttpServletRequest httpServletRequest) throws Exception {
+
+        return executionService.executeMultipartRequest(httpServletRequest,request,httpHeaders,serviceName,files);
+
     }
 }
