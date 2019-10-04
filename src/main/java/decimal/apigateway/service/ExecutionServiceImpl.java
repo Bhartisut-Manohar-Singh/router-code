@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -138,38 +135,39 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     @Override
-    public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, MultipartFile[] files) throws RouterException, IOException {
+    public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String interfaces, Map<String, String> httpHeaders, String serviceName,String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
 
+        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(interfaces, httpHeaders);
 
-        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
+        // JsonNode node = objectMapper.readValue(interfaces, JsonNode.class);
 
-        JsonNode node = objectMapper.readValue(request, JsonNode.class);
-
-        MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), updateHttpHeaders);
+      //  MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), updateHttpHeaders);
 
         String requestURI = httpServletRequest.getRequestURI();
 
         String basePath = path + "/engine/v1/dynamic-router/upload-gateway/" + serviceName;
 
 
-        HttpHeaders httpHeaders1 = new HttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
 
-        updateHttpHeaders.forEach(httpHeaders1::add);
+       // updateHttpHeaders.forEach(httpHeaders1::add);
 
-        JsonNode jsonNode = objectMapper.readValue(decryptedResponse.getResponse().toString(), JsonNode.class);
+        //JsonNode jsonNode = objectMapper.readValue(decryptedResponse.getResponse().toString(), JsonNode.class);
 
-        String actualRequest = jsonNode.get("requestData").toString();
+       // String actualRequest = jsonNode.get("requestData").toString();
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         for(MultipartFile file :files){
             body.add(Constant.MULTIPART_FILES, new MultipartInputStreamFileResource(file.getInputStream(), file.getOriginalFilename()));
         }
-        body.add("uploadRequest",actualRequest);
+        body.add("uploadRequest",uploadRequest);
+
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
 
-        System.out.println("Actual request is: " + actualRequest);
+        System.out.println("Actual request is: " + uploadRequest);
 
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, httpHeaders1);
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
         String mapping = requestURI.replaceAll(basePath, "");
 
@@ -179,16 +177,25 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
+
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
-        dynamicResponse.setStatus(Constant.SUCCESS_STATUS);
+        if(exchange.getStatusCode().value()==200) {
+            dynamicResponse.setStatus(Constant.SUCCESS_STATUS);
+
+        }else{
+            dynamicResponse.setStatus(Constant.FAILURE_STATUS);
+        }
+
         dynamicResponse.setResponse(exchange.getBody());
+
+
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
-        if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus()))
-        {
-            throw new RouterException(decryptedResponse.getResponse());
-        }
+//        if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus()))
+//        {
+//            throw new RouterException(decryptedResponse.getResponse());
+//        }
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());

@@ -18,7 +18,7 @@ public class ExecutionController
 {
     @Autowired
     ExecutionService executionService;
-    
+
 //    @Timed("apigateway_gatewayProcessor")
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException {
@@ -52,13 +52,14 @@ public class ExecutionController
 
     @PostMapping(value = "dynamic-router/upload-gateway/{serviceName}/**",consumes = "multipart/form-data" , produces = "application/json")
     public Object executeMultipartRequest(
-            @RequestBody String request,
+            @RequestPart String interfaces,
             @RequestHeader Map<String, String> httpHeaders,
             @PathVariable String serviceName,
             @RequestPart(Constant.MULTIPART_FILES) MultipartFile[] files,
+            @RequestPart("uploadRequest") String uploadRequest,
             HttpServletRequest httpServletRequest) throws Exception {
 
-        return executionService.executeMultipartRequest(httpServletRequest,request,httpHeaders,serviceName,files);
+        return executionService.executeMultipartRequest(httpServletRequest,interfaces,httpHeaders,serviceName,uploadRequest,files);
 
     }
 }
