@@ -52,7 +52,7 @@ public class ExecutionController
 
     @PostMapping(value = "dynamic-router/upload-gateway/{serviceName}/**",consumes = "multipart/form-data")
     public Object executeMultipartRequest(
-            @RequestPart String interfaces,
+            @RequestPart String request,
             @RequestHeader Map<String, String> httpHeaders,
             @PathVariable String serviceName,
             @RequestPart(Constant.MULTIPART_FILES) MultipartFile[] files,
@@ -60,9 +60,9 @@ public class ExecutionController
             HttpServletRequest httpServletRequest) throws Exception {
 
         System.out.println("------------------------------------------------------------------------------------------");
-        System.out.println("REQUEST: "+ interfaces);
+        System.out.println("REQUEST: "+ request);
         System.out.println("File Size= "+files.length);
-        return executionService.executeMultipartRequest(httpServletRequest,interfaces,httpHeaders,serviceName,uploadRequest,files);
+        return executionService.executeMultipartRequest(httpServletRequest,request,httpHeaders,serviceName,uploadRequest,files);
 
     }
 

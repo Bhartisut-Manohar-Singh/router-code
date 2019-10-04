@@ -135,22 +135,22 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     @Override
-    public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String interfaces, Map<String, String> httpHeaders, String serviceName,String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
+    public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName,String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
 
-      //  Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(interfaces, httpHeaders);
+        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
 
         // JsonNode node = objectMapper.readValue(interfaces, JsonNode.class);
 
-      //  MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), updateHttpHeaders);
+       //  MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), updateHttpHeaders);
 
         String requestURI = httpServletRequest.getRequestURI();
 
         String basePath = path + "/engine/v1/dynamic-router/upload-gateway/" + serviceName;
 
 
-        HttpHeaders headers = new HttpHeaders();
 
-       // updateHttpHeaders.forEach(httpHeaders1::add);
+//         HttpHeaders httpHeaders1 = new HttpHeaders();
+//         updateHttpHeaders.forEach(httpHeaders1::add);
 
         //JsonNode jsonNode = objectMapper.readValue(decryptedResponse.getResponse().toString(), JsonNode.class);
 
@@ -160,6 +160,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         for(MultipartFile file :files){
             body.add(Constant.MULTIPART_FILES, new MultipartInputStreamFileResource(file.getInputStream(), file.getOriginalFilename()));
         }
+        HttpHeaders headers = new HttpHeaders();
         body.add("uploadRequest",uploadRequest);
 
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -189,8 +190,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         dynamicResponse.setResponse(exchange.getBody());
 
 
-
-        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, httpHeaders);
+        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
 //        if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus()))
 //        {
