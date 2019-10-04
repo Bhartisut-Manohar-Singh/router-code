@@ -59,7 +59,13 @@ public class ExecutionController
             @RequestPart("uploadRequest") String uploadRequest,
             HttpServletRequest httpServletRequest) throws Exception {
 
+        System.out.println("------------------------------------------------------------------------------------------");
+        System.out.println("REQUEST: "+ interfaces);
+        System.out.println("File Size= "+files.length);
         return executionService.executeMultipartRequest(httpServletRequest,interfaces,httpHeaders,serviceName,uploadRequest,files);
 
     }
+
+
+
 }
