@@ -50,7 +50,7 @@ public class ExecutionController
         return executionService.executeDynamicRequest(httpServletRequest, request, httpHeaders, serviceName);
     }
 
-    @PostMapping(value = "dynamic-router/upload-gateway/{serviceName}/**",consumes = "multipart/form-data" , produces = "application/json")
+    @PostMapping(value = "dynamic-router/upload-gateway/{serviceName}/**",consumes = "multipart/form-data")
     public Object executeMultipartRequest(
             @RequestPart String interfaces,
             @RequestHeader Map<String, String> httpHeaders,

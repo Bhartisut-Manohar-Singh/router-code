@@ -137,7 +137,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String interfaces, Map<String, String> httpHeaders, String serviceName,String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
 
-        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(interfaces, httpHeaders);
+      //  Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(interfaces, httpHeaders);
 
         // JsonNode node = objectMapper.readValue(interfaces, JsonNode.class);
 
@@ -190,7 +190,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
 
 
-        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
+        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, httpHeaders);
 
 //        if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus()))
 //        {
