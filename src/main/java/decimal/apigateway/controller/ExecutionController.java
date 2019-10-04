@@ -18,7 +18,7 @@ public class ExecutionController
 {
     @Autowired
     ExecutionService executionService;
-    
+
 //    @Timed("apigateway_gatewayProcessor")
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException {
