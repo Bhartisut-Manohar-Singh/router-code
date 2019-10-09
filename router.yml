@@ -31,7 +31,6 @@ subsets:
 
 ---
 
-
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -68,19 +67,19 @@ data:
     microServiceLogs: OFF
 
 
-corePoolSize=20
-maxPoolSize=50
-queueCapacity=50
-timeToLive=10
+    corePoolSize: 20
+    maxPoolSize: 50
+    queueCapacity: 50
+    timeToLive: 10
 
-management.endpoints.web.exposure.include=info, health,heapdump,features,threaddump,metrics
-management.endpoint.health.show-details=always
+    management.endpoints.web.exposure.include: info, health,heapdump,features,threaddump,metrics
+    management.endpoint.health.show-details: always
 
-spring.boot.admin.client.instance.management-base-url=http://localhost:8001/router
-spring.boot.admin.client.instance.service-url=http://localhost:8001/router
-spring.boot.admin.client.instance.name=router
-spring.boot.admin.client.instance.prefer-ip=true
-spring.boot.admin.client.url=http://localhost:8015
+    spring.boot.admin.client.instance.management-base-url: http://localhost:8001/router
+    spring.boot.admin.client.instance.service-url: http://localhost:8001/router
+    spring.boot.admin.client.instance.name: router
+    spring.boot.admin.client.instance.prefer-ip: true
+    spring.boot.admin.client.url: http://localhost:8015
 
 
 ---
