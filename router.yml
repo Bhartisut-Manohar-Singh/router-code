@@ -1,0 +1,176 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: router
+  namespace: default
+  annotations:
+    alb.ingress.kubernetes.io/healthcheck-path: /router
+  labels:
+    app: router
+spec:
+  type: NodePort
+  ports:
+  - nodePort: 31785
+    port: 8001
+    targetPort: 8001
+    protocol: TCP
+  selector:
+    app: router
+
+---
+
+
+
+
+
+apiVersion: v1
+kind: Endpoints
+metadata:
+ name: router
+subsets:
+ - addresses:
+     - ip: 172.31.1.252
+   ports:
+     - port: 31785
+
+---
+
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: router
+  namespace: default
+data:
+  application.properties: |-
+    spring.application.name=router
+  
+    server.port=8001
+
+    server.compression.enabled=true
+    server.compression.min-response-size=1KB
+    server.compression.mime-types=application/json,application/xml,text/html,text/xml,text/plain
+
+    server.servlet.context-path=/router
+
+    eureka.client.service-url.defaultZone=http://localhost:8761/eureka
+    eureka.instance.prefer-ip-address=true
+    eureka.instance.lease-renewal-interval-in-seconds=2
+    eureka.instance.lease-expiration-duration-in-seconds=5
+    eureka.client.registry-fetch-interval-seconds=5
+
+    info.app.name=Api Gateway
+    info.app.description=An Api gateway which will handle all the request coming to vahana
+    info.app.version=1.0
+
+    feign.client.config.default.connectTimeout= 160000000
+    feign.client.config.default.readTimeout= 160000000
+
+    feign.client.config.default.logger-level=FULL
+
+    isLogEnabled=false
+
+    tempLogsPath=E:\\logs
+    kafka.integration.url = 13.233.190.96:9092
+
+    keys_to_mask=
+    microServiceLogs=OFF
+
+
+    corePoolSize=20
+    maxPoolSize=50
+    queueCapacity=50
+    timeToLive=10
+
+    #management.endpoints.web.exposure.include=info, health,heapdump,features,threaddump,metrics
+    #management.endpoint.health.show-details=always
+
+    spring.boot.admin.client.instance.management-base-url=http://localhost:8001/router
+    spring.boot.admin.client.instance.service-url=http://localhost:8001/router
+    spring.boot.admin.client.instance.name=router
+    spring.boot.admin.client.instance.prefer-ip=true
+    spring.boot.admin.client.url=http://localhost:9015
+
+    spring.boot.admin.client.username=admin
+    spring.boot.admin.client.password=admin
+
+    # Add Micrometer Config
+    management.endpoint.metrics.enabled=true
+    management.endpoints.web.exposure.include=*
+    management.endpoint.prometheus.enabled=true
+    management.endpoint.health.show-details=always
+    management.metrices.export.prometheus.enabled=true
+
+    #metricsName=api-gateway
+
+    host=localhost
+    service=api-gateway
+    region=test
+
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: router
+  name: router
+  namespace: default
+spec:
+
+  replicas: 1
+  selector:
+    matchLabels:
+      app: router
+  template:
+    metadata:
+      labels:
+        app:  router
+    spec:
+      containers:
+      - name: router
+        image: 712693083859.dkr.ecr.ap-south-1.amazonaws.com/project_value
+        ports:
+        - containerPort: 8001
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 200m
+        volumeMounts:
+        - mountPath: /app/
+          name: config-volume    
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: awslogin
+        
+      
+      volumes:
+      - configMap:
+          name: router
+        name: config-volume
+
+
+       
+---
+
+
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: router
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: router
+  minReplicas: 1
+  maxReplicas: 3
+  
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 50
+
