@@ -107,7 +107,7 @@ spec:
           name: config-volume    
       restartPolicy: Always
       imagePullSecrets:
-      - name: awslogin
+      - name: awslogin1
         
       
       volumes:
