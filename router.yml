@@ -25,7 +25,7 @@ metadata:
  name: router
 subsets:
  - addresses:
-     - ip: 172.31.1.203
+     - ip: 52.17.144.128
    ports:
      - port: 31785
 
