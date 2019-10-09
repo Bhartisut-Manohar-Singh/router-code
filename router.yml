@@ -52,29 +52,20 @@ data:
     info.app.name: Api Gateway
     info.app.description: An Api gateway which will handle all the request coming to vahana
     info.app.version: 1.0
-
     feign.client.config.default.connectTimeout: 160000000
     feign.client.config.default.readTimeout: 160000000
-
     feign.client.config.default.logger-level: FULL
-
     isLogEnabled: false
-
     tempLogsPath: E:\\logs
     kafka.integration.url: 13.233.190.96:9092
- 
-    keys_to_mask:
+#    keys_to_mask:
     microServiceLogs: OFF
-
-
     corePoolSize: 20
     maxPoolSize: 50
     queueCapacity: 50
     timeToLive: 20
-
     management.endpoints.web.exposure.include: info, health,heapdump,features,threaddump,metrics
     management.endpoint.health.show-details: always
-
     spring.boot.admin.client.instance.management-base-url: http://localhost:8001/router
     spring.boot.admin.client.instance.service-url: http://localhost:8001/router
     spring.boot.admin.client.instance.name: router
