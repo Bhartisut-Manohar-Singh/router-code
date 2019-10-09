@@ -70,7 +70,7 @@ data:
     corePoolSize: 20
     maxPoolSize: 50
     queueCapacity: 50
-    timeToLive: 10
+    timeToLive: 20
 
     management.endpoints.web.exposure.include: info, health,heapdump,features,threaddump,metrics
     management.endpoint.health.show-details: always
