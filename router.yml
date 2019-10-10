@@ -29,7 +29,7 @@ subsets:
      - ip: 172.31.1.252
    ports:
      - port: 31785
-       name: router
+     - name: "router"
 
 ---
 
