@@ -9,6 +9,7 @@ import decimal.apigateway.service.clients.EsbClient;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
 import decimal.apigateway.service.validator.RequestValidator;
+import decimal.logs.filters.AuditTraceFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
@@ -43,6 +44,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     @Autowired
     DiscoveryClient discoveryClient;
+
+    @Autowired
+    AuditTraceFilter auditTraceFilter;
 
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException {
@@ -112,6 +116,8 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String serviceUrl = "http://" + serviceName + getContextPath(serviceName) + mapping;
 
+        auditTraceFilter.requestIdentifier.setArn(serviceUrl);
+
         System.out.println("Final Url to be called is: " + serviceUrl);
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
@@ -139,22 +145,10 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
 
-        // JsonNode node = objectMapper.readValue(interfaces, JsonNode.class);
-
-       //  MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), updateHttpHeaders);
-
         String requestURI = httpServletRequest.getRequestURI();
 
         String basePath = path + "/engine/v1/dynamic-router/upload-gateway/" + serviceName;
 
-
-
-//         HttpHeaders httpHeaders1 = new HttpHeaders();
-//         updateHttpHeaders.forEach(httpHeaders1::add);
-
-        //JsonNode jsonNode = objectMapper.readValue(decryptedResponse.getResponse().toString(), JsonNode.class);
-
-       // String actualRequest = jsonNode.get("requestData").toString();
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         for(MultipartFile file :files){
@@ -165,7 +159,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-
         System.out.println("Actual request is: " + uploadRequest);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
@@ -173,6 +166,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         String mapping = requestURI.replaceAll(basePath, "");
 
         String serviceUrl = "http://" + serviceName + getContextPath(serviceName) + mapping;
+
+        auditTraceFilter.requestIdentifier.setArn(serviceUrl);
 
         System.out.println("Final Url to be called is: " + serviceUrl);
 
@@ -191,11 +186,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
-
-//        if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus()))
-//        {
-//            throw new RouterException(decryptedResponse.getResponse());
-//        }
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
