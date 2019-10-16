@@ -10,7 +10,7 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - nodePort: 31785
+  - nodePort: 31786
     port: 8001
     targetPort: 8001
     protocol: TCP
@@ -29,7 +29,7 @@ subsets:
   - ip: "172.31.1.252"
   ports:
   - name: "router-ep"
-    port: 31785
+    port: 31786
 
 
 ---
