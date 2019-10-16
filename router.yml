@@ -47,7 +47,7 @@ data:
     server.compression.min-response-size: 1KB
     server.compression.mime-types: application/json,application/xml,text/html,text/xml,text/plain
     server.servlet.context-path: /router
-    eureka.client.service-url.defaultZone: http://discovery-server:8761/eureka
+    eureka.client.service-url.defaultZone: http://discovery-server:31792/eureka
     eureka.instance.prefer-ip-address: true
     eureka.instance.lease-renewal-interval-in-seconds: 2
     eureka.instance.lease-expiration-duration-in-seconds: 5
@@ -69,8 +69,8 @@ data:
     timeToLive: 20
     management.endpoints.web.exposure.include: info, health,heapdump,features,threaddump,metrics
     management.endpoint.health.show-details: always
-    spring.boot.admin.client.instance.management-base-url: http://router:8001/router
-    spring.boot.admin.client.instance.service-url: http://router:8001/router
+    spring.boot.admin.client.instance.management-base-url: http://router:31786/router
+    spring.boot.admin.client.instance.service-url: http://router:31786/router
     spring.boot.admin.client.instance.name: router
     spring.boot.admin.client.instance.prefer-ip: true
     spring.boot.admin.client.url: http://localhost:8015
