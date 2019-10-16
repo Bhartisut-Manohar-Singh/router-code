@@ -24,12 +24,13 @@ kind: Endpoints
 metadata:
  name: router
 subsets:
- - addresses:
-     - ip: 172.31.1.236
-     - ip: 172.31.1.252
-   ports:
-     - port: 31785
-     - name: "router-ep"
+- addresses:
+  - ip: "172.31.1.236"
+  - ip: "172.31.1.252"
+  ports:
+  - name: "router-ep"
+    port: 31785
+
 
 ---
 
