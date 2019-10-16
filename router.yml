@@ -29,7 +29,7 @@ subsets:
   - ip: "172.31.1.252"
   ports:
   - name: "router-ep"
-    port: 31790
+    port: 31785
 
 
 ---
