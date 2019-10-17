@@ -2,7 +2,6 @@ package decimal.apigateway.aspects.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
-import decimal.apigateway.service.LogService;
 import decimal.common.micrometer.ConstantUtil;
 import decimal.common.micrometer.VahanaKPIMetrics;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -22,18 +21,12 @@ import java.util.Map;
 @Aspect
 public class RegistrationAspect {
 
-    private final LogService logService;
-
     @Autowired
     private VahanaKPIMetrics vahanaKpiMetrics;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final static ObjectMapper mapper = new ObjectMapper();
-
-    public RegistrationAspect(LogService logService) {
-        this.logService = logService;
-    }
 
     @Pointcut(value = "execution(* decimal.apigateway.service.RegistrationServiceImpl.*(..)) && args(request, httpHeaders, response)", argNames = "request, httpHeaders, response")
     public void beforeMethod(String request, Map<String, String> httpHeaders, HttpServletResponse response) {
