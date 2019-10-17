@@ -1,7 +1,6 @@
 package decimal.apigateway.aspects.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import decimal.apigateway.service.LogService;
 import decimal.common.micrometer.ConstantUtil;
 import decimal.common.micrometer.VahanaKPIMetrics;
 import decimal.logs.model.ErrorPayload;
@@ -17,8 +16,6 @@ import org.springframework.stereotype.Component;
 @Aspect
 public class ExceptionAspect {
 
-    private final LogService logService;
-
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -28,10 +25,6 @@ public class ExceptionAspect {
     ErrorPayload errorPayload;
 
     private final static ObjectMapper mapper = new ObjectMapper();
-
-    public ExceptionAspect(LogService logService) {
-        this.logService = logService;
-    }
 
     @AfterReturning(value = "execution(* decimal.apigateway.controller.ExceptionController.*(..))", returning = "response")
     public void exceptionHandler(ResponseEntity<Object> response) {

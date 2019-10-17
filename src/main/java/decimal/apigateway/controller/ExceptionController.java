@@ -89,7 +89,7 @@ public class ExceptionController {
 
                 String statusCode = jsonNodes.get("status") != null ? jsonNodes.get("status").asText() : HttpStatus.BAD_REQUEST.toString();
 
-                String message = jsonNodes.get("message") !=null ? jsonNodes.get("message").asText() : "Some error occurred when executing request";
+                String message = jsonNodes.get("message") !=null ? jsonNodes.get("message").toString() : "Some error occurred when executing request";
                 systemError.setErrorCode(statusCode);
                 systemError.setMessage(message);
                 systemError.setDetailedError(jsonNodes.toString());
