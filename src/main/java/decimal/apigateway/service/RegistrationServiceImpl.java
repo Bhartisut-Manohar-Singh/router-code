@@ -10,6 +10,7 @@ import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.AuthenticationClient;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.apigateway.service.validator.RequestValidator;
+import decimal.logs.filters.AuditTraceFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +54,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         httpHeaders.put("username", userName);
 
+        auditTraceFilter.requestIdentifier.setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
+
         MicroserviceResponse registerResponse = authenticationClient.register(request, httpHeaders);
 
         Map<String, Object> rsaKeysMap = objectMapper.convertValue(registerResponse.getResponse(), new TypeReference<Map<String, Object>>() {
@@ -81,12 +84,17 @@ public class RegistrationServiceImpl implements RegistrationService {
         return finalResponse;
     }
 
+    @Autowired
+    AuditTraceFilter auditTraceFilter;
+
     @Override
     public Object  authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
         MicroserviceResponse microserviceResponse = requestValidator.validateAuthentication(request, httpHeaders);
 
         httpHeaders.put("username", microserviceResponse.getMessage());
+
+        auditTraceFilter.requestIdentifier.setLoginId(microserviceResponse.getMessage().split(Constant.TILD_SPLITTER)[2]);
 
         Object plainRequest = microserviceResponse.getResponse();
 
@@ -127,6 +135,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         MicroserviceResponse microserviceResponse = requestValidator.validateLogout(request, httpHeaders);
 
         httpHeaders.put("username", microserviceResponse.getResponse().toString());
+
+        auditTraceFilter.requestIdentifier.setLoginId(microserviceResponse.getResponse().toString().split(Constant.TILD_SPLITTER)[2]);
 
         return authenticationClient.logout(httpHeaders).getResponse();
     }
