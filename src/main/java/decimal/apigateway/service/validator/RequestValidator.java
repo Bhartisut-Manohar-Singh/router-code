@@ -61,12 +61,13 @@ public class RequestValidator {
 
         httpHeaders.put("scopeToCheck", size > 3 ? "SECURE" : "OPEN");
 
-        response = securityClient.validateExecutionRequest(request, httpHeaders);
-
         httpHeaders.put("loginid", userName.split(Constant.TILD_SPLITTER)[2]);
-        httpHeaders.put("logsrequired", response.getResponse().toString());
 
         auditTraceFilter.requestIdentifier.setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
+
+        response = securityClient.validateExecutionRequest(request, httpHeaders);
+
+        httpHeaders.put("logsrequired", response.getResponse().toString());
 
         return httpHeaders;
     }
