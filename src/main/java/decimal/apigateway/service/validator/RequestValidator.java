@@ -81,7 +81,7 @@ public class RequestValidator {
         httpHeaders.put("logsrequired", appLogNode.toString());
         httpHeaders.put("serviceLogs", serviceLogNode.toString());
 
-        auditTraceFilter.setLoggingEnabled("Y".equalsIgnoreCase(appLogNode.toString()) && "Y".equalsIgnoreCase(serviceLogNode.toString()));
+        auditTraceFilter.setLogRequestAndResponse("Y".equalsIgnoreCase(appLogNode.toString()) && "Y".equalsIgnoreCase(serviceLogNode.toString()));
 
         return httpHeaders;
     }
