@@ -67,8 +67,11 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
 
+        auditTraceFilter.setRequestBody(decryptedResponse.getResponse().toString());
+
         Object response = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
 
+        auditTraceFilter.setResponseBody(response.toString());
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(response, httpHeaders);
 
         if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus()))
