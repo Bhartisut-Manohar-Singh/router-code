@@ -1,5 +1,8 @@
 package decimal.apigateway.service.validator;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.enums.RequestValidationTypes;
@@ -19,6 +22,9 @@ public class RequestValidator {
 
     private final
     SecurityClient securityClient;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     public RequestValidator(SecurityClient securityClient) {
         this.securityClient = securityClient;
@@ -67,12 +73,20 @@ public class RequestValidator {
 
         response = securityClient.validateExecutionRequest(request, httpHeaders);
 
-        httpHeaders.put("logsrequired", response.getResponse().toString());
+        ObjectNode nodes = objectMapper.convertValue(response.getResponse(), ObjectNode.class);
+
+        JsonNode appLogNode = nodes.get("appLogs");
+        JsonNode serviceLogNode = nodes.get("serviceLog");
+
+        httpHeaders.put("logsrequired", appLogNode.toString());
+        httpHeaders.put("serviceLogs", serviceLogNode.toString());
+
+        auditTraceFilter.setLoggingEnabled("Y".equalsIgnoreCase(appLogNode.toString()) && "Y".equalsIgnoreCase(serviceLogNode.toString()));
 
         return httpHeaders;
     }
 
-    public Map<String, String> validateDynamicRequest(String request, Map<String, String> httpHeaders){
+    public Map<String, String> validateDynamicRequest(String request, Map<String, String> httpHeaders) {
 
         String clientId = httpHeaders.get("clientid");
 
