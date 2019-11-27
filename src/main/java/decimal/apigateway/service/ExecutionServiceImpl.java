@@ -10,6 +10,7 @@ import decimal.apigateway.service.clients.SecurityClient;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
 import decimal.apigateway.service.validator.RequestValidator;
 import decimal.logs.filters.AuditTraceFilter;
+import decimal.logs.model.AuditPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
@@ -48,6 +49,9 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     AuditTraceFilter auditTraceFilter;
 
+    @Autowired
+    LogsWriter logsWriter;
+
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException {
 
@@ -61,24 +65,31 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
+        AuditPayload auditPayload = logsWriter.initializeLog(request, httpHeaders);
+
         Map<String, String> updatedHttpHeaders = requestValidator.validateRequest(request, httpHeaders);
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
         MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
 
-        auditTraceFilter.setRequestBody(decryptedResponse.getResponse().toString());
+        auditPayload.getRequest().setRequestBody(decryptedResponse.getResponse().toString());
 
         Object response = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
 
-        auditTraceFilter.setResponseBody(objectMapper.writeValueAsString(response));
+        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(response));
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(response, httpHeaders);
 
         if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus()))
         {
+            auditPayload.getResponse().setStatus(HttpStatus.BAD_REQUEST.toString());
             throw new RouterException(decryptedResponse.getResponse());
         }
+
+        auditPayload.getResponse().setStatus(HttpStatus.OK.toString());
+
+        logsWriter.updateLog(auditPayload);
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());

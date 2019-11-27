@@ -48,7 +48,6 @@ public class LogsManagementConfiguration {
     public AuditTraceFilter auditTraceFilter() {
         List<String> registeredUrls = new ArrayList<>();
         registeredUrls.add("register");
-        registeredUrls.add("gateway");
         registeredUrls.add("gatewayProcessor");
         registeredUrls.add("execute");
         registeredUrls.add("logout");
