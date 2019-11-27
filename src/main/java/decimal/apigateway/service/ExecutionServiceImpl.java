@@ -67,22 +67,28 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         AuditPayload auditPayload = logsWriter.initializeLog(request, httpHeaders);
 
-        Map<String, String> updatedHttpHeaders = requestValidator.validateRequest(request, httpHeaders);
+        Map<String, String> updatedHttpHeaders = requestValidator.validateRequest(request, httpHeaders, auditPayload);
+
+        String logsRequired = updatedHttpHeaders.get("logsrequired");
+        String serviceLog = updatedHttpHeaders.get("serviceLogs");
+
+        boolean logRequestResponse = "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog);
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
         MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
 
-        auditPayload.getRequest().setRequestBody(decryptedResponse.getResponse().toString());
+        if (logRequestResponse)
+            auditPayload.getRequest().setRequestBody(decryptedResponse.getResponse().toString());
 
         Object response = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
 
-        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(response));
+        if (logRequestResponse)
+            auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(response));
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(response, httpHeaders);
 
-        if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus()))
-        {
+        if (!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
             auditPayload.getResponse().setStatus(HttpStatus.BAD_REQUEST.toString());
             throw new RouterException(decryptedResponse.getResponse());
         }
@@ -143,8 +149,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
-        if(!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus()))
-        {
+        if (!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
             throw new RouterException(decryptedResponse.getResponse());
         }
 
@@ -156,7 +161,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     @Override
-    public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName,String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
+    public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
 
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
 
@@ -166,11 +171,11 @@ public class ExecutionServiceImpl implements ExecutionService {
 
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        for(MultipartFile file :files){
+        for (MultipartFile file : files) {
             body.add(Constant.MULTIPART_FILES, new MultipartInputStreamFileResource(file.getInputStream(), file.getOriginalFilename()));
         }
         HttpHeaders headers = new HttpHeaders();
-        body.add("uploadRequest",uploadRequest);
+        body.add("uploadRequest", uploadRequest);
 
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
@@ -190,10 +195,10 @@ public class ExecutionServiceImpl implements ExecutionService {
 
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
-        if(exchange.getStatusCode().value()==200) {
+        if (exchange.getStatusCode().value() == 200) {
             dynamicResponse.setStatus(Constant.SUCCESS_STATUS);
 
-        }else{
+        } else {
             dynamicResponse.setStatus(Constant.FAILURE_STATUS);
         }
 
@@ -213,7 +218,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     private String getContextPath(String serviceName) throws RouterException {
 
         System.out.println("Service name is: " + serviceName.toLowerCase());
-        String contextPath="";
+        String contextPath = "";
 
         List<String> services = discoveryClient.getServices();
 
@@ -222,7 +227,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         List<ServiceInstance> instances = discoveryClient.getInstances(serviceName.toLowerCase());
 
 
-        if(instances.isEmpty()){
+        if (instances.isEmpty()) {
             throw new RouterException(Constant.FAILURE_STATUS, "Service with name: " + serviceName + " is not registered with discovery server", null);
         }
 

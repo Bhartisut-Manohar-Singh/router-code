@@ -10,6 +10,7 @@ import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.logs.filters.AuditTraceFilter;
+import decimal.logs.model.AuditPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +52,7 @@ public class RequestValidator {
     @Autowired
     AuditTraceFilter auditTraceFilter;
 
-    public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders) throws RouterException {
+    public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) throws RouterException {
         String clientId = httpHeaders.get("clientid");
 
         httpHeaders.put("orgid", clientId.split(Constant.TILD_SPLITTER)[0]);
@@ -69,7 +70,7 @@ public class RequestValidator {
 
         httpHeaders.put("loginid", userName.split(Constant.TILD_SPLITTER)[2]);
 
-        auditTraceFilter.requestIdentifier.setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
+        auditPayload.getRequestIdentifier().setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
 
         response = securityClient.validateExecutionRequest(request, httpHeaders);
 
@@ -80,8 +81,6 @@ public class RequestValidator {
 
         httpHeaders.put("logsrequired", appLogNode.asText());
         httpHeaders.put("serviceLogs", serviceLogNode.asText());
-
-        auditTraceFilter.setLogRequestAndResponse("Y".equalsIgnoreCase(appLogNode.asText()) && "Y".equalsIgnoreCase(serviceLogNode.asText()));
 
         return httpHeaders;
     }
