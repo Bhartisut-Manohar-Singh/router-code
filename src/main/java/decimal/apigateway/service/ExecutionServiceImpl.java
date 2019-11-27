@@ -89,11 +89,11 @@ public class ExecutionServiceImpl implements ExecutionService {
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(response, httpHeaders);
 
         if (!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
-            auditPayload.getResponse().setStatus(HttpStatus.BAD_REQUEST.toString());
+            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
             throw new RouterException(decryptedResponse.getResponse());
         }
 
-        auditPayload.getResponse().setStatus(HttpStatus.OK.toString());
+        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
 
         logsWriter.updateLog(auditPayload);
 
