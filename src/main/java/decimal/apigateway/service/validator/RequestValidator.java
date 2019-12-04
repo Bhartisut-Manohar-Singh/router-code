@@ -78,9 +78,11 @@ public class RequestValidator {
 
         JsonNode appLogNode = nodes.get("appLogs");
         JsonNode serviceLogNode = nodes.get("serviceLog");
+        JsonNode keysToMask = nodes.get("keysToMask");
 
         httpHeaders.put("logsrequired", appLogNode.asText());
         httpHeaders.put("serviceLogs", serviceLogNode.asText());
+        httpHeaders.put("keysToMask", keysToMask.asText());
 
         return httpHeaders;
     }
