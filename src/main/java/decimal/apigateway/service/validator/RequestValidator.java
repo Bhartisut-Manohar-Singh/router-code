@@ -1,8 +1,6 @@
 package decimal.apigateway.service.validator;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.enums.RequestValidationTypes;
@@ -74,15 +72,11 @@ public class RequestValidator {
 
         response = securityClient.validateExecutionRequest(request, httpHeaders);
 
-        ObjectNode nodes = objectMapper.convertValue(response.getResponse(), ObjectNode.class);
+        Map<String, String> customData = response.getCustomData();
 
-        JsonNode appLogNode = nodes.get("appLogs");
-        JsonNode serviceLogNode = nodes.get("serviceLog");
-        JsonNode keysToMask = nodes.get("keysToMask");
-
-        httpHeaders.put("logsrequired", appLogNode.asText());
-        httpHeaders.put("serviceLogs", serviceLogNode.asText());
-        httpHeaders.put("keysToMask", keysToMask.asText());
+        httpHeaders.put("logsrequired", customData.get("appLogs"));
+        httpHeaders.put("serviceLogs", customData.get("serviceLog"));
+        httpHeaders.put("keysToMask", customData.get(Constant.KEYS_TO_MASK));
 
         return httpHeaders;
     }

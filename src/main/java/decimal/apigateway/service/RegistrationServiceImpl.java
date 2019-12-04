@@ -94,6 +94,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         httpHeaders.put("username", microserviceResponse.getMessage());
 
+        Map<String, String> customData = microserviceResponse.getCustomData();
+        if(customData != null){
+            httpHeaders.put(Constant.KEYS_TO_MASK, customData.get(Constant.KEYS_TO_MASK));
+        }
+
         auditTraceFilter.requestIdentifier.setLoginId(microserviceResponse.getMessage().split(Constant.TILD_SPLITTER)[2]);
 
         Object plainRequest = microserviceResponse.getResponse();
