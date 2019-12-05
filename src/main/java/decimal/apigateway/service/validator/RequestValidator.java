@@ -1,12 +1,14 @@
 package decimal.apigateway.service.validator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.enums.RequestValidationTypes;
-import decimal.apigateway.model.LogsData;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.SecurityClient;
-import decimal.apigateway.exception.RouterException;
+import decimal.logs.filters.AuditTraceFilter;
+import decimal.logs.model.AuditPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +23,7 @@ public class RequestValidator {
     SecurityClient securityClient;
 
     @Autowired
-    LogsData logsData;
+    ObjectMapper objectMapper;
 
     public RequestValidator(SecurityClient securityClient) {
         this.securityClient = securityClient;
@@ -45,7 +47,10 @@ public class RequestValidator {
         }
     }
 
-    public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders) throws RouterException {
+    @Autowired
+    AuditTraceFilter auditTraceFilter;
+
+    public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) throws RouterException {
         String clientId = httpHeaders.get("clientid");
 
         httpHeaders.put("orgid", clientId.split(Constant.TILD_SPLITTER)[0]);
@@ -59,13 +64,42 @@ public class RequestValidator {
 
         httpHeaders.put("username", userName);
 
-        logsData.setLoginId(userName);
         httpHeaders.put("scopeToCheck", size > 3 ? "SECURE" : "OPEN");
+
+        httpHeaders.put("loginid", userName.split(Constant.TILD_SPLITTER)[2]);
+
+        auditPayload.getRequestIdentifier().setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
 
         response = securityClient.validateExecutionRequest(request, httpHeaders);
 
-        httpHeaders.put("loginid", userName.split(Constant.TILD_SPLITTER)[2]);
-        httpHeaders.put("logsrequired", response.getResponse().toString());
+        Map<String, String> customData = response.getCustomData();
+
+        httpHeaders.put("logsrequired", customData.get("appLogs"));
+        httpHeaders.put("serviceLogs", customData.get("serviceLog"));
+        httpHeaders.put(Constant.KEYS_TO_MASK, customData.get(Constant.KEYS_TO_MASK));
+
+        return httpHeaders;
+    }
+
+    public Map<String, String> validateDynamicRequest(String request, Map<String, String> httpHeaders) {
+
+        String clientId = httpHeaders.get("clientid");
+
+        httpHeaders.put("orgid", clientId.split(Constant.TILD_SPLITTER)[0]);
+        httpHeaders.put("appid", clientId.split(Constant.TILD_SPLITTER)[1]);
+
+        MicroserviceResponse response = securityClient.validate(request, httpHeaders, RequestValidationTypes.REQUEST.name());
+
+        String userName = response.getResponse().toString();
+
+        httpHeaders.put("username", userName);
+        auditTraceFilter.requestIdentifier.setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
+
+        RequestValidationTypes[] requestValidationTypesArr = {APPLICATION, INACTIVE_SESSION, SESSION, IP, TXN_KEY, HASH};
+
+        for (RequestValidationTypes requestValidationTypes : requestValidationTypesArr) {
+            securityClient.validate(request, httpHeaders, requestValidationTypes.name());
+        }
 
         return httpHeaders;
     }

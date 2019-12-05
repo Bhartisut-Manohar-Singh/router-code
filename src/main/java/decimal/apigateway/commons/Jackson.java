@@ -97,4 +97,18 @@ public class Jackson {
 
         return objectMapper.createObjectNode();
     }
+
+    public String objectToString(Object object){
+        if(object == null){
+            return null;
+        }
+
+        try {
+            return objectMapper.writeValueAsString(object);
+        } catch (IOException e) {
+            ERROR_LOGGER.error("Error occurred in parsing request to object node");
+        }
+
+        return null;
+    }
 }

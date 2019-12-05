@@ -1,10 +1,9 @@
 package decimal.apigateway.aspects.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import decimal.apigateway.commons.Constant;
-import decimal.apigateway.service.LogService;
 import decimal.common.micrometer.ConstantUtil;
 import decimal.common.micrometer.VahanaKPIMetrics;
+import decimal.logs.model.ErrorPayload;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
@@ -17,26 +16,21 @@ import org.springframework.stereotype.Component;
 @Aspect
 public class ExceptionAspect {
 
-    private final LogService logService;
-
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private VahanaKPIMetrics vahanaKpiMetrics;
 
-    private final static ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    ErrorPayload errorPayload;
 
-    public ExceptionAspect(LogService logService) {
-        this.logService = logService;
-    }
+    private final static ObjectMapper mapper = new ObjectMapper();
 
     @AfterReturning(value = "execution(* decimal.apigateway.controller.ExceptionController.*(..))", returning = "response")
     public void exceptionHandler(ResponseEntity<Object> response) {
-        logService.updateLogsData(response.getBody(), response.getStatusCode().toString(), Constant.FAILURE_STATUS);
         try {
             String errorMsg = response.getStatusCode().toString()!= null && !response.getStatusCode().toString().equals("") ? response.getStatusCode().toString() : "Generic Error Msg";
             String errorCode = response.getStatusCodeValue() != 0 ? Integer.toString(response.getStatusCodeValue()) : "Generic ErrorCode";
-//            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS, errorCode ,errorMsg ,  CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response.getBody()).getBytes().length));
             this.vahanaKpiMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS, errorCode ,errorMsg ,  System.currentTimeMillis(), new Long(mapper.writeValueAsString(response.getBody()).getBytes().length));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -49,7 +43,6 @@ public class ExceptionAspect {
             String errorMsg = response.getStatusCode().toString()!= null && !response.getStatusCode().toString().equals("") ? response.getStatusCode().toString() : "Generic Error Msg";
             String errorCode = response.getStatusCodeValue() != 0 ? Integer.toString(response.getStatusCodeValue()) : "Generic ErrorCode";
             this.vahanaKpiMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS, errorCode , errorMsg ,  System.currentTimeMillis(), new Long(mapper.writeValueAsString(response.getBody()).getBytes().length));
-//            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS, errorCode , errorMsg ,  CommonUtils.getCurrentUTC(), new Long(mapper.writeValueAsString(response.getBody()).getBytes().length));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
