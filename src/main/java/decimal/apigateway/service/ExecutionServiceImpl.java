@@ -2,6 +2,7 @@ package decimal.apigateway.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
@@ -86,9 +87,14 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
 
+        ObjectNode nodes = objectMapper.createObjectNode();
+
         if (logRequestResponse) {
             String requestBody = JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
             auditPayload.getRequest().setRequestBody(requestBody);
+        } else {
+            nodes.put("message", "It seems that request logs is not enabled for this api/service.");
+            auditPayload.getRequest().setRequestBody(objectMapper.writeValueAsString(nodes));
         }
 
         Object response = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
@@ -97,6 +103,9 @@ public class ExecutionServiceImpl implements ExecutionService {
             String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(response), maskKeys);
 
             auditPayload.getResponse().setResponse(responseBody);
+        } else {
+            nodes.put("message", "It seems that response logs is not enabled for this api/service.");
+            auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(nodes));
         }
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(response, httpHeaders);
