@@ -10,6 +10,7 @@ import decimal.apigateway.service.clients.SecurityClient;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
 import decimal.apigateway.service.validator.RequestValidator;
 import decimal.logs.filters.AuditTraceFilter;
+import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,9 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ExecutionServiceImpl implements ExecutionService {
@@ -72,19 +71,33 @@ public class ExecutionServiceImpl implements ExecutionService {
         String logsRequired = updatedHttpHeaders.get("logsrequired");
         String serviceLog = updatedHttpHeaders.get("serviceLogs");
 
+        String keysToMask = updatedHttpHeaders.get(Constant.KEYS_TO_MASK);
+
+        List<String> maskKeys = new ArrayList<>();
+
+        if (keysToMask != null && !keysToMask.isEmpty()) {
+            String[] keysToMaskArr = keysToMask.split(",");
+            maskKeys = Arrays.asList(keysToMaskArr);
+        }
+
         boolean logRequestResponse = "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog);
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
         MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
 
-        if (logRequestResponse)
-            auditPayload.getRequest().setRequestBody(decryptedResponse.getResponse().toString());
+        if (logRequestResponse) {
+            String requestBody = JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
+            auditPayload.getRequest().setRequestBody(requestBody);
+        }
 
         Object response = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
 
-        if (logRequestResponse)
-            auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(response));
+        if (logRequestResponse) {
+            String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(response), maskKeys);
+
+            auditPayload.getResponse().setResponse(responseBody);
+        }
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(response, httpHeaders);
 
