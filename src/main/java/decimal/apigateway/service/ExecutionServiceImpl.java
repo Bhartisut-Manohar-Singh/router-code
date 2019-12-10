@@ -197,8 +197,9 @@ public class ExecutionServiceImpl implements ExecutionService {
             body.add(Constant.MULTIPART_FILES, new MultipartInputStreamFileResource(file.getInputStream(), file.getOriginalFilename()));
         }
         HttpHeaders headers = new HttpHeaders();
-        httpHeaders.put("orgId",updateHttpHeaders.get("orgid"));
-        httpHeaders.put("appId",updateHttpHeaders.get("appid"));
+
+        headers.add("orgId",updateHttpHeaders.get("orgid"));
+        headers.add("appId",updateHttpHeaders.get("appid"));
 
         body.add("uploadRequest", uploadRequest);
 
