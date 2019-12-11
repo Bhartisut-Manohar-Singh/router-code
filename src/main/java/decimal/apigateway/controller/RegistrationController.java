@@ -21,7 +21,6 @@ public class RegistrationController {
         this.registrationService = registrationService;
     }
 
-//    @Timed("apigateway_register")
     @PostMapping("register")
     public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
@@ -34,19 +33,16 @@ public class RegistrationController {
             return registrationService.register(request, httpHeaders, response);
     }
 
-//    @Timed("apigateway_authenticate")
     @PostMapping("authenticate")
     public Object authenticate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
         return registrationService.authenticate(request, httpHeaders, response);
     }
 
-//    @Timed("apigateway_logout")
     @PostMapping("logout")
     public Object logout(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
         return registrationService.logout(request, httpHeaders, response);
     }
 
-//    @Timed("apigateway_forceLogout")
     @PostMapping("forceLogout")
     public Object forceLogout(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
         return registrationService.forceLogout(request, httpHeaders, response);
