@@ -87,14 +87,14 @@ data:
     queueCapacity: 50
     timeToLive: 10
 
-    management.endpoint.metrics.enabled= true
-    management.endpoints.web.exposure.include= *
-    management.endpoint.prometheus.enabled= true
-    management.endpoint.health.show-details= always
-    management.metrics.export.prometheus.enabled= true
-    host= 176.34.133.237
-    service= api
-    region= dev
+    management.endpoint.metrics.enabled: true
+    management.endpoints.web.exposure.include: *
+    management.endpoint.prometheus.enabled: true
+    management.endpoint.health.show-details: always
+    management.metrics.export.prometheus.enabled: true
+    host: 176.34.133.237
+    service: api
+    region: dev
 
     spring.servlet.multipart.enabled: true
     
