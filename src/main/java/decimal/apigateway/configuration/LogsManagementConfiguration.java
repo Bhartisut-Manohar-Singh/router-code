@@ -1,10 +1,9 @@
 package decimal.apigateway.configuration;
 
+import decimal.apigateway.commons.Constant;
 import decimal.logs.filters.AuditTraceFilter;
-import decimal.logs.model.AuditPayload;
-import decimal.logs.model.ErrorPayload;
-import decimal.logs.model.LogEntry;
-import decimal.logs.model.Payload;
+import decimal.logs.filters.IdentifierFilter;
+import decimal.logs.model.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +41,14 @@ public class LogsManagementConfiguration {
     @RequestScope
     public ErrorPayload errorPayload() {
         return new ErrorPayload();
+    }
+
+    @Bean
+    public IdentifierFilter identifierFilter(){
+        RequestIdentifierMapper requestIdentifierMapper = new RequestIdentifierMapper();
+        requestIdentifierMapper.mapArnWithHeaderKey("servicename");
+        requestIdentifierMapper.mapTraceIdWithHeaderKey("requestid");
+        return new IdentifierFilter(requestIdentifierMapper);
     }
 
     @Bean
