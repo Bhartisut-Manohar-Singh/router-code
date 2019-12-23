@@ -183,7 +183,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     @Override
-    public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
+    public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName,String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
 
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
 
@@ -197,6 +197,10 @@ public class ExecutionServiceImpl implements ExecutionService {
             body.add(Constant.MULTIPART_FILES, new MultipartInputStreamFileResource(file.getInputStream(), file.getOriginalFilename()));
         }
         HttpHeaders headers = new HttpHeaders();
+
+        headers.add("orgId",updateHttpHeaders.get("orgid"));
+        headers.add("appId",updateHttpHeaders.get("appid"));
+
         body.add("uploadRequest", uploadRequest);
 
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -225,7 +229,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         dynamicResponse.setResponse(exchange.getBody());
-
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
