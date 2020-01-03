@@ -50,7 +50,7 @@ public class LogsManagementConfiguration {
         requestIdentifierMapper.mapTraceIdWithHeaderKey("requestid");
         requestIdentifierMapper.mapOrgIdWithHeaderKey("orgid");
         requestIdentifierMapper.mapAppIdWithHeaderKey("appid");
-        return new IdentifierFilter(requestIdentifierMapper);
+        return new IdentifierFilter(requestIdentifierMapper, isHttpTracingEnabled);
     }
 
     @Bean
