@@ -3,22 +3,22 @@ kind: Service
 metadata:
  name: api
 
-#spec:
-#  ports:
-#  -  port: 80
-#     targetPort: 8001
-#  selector:
-#     app: api
-
 spec:
-  type: NodePort
   ports:
-    - nodePort: 31785
-      port: 8001
-      targetPort: 8001
-      protocol: TCP
+  -  port: 80
+     targetPort: 8001
   selector:
-    app: igw
+     app: api
+
+#spec:
+#  type: NodePort
+#  ports:
+#    - nodePort: 31785
+#      port: 8001
+#      targetPort: 8001
+#      protocol: TCP
+#  selector:
+#    app: igw
 
 ---
 
