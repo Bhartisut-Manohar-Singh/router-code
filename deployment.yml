@@ -56,8 +56,8 @@ data:
 
     eureka.client.enabled=true
 
-    eureka.client.fetch-registry: false
-    eureka.client.register-with-eureka: false
+    eureka.client.fetch-registry: true
+    eureka.client.register-with-eureka: true
     
     eureka.instance.prefer-ip-address: true   
     eureka.instance.lease-renewal-interval-in-seconds: 2
