@@ -114,14 +114,14 @@ data:
 ---
 
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   labels:
     app: api
   name: api
   namespace: default
 spec:
-
+  
   replicas: 1
   selector:
     matchLabels:
@@ -131,12 +131,14 @@ spec:
       labels:
         app:  api
     spec:
+      hostNetwork: true
       containers:
         - name: api
           image: 712693083859.dkr.ecr.ap-south-1.amazonaws.com/project_value
           ports:
             - containerPort: 8001
           imagePullPolicy: Always
+          args: ["--port", "8001"]
           resources:
             requests:
               cpu: 200m
