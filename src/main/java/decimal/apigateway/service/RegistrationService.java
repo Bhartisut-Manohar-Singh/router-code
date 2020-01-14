@@ -1,6 +1,6 @@
 package decimal.apigateway.service;
 
-import exception.RouterException;
+import decimal.apigateway.exception.RouterException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;

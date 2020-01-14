@@ -1,73 +1,94 @@
 package decimal.apigateway.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import decimal.apigateway.commons.Constant;
-import decimal.apigateway.model.LogsData;
-import decimal.apigateway.service.masking.MaskService;
-import decimal.kafka.Service.ProducerServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
+import decimal.logs.connector.LogsConnector;
+import decimal.logs.constant.LogsIdentifier;
+import decimal.logs.model.AuditPayload;
+import decimal.logs.model.Request;
+import decimal.logs.model.RequestIdentifier;
+import decimal.logs.model.Response;
 import org.springframework.stereotype.Service;
 
-import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
-import static decimal.apigateway.commons.Loggers.GENERAL_LOGGER;
+import java.time.Instant;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Predicate;
 
 @Service
-public class LogsWriter
-{
-    @Value("${kafka.integration.url}")
-    String kafkaUrl;
-
-    @Value("${microServiceLogs}")
-    String microServiceLogs;
-
-    @Autowired
-    MaskService maskService;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @Async("myTaskExecutor")
-    public void writeLogs(LogsData logsData)
+public class LogsWriter {
+    public AuditPayload initializeLog(String request, Map<String, String> httpHeaders)
     {
-        String finalLogs;
-        try
-        {
-            try
-            {
-                ApiLogFormatter apiLogFormatter = new ApiLogFormatter(logsData);
-                apiLogFormatter.setData(objectMapper.convertValue(logsData, ObjectNode.class));
-                finalLogs = objectMapper.writeValueAsString(apiLogFormatter);
-                finalLogs = maskService.maskMessage(finalLogs);
+        AuditPayload auditPayload = new AuditPayload();
+        auditPayload.setRequestTimestamp(Instant.now());
 
-                GENERAL_LOGGER.info(Thread.currentThread().getName());
+        RequestIdentifier requestIdentifier = getRequestIdentifier(httpHeaders);
 
-            }
-            catch (JsonProcessingException e)
-            {
-                finalLogs="{}";
-            }
+        auditPayload.setRequestIdentifier(requestIdentifier);
 
-            if(microServiceLogs.equalsIgnoreCase("ON"))
-            {
-                GENERAL_LOGGER.info("Send request to push logs to kafka");
+        Request requestObj = new Request();
+        requestObj.setHeaders(httpHeaders);
 
-                ProducerServiceImpl producerService = new ProducerServiceImpl();
+        auditPayload.setRequest(requestObj);
 
-                producerService.executeProducer(finalLogs, kafkaUrl, Constant.LOGS_TOPIC);
+        Response response = new Response();
+        auditPayload.setResponse(response);
 
-                GENERAL_LOGGER.info("Logs has been pushed to kafka");
-            }
-            else {
-                GENERAL_LOGGER.info("Logs is not enabled");
+        return auditPayload;
+    }
+
+    public void updateLog(AuditPayload auditPayload){
+
+        auditPayload.setResponseTimestamp(Instant.now());
+        auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().toEpochMilli() - auditPayload.getRequestTimestamp().toEpochMilli());
+
+        LogsConnector.newInstance().audit(auditPayload);
+    }
+
+    private Predicate<String> isNotNullAndNotEmpty = (str) -> str != null && !str.isEmpty();
+
+    private RequestIdentifier getRequestIdentifier(Map<String, String> requestHeaders) {
+        RequestIdentifier requestIdentifier = new RequestIdentifier();
+
+
+        String clientId = requestHeaders.get(LogsIdentifier.clientid.name());
+        String orgId = requestHeaders.get(LogsIdentifier.orgid.name());
+        String appId = requestHeaders.get(LogsIdentifier.appid.name());
+        String serviceName = requestHeaders.get(LogsIdentifier.servicename.name());
+        String apiName = requestHeaders.get(LogsIdentifier.apiname.name());
+
+        String requestId = requestHeaders.get(LogsIdentifier.requestid.name());
+        String traceId = requestHeaders.get(LogsIdentifier.traceid.name());
+
+        String username = requestHeaders.get(LogsIdentifier.username.name());
+        String loginId = requestHeaders.get(LogsIdentifier.loginid.name());
+
+        if (isNotNullAndNotEmpty.test(clientId)) {
+            String[] split = clientId.split("~");
+            orgId = split[0];
+            appId = split[1];
+        }
+
+        String arn = isNotNullAndNotEmpty.test(serviceName) ? serviceName : apiName;
+
+        String finalTraceId = isNotNullAndNotEmpty.test(traceId) ? traceId : (isNotNullAndNotEmpty.test(requestId) ? requestId : UUID.randomUUID().toString());
+
+        if (loginId != null && !loginId.isEmpty())
+            requestIdentifier.setLoginId(loginId);
+        else if (username != null && !username.isEmpty()) {
+            try {
+                String[] split = username.split("~");
+                requestIdentifier.setLoginId(split[2]);
+            } catch (Exception ex) {
+                System.out.println("Unable to get login Id");
             }
         }
-        catch (Exception e)
-        {
-            ERROR_LOGGER.error("Unable to push logs to Kafka", e);
-        }
+
+        requestIdentifier.setOrgId(orgId);
+        requestIdentifier.setAppId(appId);
+        requestIdentifier.setSystemName("api-gateway");
+        requestIdentifier.setArn(arn);
+        requestIdentifier.setTraceId(finalTraceId);
+        requestIdentifier.setSpanId(UUID.randomUUID().toString());
+
+        return requestIdentifier;
     }
 }

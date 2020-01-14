@@ -11,6 +11,9 @@ import java.util.Map;
 @FeignClient(value = Constant.ESB)
 public interface EsbClient {
 
-    @PostMapping(value =  Constant.ESB + "/service-executor/execute", consumes = "application/json")
+    @PostMapping(value = Constant.ESB + "/service-executor/execute", consumes = "application/json")
     Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
+
+    @PostMapping(value = Constant.ESB + "/service-executor/execute-plain", consumes = "application/json")
+    Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
 }

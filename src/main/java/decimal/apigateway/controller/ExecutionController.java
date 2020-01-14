@@ -1,10 +1,13 @@
 package decimal.apigateway.controller;
 
+import decimal.apigateway.commons.Constant;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionService;
-import exception.RouterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
 
@@ -21,8 +24,45 @@ public class ExecutionController
         return executionService.executePlainRequest(request, httpHeaders);
     }
 
+    @PostMapping("execute/{orgId}/{appId}/{serviceName}/{version}")
+    public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String orgId,
+                                      @PathVariable String appId, @PathVariable String serviceName, @PathVariable String version) throws RouterException
+    {
+        httpHeaders.put("servicename", serviceName);
+        httpHeaders.put("orgid", orgId);
+        httpHeaders.put("appid", appId);
+        httpHeaders.put("version", version);
+
+        return executionService.executePlainRequest(request, httpHeaders);
+    }
+
     @PostMapping("gateway")
     public Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         return executionService.executeRequest(request, httpHeaders);
     }
+
+    @PostMapping(value = "dynamic-router/{serviceName}/**")
+    public Object executeService(@RequestBody String request, HttpServletRequest httpServletRequest, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName) throws IOException, RouterException {
+
+        return executionService.executeDynamicRequest(httpServletRequest, request, httpHeaders, serviceName);
+    }
+
+    @PostMapping(value = "dynamic-router/upload-gateway/{serviceName}/**",consumes = "multipart/form-data")
+    public Object executeMultipartRequest(
+            @RequestPart String request,
+            @RequestHeader Map<String, String> httpHeaders,
+            @PathVariable String serviceName,
+            @RequestPart(Constant.MULTIPART_FILES) MultipartFile[] files,
+            @RequestPart("uploadRequest") String uploadRequest,
+            HttpServletRequest httpServletRequest) throws Exception {
+
+        System.out.println("------------------------------------------------------------------------------------------");
+        System.out.println("REQUEST: "+ request);
+        System.out.println("File Size= "+files.length);
+        return executionService.executeMultipartRequest(httpServletRequest,request,httpHeaders,serviceName,uploadRequest,files);
+
+    }
+
+
+
 }

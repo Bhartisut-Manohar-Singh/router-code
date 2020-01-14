@@ -1,7 +1,8 @@
 package decimal.apigateway.controller;
 
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.RegistrationService;
-import exception.RouterException;
+import io.micrometer.core.annotation.Timed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +32,6 @@ public class RegistrationController {
         else
             return registrationService.register(request, httpHeaders, response);
     }
-
 
     @PostMapping("authenticate")
     public Object authenticate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {

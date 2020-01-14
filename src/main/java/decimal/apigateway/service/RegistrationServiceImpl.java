@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.ResponseOperations;
-import decimal.apigateway.model.LogsData;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.AuthenticationClient;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.apigateway.service.validator.RequestValidator;
-import exception.RouterException;
+import decimal.logs.filters.AuditTraceFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,9 +39,6 @@ public class RegistrationServiceImpl implements RegistrationService {
     RequestValidator requestValidator;
 
     @Autowired
-    LogsData logsData;
-
-    @Autowired
     public RegistrationServiceImpl(SecurityClient securityClient, AuthenticationClient authenticationClient, ObjectMapper objectMapper) {
         this.securityClient = securityClient;
         this.authenticationClient = authenticationClient;
@@ -57,7 +54,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         httpHeaders.put("username", userName);
 
-        logsData.setLoginId(userName);
+        auditTraceFilter.requestIdentifier.setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
 
         MicroserviceResponse registerResponse = authenticationClient.register(request, httpHeaders);
 
@@ -84,19 +81,25 @@ public class RegistrationServiceImpl implements RegistrationService {
         response.addHeader("hash", responseHash.getMessage());
         node.put("hash", responseHash.getMessage());
 
-        logsData.setResponseHeaders(node);
-
         return finalResponse;
     }
 
+    @Autowired
+    AuditTraceFilter auditTraceFilter;
+
     @Override
-    public Object authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+    public Object  authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
         MicroserviceResponse microserviceResponse = requestValidator.validateAuthentication(request, httpHeaders);
 
         httpHeaders.put("username", microserviceResponse.getMessage());
 
-        logsData.setLoginId(microserviceResponse.getMessage());
+        Map<String, String> customData = microserviceResponse.getCustomData();
+        if(customData != null){
+            httpHeaders.put(Constant.KEYS_TO_MASK, customData.get(Constant.KEYS_TO_MASK));
+        }
+
+        auditTraceFilter.requestIdentifier.setLoginId(microserviceResponse.getMessage().split(Constant.TILD_SPLITTER)[2]);
 
         Object plainRequest = microserviceResponse.getResponse();
 
@@ -137,6 +140,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         MicroserviceResponse microserviceResponse = requestValidator.validateLogout(request, httpHeaders);
 
         httpHeaders.put("username", microserviceResponse.getResponse().toString());
+
+        auditTraceFilter.requestIdentifier.setLoginId(microserviceResponse.getResponse().toString().split(Constant.TILD_SPLITTER)[2]);
 
         return authenticationClient.logout(httpHeaders).getResponse();
     }
