@@ -158,21 +158,21 @@ spec:
 
 
 ---
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: api
-  namespace: default
-spec:
-  rules:
-  - http:
-      paths:
-      - path: /router
-        backend:
-          serviceName: api
-          servicePort: 8002
+#apiVersion: extensions/v1beta1
+#kind: Ingress
+#metadata:
+#  name: api
+#  namespace: default
+#spec:
+#  rules:
+#  - http:
+#      paths:
+#      - path: /router
+#        backend:
+#          serviceName: api
+#          servicePort: 8002
 
----
+#---
 
 
 apiVersion: autoscaling/v2beta1
