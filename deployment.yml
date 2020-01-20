@@ -63,7 +63,7 @@ data:
     eureka.instance.lease-renewal-interval-in-seconds: 2
     eureka.instance.lease-expiration-duration-in-seconds: 5
     eureka.client.registry-fetch-interval-seconds: 5
-    eureka.client.service-url.defaultZone: http://discovery-server/eureka
+    eureka.client.service-url.defaultZone: http://discovery-server
     
     info.app.name: Api Gateway
     info.app.description: An Api gateway which will handle all the request coming to vahana
