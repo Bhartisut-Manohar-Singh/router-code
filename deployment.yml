@@ -143,9 +143,9 @@ metadata:
 spec:
   
 #  replicas: 1
-  selector:
-    matchLabels:
-      app: api
+#  selector:
+#    matchLabels:
+#      app: api
   template:
     metadata:
       labels:
