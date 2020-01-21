@@ -14,8 +14,8 @@ spec:
   type: NodePort
   ports:
     - nodePort: 31785
-      port: 8001
-      targetPort: 8001
+      port: 8002
+      targetPort: 8002
       protocol: TCP
 #  selector:
 #    app: igw
@@ -139,9 +139,9 @@ spec:
         - name: api
           image: 712693083859.dkr.ecr.ap-south-1.amazonaws.com/project_value
           ports:
-            - containerPort: 8001
+            - containerPort: 8002
           imagePullPolicy: Always
-          args: ["--port", "8001"]
+          args: ["--port", "8002"]
           resources:
             requests:
               cpu: 200m
