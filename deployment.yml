@@ -81,7 +81,7 @@ data:
     eureka.instance.lease-renewal-interval-in-seconds: 12
     eureka.instance.lease-expiration-duration-in-seconds: 15
     eureka.client.registry-fetch-interval-seconds: 15
-    eureka.client.service-url.defaultZone: http://discovery-server:8761/eureka/
+    eureka.client.service-url.defaultZone: http://discovery-server:8761/
     
 
     
