@@ -138,7 +138,7 @@ spec:
           ports:
             - containerPort: 8002
           imagePullPolicy: Always
-          args: ["--port", "8001"]
+          args: ["--port", "8002"]
           resources:
             requests:
               cpu: 200m
