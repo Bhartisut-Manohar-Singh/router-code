@@ -28,8 +28,9 @@ metadata:
   name: api
 subsets:
   - addresses:
-      - ip: 172.31.37.54
-      - ip: 172.31.35.216
+     - ip: 172.30.0.137
+     - ip: 172.30.0.196
+
     ports:
       - port: 8002
 
