@@ -142,10 +142,10 @@ metadata:
   namespace: default
 spec:
   
-#  replicas: 1
-#  selector:
-#    matchLabels:
-#      app: api
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
   template:
     metadata:
       labels:
