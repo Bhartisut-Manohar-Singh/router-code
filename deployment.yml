@@ -5,7 +5,7 @@ metadata:
 
 spec:
   ports:
-  -  port: 80
+  -  port: 8002
      targetPort: 8002
   selector:
      app: api
@@ -63,7 +63,7 @@ data:
     eureka.instance.lease-renewal-interval-in-seconds: 12
     eureka.instance.lease-expiration-duration-in-seconds: 15
     eureka.client.registry-fetch-interval-seconds: 15
-    eureka.client.service-url.defaultZone: http://discovery-server:8761/
+    eureka.client.service-url.defaultZone: http://discovery-server:8761/eureka/
 
     
     info.app.name: Api Gateway
