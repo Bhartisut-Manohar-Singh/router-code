@@ -30,10 +30,9 @@ metadata:
   labels:
     app: api
 spec:
-  type: NodePort
+#  type: NodePort
   ports:
-    - nodePort: 31798
-      port: 8002
+    - port: 8002
       targetPort: 8002
       protocol: TCP
 
@@ -49,7 +48,7 @@ subsets:
       - ip: 172.31.35.216
       - ip: 172.31.37.54
     ports:
-      - port: 31798
+      - port: 8002
 
 ---
 
