@@ -149,7 +149,7 @@ spec:
       labels:
         app: router
     spec:
-      hostNetwork: true
+ #     hostNetwork: true
       containers:
         - name: router
           image: 712693083859.dkr.ecr.ap-south-1.amazonaws.com/project_value
