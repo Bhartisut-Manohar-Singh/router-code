@@ -74,7 +74,7 @@ data:
 
  
     eureka.client.fetch-registry: false
-    eureka.client.register-with-eureka: false
+    eureka.client.register-with-eureka: true
     
     eureka.instance.prefer-ip-address: true   
     eureka.instance.lease-renewal-interval-in-seconds: 12
@@ -177,19 +177,19 @@ spec:
 
 
 ---
-#apiVersion: extensions/v1beta1
-#kind: Ingress
-#metadata:
-#  name: api
-#  namespace: default
-#spec:
-#  rules:
-#  - http:
-#      paths:
-#      - path: /router
-#        backend:
-#          serviceName: api
-#          servicePort: 8002
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: api
+  namespace: default
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /router
+        backend:
+          serviceName: api
+          servicePort: 8002
 
 #---
 
