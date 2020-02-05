@@ -163,12 +163,12 @@ spec:
           volumeMounts:
             - mountPath: /app/
               name: router-volume
-            - mountPath: /var/my-secret/
-              name: dg-ecr-pull
-              readOnly: true
+        #    - mountPath: /var/my-secret/
+        #      name: dg-ecr-pull
+        #      readOnly: true
       restartPolicy: Always
       imagePullSecrets:
-        - name: awslogin
+        - name: dg-ecr-pull
 
 
       volumes:
@@ -176,9 +176,9 @@ spec:
             name: router
           name: router-volume
 
-        - name: dg-ecr-pull
-          secret:
-           secretName: dg-ecr-pull
+    #    - name: dg-ecr-pull
+    #      secret:
+    #       secretName: dg-ecr-pull
 
 ---
 apiVersion: extensions/v1beta1
