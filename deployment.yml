@@ -164,8 +164,8 @@ spec:
             - mountPath: /app/
               name: router-volume
       restartPolicy: Always
-      imagePullSecrets:
-        - name: awslogin
+  #    imagePullSecrets:
+  #      - name: awslogin
 
 
       volumes:
