@@ -167,8 +167,8 @@ spec:
               name: dg-ecr-pull
               readOnly: true
       restartPolicy: Always
-  #    imagePullSecrets:
-  #      - name: awslogin
+      imagePullSecrets:
+        - name: awslogin
 
 
       volumes:
