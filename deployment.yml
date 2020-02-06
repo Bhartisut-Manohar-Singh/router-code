@@ -35,6 +35,8 @@ spec:
     - port: 8001
       targetPort: 8001
       protocol: TCP
+  selector:
+    app: router
 
 
 #---
