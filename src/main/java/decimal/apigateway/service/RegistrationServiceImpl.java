@@ -104,6 +104,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         if(customData != null)
         {
             httpHeaders.put(Constant.KEYS_TO_MASK, customData.get(Constant.KEYS_TO_MASK));
+            httpHeaders.put("logsrequired", customData.get("appLogs"));
+            httpHeaders.put("servicelogs", customData.get("serviceLog"));
         }
 
         String keysToMask = httpHeaders.get(Constant.KEYS_TO_MASK);
@@ -115,12 +117,23 @@ public class RegistrationServiceImpl implements RegistrationService {
             maskKeys = Arrays.asList(keysToMaskArr);
         }
 
-        auditPayload.getRequestIdentifier().setLoginId(microserviceResponse.getMessage().split(Constant.TILD_SPLITTER)[2]);
+        String logsRequired = httpHeaders.get("logsrequired");
+        String serviceLog = httpHeaders.get("servicelogs");
+
+        boolean logRequestResponse = "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog);
 
         Object plainRequest = microserviceResponse.getResponse();
 
-        String maskedRequest = JsonMasker.maskMessage(plainRequest.toString(), maskKeys);
-        auditPayload.getRequest().setRequestBody(maskedRequest);
+        ObjectNode nodes = objectMapper.createObjectNode();
+
+        if (logRequestResponse) {
+            String requestBody = JsonMasker.maskMessage(plainRequest.toString(), maskKeys);
+            auditPayload.getRequest().setRequestBody(requestBody);
+        } else {
+            nodes.put("message", "It seems that request logs is not enabled for this api/service.");
+            auditPayload.getRequest().setRequestBody(objectMapper.writeValueAsString(nodes));
+        }
+        auditPayload.getRequestIdentifier().setLoginId(microserviceResponse.getMessage().split(Constant.TILD_SPLITTER)[2]);
 
         MicroserviceResponse authenticateResponse = authenticationClient.authenticate(plainRequest, httpHeaders);
 
@@ -131,9 +144,14 @@ public class RegistrationServiceImpl implements RegistrationService {
                 httpHeaders.get("servicename"),
                 objectMapper.writeValueAsString(authResponse));
 
-        String maskedResponse = JsonMasker.maskMessage(finalResponse.toString(), maskKeys);
 
-        auditPayload.getResponse().setResponse(maskedResponse);
+        if (logRequestResponse) {
+            String maskedResponse = JsonMasker.maskMessage(finalResponse.toString(), maskKeys);
+            auditPayload.getResponse().setResponse(maskedResponse);
+        } else {
+            nodes.put("message", "It seems that response logs is not enabled for this api/service.");
+            auditPayload.getRequest().setRequestBody(objectMapper.writeValueAsString(nodes));
+        }
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(finalResponse, httpHeaders);
 
