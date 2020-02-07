@@ -11,6 +11,8 @@ import decimal.apigateway.service.clients.AuthenticationClient;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.apigateway.service.validator.RequestValidator;
 import decimal.logs.filters.AuditTraceFilter;
+import decimal.logs.masking.JsonMasker;
+import decimal.logs.model.AuditPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +21,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @CrossOrigin
@@ -87,21 +88,39 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Autowired
     AuditTraceFilter auditTraceFilter;
 
+    @Autowired
+    LogsWriter logsWriter;
+
     @Override
     public Object  authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+
+        AuditPayload auditPayload = logsWriter.initializeLog(request, httpHeaders);
 
         MicroserviceResponse microserviceResponse = requestValidator.validateAuthentication(request, httpHeaders);
 
         httpHeaders.put("username", microserviceResponse.getMessage());
 
         Map<String, String> customData = microserviceResponse.getCustomData();
-        if(customData != null){
+        if(customData != null)
+        {
             httpHeaders.put(Constant.KEYS_TO_MASK, customData.get(Constant.KEYS_TO_MASK));
         }
 
-        auditTraceFilter.requestIdentifier.setLoginId(microserviceResponse.getMessage().split(Constant.TILD_SPLITTER)[2]);
+        String keysToMask = httpHeaders.get(Constant.KEYS_TO_MASK);
+
+        List<String> maskKeys = new ArrayList<>();
+
+        if (keysToMask != null && !keysToMask.isEmpty()) {
+            String[] keysToMaskArr = keysToMask.split(",");
+            maskKeys = Arrays.asList(keysToMaskArr);
+        }
+
+        auditPayload.getRequestIdentifier().setLoginId(microserviceResponse.getMessage().split(Constant.TILD_SPLITTER)[2]);
 
         Object plainRequest = microserviceResponse.getResponse();
+
+        String maskedRequest = JsonMasker.maskMessage(plainRequest.toString(), maskKeys);
+        auditPayload.getRequest().setRequestBody(maskedRequest);
 
         MicroserviceResponse authenticateResponse = authenticationClient.authenticate(plainRequest, httpHeaders);
 
@@ -111,6 +130,10 @@ public class RegistrationServiceImpl implements RegistrationService {
         Object finalResponse = responseOperations.prepareResponseObject(httpHeaders.get("requestid"),
                 httpHeaders.get("servicename"),
                 objectMapper.writeValueAsString(authResponse));
+
+        String maskedResponse = JsonMasker.maskMessage(finalResponse.toString(), maskKeys);
+
+        auditPayload.getResponse().setResponse(maskedResponse);
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(finalResponse, httpHeaders);
 
@@ -131,6 +154,10 @@ public class RegistrationServiceImpl implements RegistrationService {
         response.addHeader("hash", authResponseHash.getMessage());
 
         node.put("hash", authResponseHash.getMessage());
+
+        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
+
+        logsWriter.updateLog(auditPayload);
 
         return finalResponseMap;
     }

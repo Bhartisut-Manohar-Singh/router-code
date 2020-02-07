@@ -1,6 +1,5 @@
 package decimal.apigateway.configuration;
 
-import decimal.apigateway.commons.Constant;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.filters.IdentifierFilter;
 import decimal.logs.model.*;
@@ -56,7 +55,7 @@ public class LogsManagementConfiguration {
     @Bean
     public AuditTraceFilter auditTraceFilter() {
         List<String> registeredUrls = new ArrayList<>();
-        registeredUrls.add("register");
+//        registeredUrls.add("register");
         registeredUrls.add("gatewayProcessor");
         registeredUrls.add("execute");
         registeredUrls.add("logout");
