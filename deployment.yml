@@ -117,7 +117,7 @@ spec:
     spec:
       containers:
       - name: api-gateway
-        image: 712693083859.dkr.ecr.ap-south-1.amazonaws.com/tpg-admin-server:project_value
+        image: 712693083859.dkr.ecr.ap-south-1.amazonaws.com/project_value
         ports:
         - containerPort: 9000
         imagePullPolicy: Always
