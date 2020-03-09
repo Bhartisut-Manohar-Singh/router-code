@@ -7,10 +7,9 @@ metadata:
   labels:
     app: api-gateway
 spec:
-  type: NodePort
+ # type: NodePort
   ports:
-  - nodePort: 31798
-    port: 9000
+  - port: 9000
     targetPort: 80
     protocol: TCP
   selector:
@@ -110,15 +109,15 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: api-gateway-test
+      app: api-gateway
   template:
     metadata:
       labels:
-        app:  api-gateway-test
+        app:  api-gateway
     spec:
       containers:
-      - name: api-gateway-test
-        image: 712693083859.dkr.ecr.ap-south-1.amazonaws.com/tpg-admin-server:jenkins-build-1.0.58
+      - name: api-gateway
+        image: 712693083859.dkr.ecr.ap-south-1.amazonaws.com/tpg-admin-server:project_value
         ports:
         - containerPort: 9000
         imagePullPolicy: Always
@@ -126,7 +125,7 @@ spec:
           requests:
             cpu: 200m
         volumeMounts:
-        - mountPath: /app/
+        - mountPath: /usr/deployment/
           name: api-gateway-volume    
       restartPolicy: Always
       imagePullSecrets:
@@ -161,3 +160,19 @@ spec:
     resource:
       name: cpu
       targetAverageUtilization: 50
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: router
+  namespace: default
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /router
+        backend:
+          serviceName: router
+          servicePort: 9000
