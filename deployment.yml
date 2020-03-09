@@ -126,7 +126,10 @@ spec:
             cpu: 200m
         volumeMounts:
         - mountPath: /usr/deployment/
-          name: api-gateway-volume    
+          name: api-gateway-volume
+        - mountPath: /var/my-secret/
+          name: dg-ecr-pull
+          readOnly: true
       restartPolicy: Always
       imagePullSecrets:
       - name: aws-ecr-5
@@ -136,6 +139,10 @@ spec:
       - configMap:
           name: api-gateway-v2
         name: api-gateway-volume
+    
+      - name: dg-ecr-pull
+        secret:
+          secretName: dg-ecr-pull
 
 
        
