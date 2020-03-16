@@ -114,21 +114,19 @@ spec:
       labels:
         app: router
     spec:
- #     hostNetwork: true
       containers:
         - name: router
           image: 712693083859.dkr.ecr.ap-south-1.amazonaws.com/project_value
           ports:
             - containerPort: 9000
           imagePullPolicy: Always
-#          args: ["--port", "8002"]
           resources:
             requests:
               cpu: 200m
           volumeMounts:
             - mountPath: /app/
               name: router-volume
-       restartPolicy: Always
+      restartPolicy: Always
       imagePullSecrets:
         - name: awslogin
 
