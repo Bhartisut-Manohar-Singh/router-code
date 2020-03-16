@@ -1,0 +1,182 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: router
+  namespace: default
+  annotations:
+    alb.ingress.kubernetes.io/healthcheck-path: /router
+  labels:
+    app: router
+spec:
+  ports:
+  -  port: 9000
+     targetPort: 9000
+     protocol: TCP
+  selector:
+     app: router
+
+---
+
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: router
+  namespace: default
+data:
+  application.properties: |-
+
+    spring.application.name: router
+
+    server.port: 9000
+
+    server.compression.enabled: true
+    server.compression.min-response-size: 1KB
+    server.compression.mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+    server.servlet.context-path: /router
+
+ 
+    eureka.client.fetch-registry: false
+    eureka.client.register-with-eureka: true
+    
+    eureka.instance.prefer-ip-address: true   
+    eureka.instance.lease-renewal-interval-in-seconds: 12
+    eureka.instance.lease-expiration-duration-in-seconds: 15
+    eureka.client.registry-fetch-interval-seconds: 15
+    eureka.client.service-url.defaultZone: http://discovery-server:8761/eureka/
+    
+
+    
+    info.app.name: Api Gateway
+    info.app.description: An Api gateway which will handle all the request coming to vahana
+    info.app.version: 1.0
+
+    feign.client.config.default.connectTimeout: 160000000
+    feign.client.config.default.readTimeout: 160000000
+
+    feign.client.config.default.logger-level: FULL
+
+    isLogEnabled: false
+
+    tempLogsPath: E:\\logs
+    kafka.integration.url: 13.233.190.96:9092
+
+
+    keys_to_mask:
+    microServiceLogs: OFF
+
+    isHttpTracingEnabled: false
+
+    corePoolSize: 20
+    maxPoolSize: 50
+    queueCapacity: 50
+    timeToLive: 10
+
+    management.endpoint.metrics.enabled: true
+    management.endpoints.web.exposure.include: *
+    management.endpoint.prometheus.enabled: true
+    management.endpoint.health.show-details: always
+    management.metrics.export.prometheus.enabled: true
+    host: 176.34.133.237
+    service: api
+    region: dev
+
+    spring.servlet.multipart.enabled: true
+    
+    spring.servlet.multipart.file-size-threshold: 1000MB
+   
+    spring.servlet.multipart.max-file-size: 1000MB
+    
+    spring.servlet.multipart.max-request-size: 1000MB
+
+
+
+
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: router
+  name: router
+  namespace: default
+spec:
+  
+  replicas: 1
+  selector:
+    matchLabels:
+      app: router
+  template:
+    metadata:
+      labels:
+        app: router
+    spec:
+ #     hostNetwork: true
+      containers:
+        - name: router
+          image: 712693083859.dkr.ecr.ap-south-1.amazonaws.com/project_value
+          ports:
+            - containerPort: 9000
+          imagePullPolicy: Always
+#          args: ["--port", "8002"]
+          resources:
+            requests:
+              cpu: 200m
+          volumeMounts:
+            - mountPath: /app/
+              name: router-volume
+            - mountPath: /var/my-secret/
+              name: dg-ecr-pull
+              readOnly: true
+      #restartPolicy: Always
+      imagePullSecrets:
+        - name: awslogin
+
+
+      volumes:
+        - configMap:
+            name: router
+          name: router-volume
+
+        - name: dg-ecr-pull
+          secret:
+           secretName: dg-ecr-pull
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: router
+  namespace: default
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /router
+        backend:
+          serviceName: router
+          servicePort: 9000
+
+---
+
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api
+  minReplicas: 1
+  maxReplicas: 3
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 50
