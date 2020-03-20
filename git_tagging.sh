@@ -3,8 +3,8 @@ BRANCH_NAME=${1}
 MAJOR_VERSION=1
 MINOR_VERSION=0
 GIT_REPO=https://devops.decimaltech.net/root/tpg-vconnect-config.git
-GIT_USER=charvee.punia
-GIT_PASS=Decimal1964
+GIT_USER=devops_decimal
+GIT_PASS=decimal%24devops
         
 major_max=1
 minor_max=0
