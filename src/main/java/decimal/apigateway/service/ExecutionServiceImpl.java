@@ -245,6 +245,36 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     }
 
+    @Override
+    public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException {
+        System.out.println("Actual request is: " + request);
+
+        HttpHeaders updateHttpHeaders = new HttpHeaders();
+        httpHeaders.forEach(updateHttpHeaders::set);
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(request, updateHttpHeaders);
+
+        String requestURI = httpServletRequest.getRequestURI();
+
+        String basePath = path + "/engine/v1/dynamic-router/" + serviceName;
+
+        String mapping = requestURI.replaceAll(basePath, "");
+
+        String serviceUrl = "http://" + serviceName + getContextPath(serviceName) + mapping;
+
+        auditTraceFilter.requestIdentifier.setArn(serviceUrl);
+
+        System.out.println("Final Url to be called is: " + serviceUrl);
+
+        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
+
+        MicroserviceResponse dynamicResponse = new MicroserviceResponse();
+        dynamicResponse.setStatus(Constant.SUCCESS_STATUS);
+        dynamicResponse.setResponse(exchange.getBody());
+
+        return dynamicResponse;
+    }
+
     private String getContextPath(String serviceName) throws RouterException {
 
         System.out.println("Service name is: " + serviceName.toLowerCase());
