@@ -256,7 +256,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String requestURI = httpServletRequest.getRequestURI();
 
-        String basePath = path + "/engine/v1/dynamic-router/plain" + serviceName;
+        String basePath = path + "/engine/v1/dynamic-router/plain/" + serviceName;
 
         String mapping = requestURI.replaceAll(basePath, "");
 
