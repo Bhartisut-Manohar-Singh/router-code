@@ -87,10 +87,15 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
 
+        System.out.println("***********************************************************");
+        System.out.println("Decrypted request " + decryptedResponse.getResponse());
+        System.out.println("***********************************************************");
+        System.out.println("Decrypted request with toString" + decryptedResponse.getResponse().toString());
+        System.out.println("***********************************************************");
         ObjectNode nodes = objectMapper.createObjectNode();
 
         if (logRequestResponse) {
-            String requestBody = JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
+            String requestBody = decryptedResponse.getResponse().toString();//JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
             auditPayload.getRequest().setRequestBody(requestBody);
         } else {
             nodes.put("message", "It seems that request logs is not enabled for this api/service.");
@@ -183,7 +188,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     @Override
-    public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName,String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
+    public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
 
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
 
@@ -198,8 +203,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
         HttpHeaders headers = new HttpHeaders();
 
-        headers.add("orgId",updateHttpHeaders.get("orgid"));
-        headers.add("appId",updateHttpHeaders.get("appid"));
+        headers.add("orgId", updateHttpHeaders.get("orgid"));
+        headers.add("appId", updateHttpHeaders.get("appid"));
 
         body.add("uploadRequest", uploadRequest);
 
