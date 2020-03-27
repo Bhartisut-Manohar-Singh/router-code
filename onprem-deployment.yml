@@ -60,7 +60,7 @@ data:
     isLogEnabled: false
 
     tempLogsPath: E:\\logs
-    kafka.integration.url: 13.233.190.96:9092
+    kafka.integration.url: http://kafka-0.kafka-svc.default.svc.cluster.local:9093
 
 
     keys_to_mask:
