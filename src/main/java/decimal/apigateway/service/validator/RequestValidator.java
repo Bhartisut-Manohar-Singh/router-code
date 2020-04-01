@@ -47,6 +47,17 @@ public class RequestValidator {
         }
     }
 
+    public void validatePlainDynamicRequest(String request, Map<String, String> httpHeaders) throws RouterException {
+
+        httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
+
+        RequestValidationTypes[] requestValidationTypes = { CLIENT_SECRET,IP};
+
+        for (RequestValidationTypes plainRequestValidation : requestValidationTypes) {
+            securityClient.validate(request, httpHeaders, plainRequestValidation.name());
+        }
+    }
+
     @Autowired
     AuditTraceFilter auditTraceFilter;
 
