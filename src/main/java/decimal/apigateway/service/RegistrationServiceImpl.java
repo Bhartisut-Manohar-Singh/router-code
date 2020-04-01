@@ -49,13 +49,15 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
+//        AuditPayload auditPayload = logsWriter.initializeLog(request, httpHeaders);
+
         ObjectNode jsonNodes = objectMapper.convertValue(requestValidator.validateRegistrationRequest(request, httpHeaders), ObjectNode.class);
 
         String userName = jsonNodes.get("username").asText();
 
         httpHeaders.put("username", userName);
 
-        auditTraceFilter.requestIdentifier.setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
+//        auditTraceFilter.requestIdentifier.setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
 
         MicroserviceResponse registerResponse = authenticationClient.register(request, httpHeaders);
 

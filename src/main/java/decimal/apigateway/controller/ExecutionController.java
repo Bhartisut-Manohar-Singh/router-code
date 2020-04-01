@@ -47,6 +47,12 @@ public class ExecutionController
         return executionService.executeDynamicRequest(httpServletRequest, request, httpHeaders, serviceName);
     }
 
+    @PostMapping(value = "dynamic-router/plain/{serviceName}/**")
+    public Object executeServicePlain(@RequestBody String request, HttpServletRequest httpServletRequest, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName) throws IOException, RouterException {
+
+        return executionService.executeDynamicRequestPlain(httpServletRequest, request, httpHeaders, serviceName);
+    }
+
     @PostMapping(value = "dynamic-router/upload-gateway/{serviceName}/**",consumes = "multipart/form-data")
     public Object executeMultipartRequest(
             @RequestPart String request,
@@ -62,6 +68,8 @@ public class ExecutionController
         return executionService.executeMultipartRequest(httpServletRequest,request,httpHeaders,serviceName,uploadRequest,files);
 
     }
+
+
 
 
 
