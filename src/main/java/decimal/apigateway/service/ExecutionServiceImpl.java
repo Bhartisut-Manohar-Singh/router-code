@@ -87,11 +87,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
 
-        System.out.println("***********************************************************");
-        System.out.println("Decrypted request " + decryptedResponse.getResponse());
-        System.out.println("***********************************************************");
-        System.out.println("Decrypted request with toString" + decryptedResponse.getResponse().toString());
-        System.out.println("***********************************************************");
+
         ObjectNode nodes = objectMapper.createObjectNode();
 
         if (logRequestResponse) {
@@ -157,7 +153,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String actualRequest = jsonNode.get("requestData").toString();
 
-        System.out.println("Actual request is: " + actualRequest);
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
 
         String mapping = requestURI.replaceAll(basePath, "");
@@ -165,8 +160,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         String serviceUrl = "http://" + serviceName + getContextPath(serviceName) + mapping;
 
         auditTraceFilter.requestIdentifier.setArn(serviceUrl);
-
-        System.out.println("Final Url to be called is: " + serviceUrl);
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
@@ -210,8 +203,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        System.out.println("Actual request is: " + uploadRequest);
-
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
         String mapping = requestURI.replaceAll(basePath, "");
@@ -220,10 +211,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         auditTraceFilter.requestIdentifier.setArn(serviceUrl);
 
-        System.out.println("Final Url to be called is: " + serviceUrl);
-
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
-
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200) {
@@ -247,7 +235,8 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     @Override
     public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException {
-        System.out.println("Actual request is: " + request);
+
+        requestValidator.validatePlainDynamicRequest(request, httpHeaders);
 
         HttpHeaders updateHttpHeaders = new HttpHeaders();
         httpHeaders.forEach(updateHttpHeaders::set);
@@ -262,8 +251,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String serviceUrl = "http://" + serviceName + getContextPath(serviceName) + mapping;
 
-        System.out.println("Final Url to be called is: " + serviceUrl);
-
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
@@ -275,7 +262,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     private String getContextPath(String serviceName) throws RouterException {
 
-        System.out.println("Service name is: " + serviceName.toLowerCase());
         String contextPath = "";
 
         List<String> services = discoveryClient.getServices();
@@ -288,8 +274,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         if (instances.isEmpty()) {
             throw new RouterException(Constant.FAILURE_STATUS, "Service with name: " + serviceName + " is not registered with discovery server", null);
         }
-
-        System.out.println("Number of Instances found are: " + instances.size());
 
         for (ServiceInstance serviceInstance : instances) {
             Map<String, String> metadata = serviceInstance.getMetadata();
