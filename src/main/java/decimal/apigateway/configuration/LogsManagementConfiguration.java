@@ -19,7 +19,7 @@ public class LogsManagementConfiguration {
     @Value("${isHttpTracingEnabled}")
     boolean isHttpTracingEnabled;
 
-    @Value("logging-agent-url")
+    @Value("${logging-agent-url}")
     String lsvUrl;
 
     @Bean
