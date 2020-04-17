@@ -268,7 +268,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         String mapping = requestURI.replaceAll(basePath, "");
 
         String serviceUrl = "http://" + serviceName + getContextPath(serviceName) + mapping;
-        auditTraceFilter.requestIdentifier.setArn(serviceUrl);
+
+        auditPayload.getRequestIdentifier().setArn(serviceUrl);
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
