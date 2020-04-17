@@ -15,4 +15,5 @@ public class Constant {
     public static final String MULTIPART_FILES= "files";
 
     public static final String KEYS_TO_MASK = "keys_to_mask";
+    public static final String INVALID_URI = "Invalid Request URI recieved from HttpServletRequest";
 }
