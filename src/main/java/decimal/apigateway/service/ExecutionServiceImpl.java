@@ -243,7 +243,6 @@ public class ExecutionServiceImpl implements ExecutionService {
     public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, JsonProcessingException {
 
         AuditPayload auditPayload=logsWriter.initializeLog(request,httpHeaders);
-
         requestValidator.validatePlainDynamicRequest(request, httpHeaders);
 
         HttpHeaders updateHttpHeaders = new HttpHeaders();
