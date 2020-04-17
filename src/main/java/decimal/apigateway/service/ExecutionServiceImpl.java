@@ -11,6 +11,7 @@ import decimal.apigateway.service.clients.EsbClient;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
 import decimal.apigateway.service.validator.RequestValidator;
+import decimal.logs.connector.LogsConnector;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
@@ -258,7 +259,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String requestURI = httpServletRequest.getRequestURI();
 
-
         if(StringUtils.isEmpty(requestURI))
         {
             throw new RouterException(Constant.FAILURE_STATUS,Constant.INVALID_URI,null);
@@ -277,14 +277,14 @@ public class ExecutionServiceImpl implements ExecutionService {
         dynamicResponse.setStatus(Constant.SUCCESS_STATUS);
         dynamicResponse.setResponse(exchange.getBody());
         responseData.setTimestamp(Instant.now());
-        responseData.setResponse(objectMapper.writeValueAsString(exchange.getBody()));
+        responseData.setResponse(objectMapper.writeValueAsString(dynamicResponse));
         auditPayload.setRequest(requestData);
         auditPayload.setResponse(responseData);
         LogsConnector.newInstance().audit(auditPayload);
 
         return dynamicResponse;
     }
-    }
+
 
     private String getContextPath(String serviceName) throws RouterException {
 
