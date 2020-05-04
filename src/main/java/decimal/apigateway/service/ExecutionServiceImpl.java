@@ -1,5 +1,6 @@
 package decimal.apigateway.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -10,9 +11,12 @@ import decimal.apigateway.service.clients.EsbClient;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
 import decimal.apigateway.service.validator.RequestValidator;
+import decimal.logs.connector.LogsConnector;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
+import decimal.logs.model.Request;
+import decimal.logs.model.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
@@ -21,11 +25,13 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -234,16 +240,28 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     @Override
-    public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException {
+    public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, JsonProcessingException {
 
+        AuditPayload auditPayload=logsWriter.initializeLog(request,httpHeaders);
         requestValidator.validatePlainDynamicRequest(request, httpHeaders);
 
         HttpHeaders updateHttpHeaders = new HttpHeaders();
         httpHeaders.forEach(updateHttpHeaders::set);
 
         HttpEntity<String> requestEntity = new HttpEntity<>(request, updateHttpHeaders);
+        Request requestData=new Request();
+        Response responseData=new Response();
+        requestData.setTimestamp(Instant.now());
+        requestData.setRequestBody(objectMapper.writeValueAsString(request));
+        requestData.setHeaders(updateHttpHeaders.toSingleValueMap());
+        auditPayload.setRequest(requestData);
 
         String requestURI = httpServletRequest.getRequestURI();
+
+        if(StringUtils.isEmpty(requestURI))
+        {
+            throw new RouterException(Constant.FAILURE_STATUS,Constant.INVALID_URI,null);
+        }
 
         String basePath = path + "/engine/v1/dynamic-router/plain/" + serviceName;
 
@@ -251,14 +269,22 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String serviceUrl = "http://" + serviceName + getContextPath(serviceName) + mapping;
 
+        auditPayload.getRequestIdentifier().setArn(serviceUrl);
+
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         dynamicResponse.setStatus(Constant.SUCCESS_STATUS);
         dynamicResponse.setResponse(exchange.getBody());
+        responseData.setTimestamp(Instant.now());
+        responseData.setResponse(objectMapper.writeValueAsString(dynamicResponse));
+        auditPayload.setRequest(requestData);
+        auditPayload.setResponse(responseData);
+        LogsConnector.newInstance().audit(auditPayload);
 
         return dynamicResponse;
     }
+
 
     private String getContextPath(String serviceName) throws RouterException {
 

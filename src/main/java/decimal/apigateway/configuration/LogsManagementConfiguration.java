@@ -1,5 +1,6 @@
 package decimal.apigateway.configuration;
 
+import decimal.logs.connector.LogsConnector;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.filters.IdentifierFilter;
 import decimal.logs.model.*;
@@ -17,6 +18,9 @@ public class LogsManagementConfiguration {
 
     @Value("${isHttpTracingEnabled}")
     boolean isHttpTracingEnabled;
+
+    @Value("${logging-agent-url}")
+    String lsvUrl;
 
     @Bean
     @RequestScope
@@ -55,7 +59,6 @@ public class LogsManagementConfiguration {
     @Bean
     public AuditTraceFilter auditTraceFilter() {
         List<String> registeredUrls = new ArrayList<>();
-//        registeredUrls.add("register");
         registeredUrls.add("gatewayProcessor");
         registeredUrls.add("execute");
         registeredUrls.add("logout");
@@ -63,6 +66,11 @@ public class LogsManagementConfiguration {
         registeredUrls.add("dynamic-router");
 
 
-        return new AuditTraceFilter("API-GATEWAY", isHttpTracingEnabled, registeredUrls);
+        return new AuditTraceFilter("API-GATEWAY", isHttpTracingEnabled, registeredUrls, lsvUrl);
+    }
+
+    @Bean
+    public LogsConnector logsConnector(){
+        return  LogsConnector.newInstance(lsvUrl);
     }
 }
