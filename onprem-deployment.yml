@@ -37,7 +37,7 @@ data:
     server.servlet.context-path: /router
 
  
-    eureka.client.fetch-registry: false
+    eureka.client.fetch-registry: true
     eureka.client.register-with-eureka: true
     
     eureka.instance.prefer-ip-address: true   
