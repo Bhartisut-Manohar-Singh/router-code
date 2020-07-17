@@ -27,6 +27,9 @@ public class RegistrationController {
         String serviceName = httpHeaders.get("servicename");
         System.out.println("Service Name: " + serviceName);
 
+        System.out.println("====================Headers for register=============================");
+        httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
+
         if (serviceName.contains("AUTH") || serviceName.contains("auth"))
             return registrationService.authenticate(request, httpHeaders, response);
         else
@@ -35,11 +38,15 @@ public class RegistrationController {
 
     @PostMapping("authenticate")
     public Object authenticate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+        System.out.println("====================Headers for authenticate=============================");
+        httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
         return registrationService.authenticate(request, httpHeaders, response);
     }
 
     @PostMapping("logout")
     public Object logout(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+        System.out.println("====================Headers for logout=============================");
+        httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
         return registrationService.logout(request, httpHeaders, response);
     }
 
