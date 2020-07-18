@@ -15,13 +15,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpServerErrorException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -113,6 +117,18 @@ public class ExceptionController {
         errorPayload.setRequestIdentifier(auditTraceFilter.requestIdentifier);
 
         LogsConnector.newInstance().error(errorPayload, ex);
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+    public String handleHttpMediaTypeNotAcceptableException(Exception ex, HttpServletRequest request) {
+        Enumeration<String> headerNames=request.getHeaderNames();
+        if (headerNames != null) {
+            while (headerNames.hasMoreElements()) {
+                System.out.println(headerNames.nextElement()+"="+ request.getHeader(headerNames.nextElement()));
+            }
+        }
+        ex.printStackTrace();
+        return "acceptable MIME type:" + MediaType.APPLICATION_JSON_VALUE;
     }
 
     /*@ExceptionHandler(value = Exception.class)
