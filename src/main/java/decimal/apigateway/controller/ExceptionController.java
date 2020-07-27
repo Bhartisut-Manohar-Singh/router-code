@@ -119,29 +119,6 @@ public class ExceptionController {
         LogsConnector.newInstance().error(errorPayload, ex);
     }
 
-    @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
-    public String handleHttpMediaTypeNotAcceptableException(Exception ex, HttpServletRequest request) {
-        Enumeration<String> headerNames=request.getHeaderNames();
-        if (headerNames != null) {
-            while (headerNames.hasMoreElements()) {
-                System.out.println(headerNames.nextElement()+"="+ request.getHeader(headerNames.nextElement()));
-            }
-        }
-        ex.printStackTrace();
-        return "acceptable MIME type:" + MediaType.APPLICATION_JSON_VALUE;
-    }
-    @ExceptionHandler(Exception.class)
-    public String handleGenriceException(Exception ex, HttpServletRequest request) {
-        Enumeration<String> headerNames=request.getHeaderNames();
-        if (headerNames != null) {
-            while (headerNames.hasMoreElements()) {
-                System.out.println(headerNames.nextElement()+"="+ request.getHeader(headerNames.nextElement()));
-            }
-        }
-        ex.printStackTrace();
-        return "acceptable MIME type:" + MediaType.APPLICATION_JSON_VALUE;
-    }
-
     /*@ExceptionHandler(value = Exception.class)
     public ResponseEntity<Object> handleException(Exception ex, HttpServletRequest req)
     {
