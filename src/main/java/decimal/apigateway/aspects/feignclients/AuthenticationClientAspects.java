@@ -1,6 +1,5 @@
 package decimal.apigateway.aspects.feignclients;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
@@ -8,7 +7,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -16,9 +14,6 @@ import java.util.Map;
 @Component
 @Aspect
 public class AuthenticationClientAspects {
-
-    @Autowired
-    ObjectMapper objectMapper;
 
     @Pointcut(value = "execution(* decimal.apigateway.service.clients.AuthenticationClient.*(..)) && args(requestBody, httpHeaders)")
     public void feignClients(String requestBody, Map<String, String> httpHeaders) {
@@ -32,7 +27,6 @@ public class AuthenticationClientAspects {
     public MicroserviceResponse initiateEndpointForRegistration(ProceedingJoinPoint proceedingJoinPoint, String requestBody, Map<String, String> httpHeaders) throws Throwable {
         MicroserviceResponse response = (MicroserviceResponse) proceedingJoinPoint.proceed();
 
-        System.out.println("======================Feign Response "+objectMapper.writeValueAsString(response)+"==================================================");
         String status = response.getStatus();
 
         if (!Constant.SUCCESS_STATUS.equalsIgnoreCase(status)) {
