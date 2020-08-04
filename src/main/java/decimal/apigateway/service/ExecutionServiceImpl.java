@@ -97,8 +97,9 @@ public class ExecutionServiceImpl implements ExecutionService {
         ObjectNode nodes = objectMapper.createObjectNode();
 
         if (logRequestResponse) {
-            String requestBody = decryptedResponse.getResponse().toString();//JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
-            auditPayload.getRequest().setRequestBody(requestBody);
+            String requestBody = decryptedResponse.getResponse().toString();
+          String maskRequestBody=  JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
+            auditPayload.getRequest().setRequestBody(maskRequestBody);
         } else {
             nodes.put("message", "It seems that request logs is not enabled for this api/service.");
             auditPayload.getRequest().setRequestBody(objectMapper.writeValueAsString(nodes));
