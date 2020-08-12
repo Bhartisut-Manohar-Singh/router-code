@@ -34,7 +34,7 @@ data:
 
     server.servlet.context-path=/router
 
-    eureka.client.service-url.defaultZone=http://localhost:8761/eureka
+    eureka.client.service-url.defaultZone=http://discovery-server:8761/eureka/
     eureka.instance.prefer-ip-address=true
     eureka.instance.lease-renewal-interval-in-seconds=2
     eureka.instance.lease-expiration-duration-in-seconds=5
@@ -70,7 +70,7 @@ data:
     service=api-gateway
     region=dev
 
-    logging-agent-url=http://127.0.0.1:9051
+    logging-agent-url=logging-agent:9051
 
 
 
