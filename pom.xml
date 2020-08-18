@@ -80,7 +80,7 @@
         <dependency>
             <groupId>decimal</groupId>
             <artifactId>logs-management</artifactId>
-            <version>1.4</version>
+            <version>1.5</version>
         </dependency>
 
         <!-- Add Log4j2 Dependency -->
