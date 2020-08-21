@@ -46,7 +46,6 @@ data:
     feign.client.config.default.logger-level=FULL
 
 
-    # MULTIPART (MultipartProperties)
     # Enable multipart uploads
     spring.servlet.multipart.enabled=true
     # Threshold after which files are written to disk.
