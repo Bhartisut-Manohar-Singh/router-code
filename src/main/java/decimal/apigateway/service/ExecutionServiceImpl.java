@@ -8,6 +8,7 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.EsbClient;
+import decimal.apigateway.service.clients.MonitoringClient;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
 import decimal.apigateway.service.validator.RequestValidator;
@@ -58,14 +59,18 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     LogsWriter logsWriter;
 
+
+
+
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException {
 
         requestValidator.validatePlainRequest(request, httpHeaders);
         httpHeaders.put("logsrequired", "Y");
         httpHeaders.put("loginid", "random_login_id");
+        Object objectNode= esbClient.executePlainRequest(request,httpHeaders);
 
-        return esbClient.executePlainRequest(request, httpHeaders);
+        return objectNode;
     }
 
     @Override
@@ -98,7 +103,8 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         if (logRequestResponse) {
             String requestBody = decryptedResponse.getResponse().toString();
-          String maskRequestBody=  JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
+            String maskRequestBody=JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
+
             auditPayload.getRequest().setRequestBody(maskRequestBody);
         } else {
             nodes.put("message", "It seems that request logs is not enabled for this api/service.");
@@ -106,6 +112,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         Object response = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
+
 
         if (logRequestResponse) {
             String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(response), maskKeys);
@@ -129,6 +136,8 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
+
+
 
         return finalResponseMap;
     }

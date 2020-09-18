@@ -14,11 +14,14 @@ public class ErrorHandler implements ErrorDecoder {
     @Override
     public Exception decode(String s, Response response) {
 
+
+
         Object responseBody = null;
 
         try
         {
             responseBody = IOUtils.toString(response.body().asInputStream());
+
 
             System.out.println("Error received from target server with body: " + responseBody);
 
