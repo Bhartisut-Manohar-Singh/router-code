@@ -180,11 +180,18 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws RouterException {
-        MicroserviceResponse microserviceResponse = requestValidator.validateLogout(request, httpHeaders);
+        try {
+            MicroserviceResponse microserviceResponse = requestValidator.validateLogout(request, httpHeaders);
 
-        httpHeaders.put("username", microserviceResponse.getResponse().toString());
+            httpHeaders.put("username", microserviceResponse.getResponse().toString());
 
-        auditTraceFilter.requestIdentifier.setLoginId(microserviceResponse.getResponse().toString().split(Constant.TILD_SPLITTER)[2]);
+            auditTraceFilter.requestIdentifier.setLoginId(microserviceResponse.getResponse().toString().split(Constant.TILD_SPLITTER)[2]);
+
+        }
+        catch (Exception ex)
+        {
+            System.out.println("Security Failure!!!!!");
+        }
 
         return authenticationClient.logout(httpHeaders).getResponse();
     }
