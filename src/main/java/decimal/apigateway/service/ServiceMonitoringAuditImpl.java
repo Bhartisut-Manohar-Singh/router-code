@@ -1,7 +1,9 @@
 package decimal.apigateway.service;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import decimal.apigateway.model.MonitoringAuditServiceRequest;
+import decimal.apigateway.model.RequestModel;
 import decimal.apigateway.service.clients.MonitoringClient;
+import decimal.logs.model.ErrorPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +16,22 @@ public class ServiceMonitoringAuditImpl implements ServiceMonitoringAudit{
     MonitoringClient monitoringClient;
 
     @Override
-    public void performAudit(Map<String, String> httpHeaders, Object serviceResponse) {
-      monitoringClient.executeRequest(serviceResponse,httpHeaders);
+    public void performAudit(ErrorPayload serviceResponse) {
+
+        RequestModel  requestModel= new RequestModel();
+        requestModel.setAppId(serviceResponse.getRequestIdentifier().getAppId());
+        requestModel.setOrgId(serviceResponse.getRequestIdentifier().getOrgId());
+        requestModel.setLoginId(serviceResponse.getRequestIdentifier().getLoginId());
+        requestModel.setServiceName(serviceResponse.getRequestIdentifier().getArn());
+
+        if(null!=serviceResponse.getRequestIdentifier().getArn() && !serviceResponse.getRequestIdentifier().getArn().isEmpty()) {
+            MonitoringAuditServiceRequest monitoringRequest = new MonitoringAuditServiceRequest();
+            monitoringRequest.setRequest(requestModel);
+            monitoringRequest.setType("VALIDATION");
+            monitoringRequest.setMessage(serviceResponse.getSystemError().getMessage());
+
+            monitoringClient.executeRequest(monitoringRequest);
+        }
+
     }
 }

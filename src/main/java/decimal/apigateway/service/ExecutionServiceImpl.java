@@ -8,7 +8,6 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.EsbClient;
-import decimal.apigateway.service.clients.MonitoringClient;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
 import decimal.apigateway.service.validator.RequestValidator;
@@ -136,8 +135,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
-
-
 
         return finalResponseMap;
     }

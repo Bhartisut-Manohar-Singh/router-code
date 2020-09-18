@@ -14,8 +14,6 @@ public class ErrorHandler implements ErrorDecoder {
     @Override
     public Exception decode(String s, Response response) {
 
-
-
         Object responseBody = null;
 
         try
