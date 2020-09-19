@@ -27,6 +27,7 @@ public class ServiceMonitoringAuditImpl implements ServiceMonitoringAudit{
         requestModel.setOrgId(serviceResponse.getRequestIdentifier().getOrgId());
         requestModel.setLoginId(serviceResponse.getRequestIdentifier().getLoginId());
         requestModel.setServiceName(serviceResponse.getRequestIdentifier().getArn());
+        requestModel.setRequestId(serviceResponse.getRequestIdentifier().getTraceId());
 
         if(null!=serviceResponse.getRequestIdentifier().getArn() && !serviceResponse.getRequestIdentifier().getArn().isEmpty()) {
             MonitoringAuditServiceRequest monitoringRequest = new MonitoringAuditServiceRequest();
