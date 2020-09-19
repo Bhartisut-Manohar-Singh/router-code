@@ -1,14 +1,18 @@
 package decimal.apigateway.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.model.MonitoringAuditServiceRequest;
 import decimal.apigateway.model.RequestModel;
 import decimal.apigateway.service.clients.MonitoringClient;
 import decimal.logs.model.ErrorPayload;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
+@Log
 @Service
 public class ServiceMonitoringAuditImpl implements ServiceMonitoringAudit{
 
@@ -16,7 +20,7 @@ public class ServiceMonitoringAuditImpl implements ServiceMonitoringAudit{
     MonitoringClient monitoringClient;
 
     @Override
-    public void performAudit(ErrorPayload serviceResponse) {
+    public void performAudit(ErrorPayload serviceResponse){
 
         RequestModel  requestModel= new RequestModel();
         requestModel.setAppId(serviceResponse.getRequestIdentifier().getAppId());
@@ -30,6 +34,13 @@ public class ServiceMonitoringAuditImpl implements ServiceMonitoringAudit{
             monitoringRequest.setType("VALIDATION");
             monitoringRequest.setMessage(serviceResponse.getSystemError().getMessage());
 
+            log.info("Calling Monitoring ================");
+            log.info("MONITOrING---REQUEST");
+            try {
+                log.info(new ObjectMapper().writeValueAsString(monitoringRequest));
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
             monitoringClient.executeRequest(monitoringRequest);
         }
 
