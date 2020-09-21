@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
+import decimal.apigateway.service.ServiceMonitoringAudit;
 import decimal.common.micrometer.ConstantUtil;
 import decimal.common.micrometer.VahanaKPIMetrics;
 import decimal.logs.connector.LogsConnector;
@@ -41,6 +42,9 @@ public class ExceptionController {
 
     @Autowired
     private VahanaKPIMetrics vahanaKpiMetrics;
+
+    @Autowired
+    ServiceMonitoringAudit serviceMonitoringAudit;
 
     @ExceptionHandler(value = RouterException.class)
     public ResponseEntity<Object> handleRouterException(RouterException ex) {
@@ -117,6 +121,8 @@ public class ExceptionController {
         errorPayload.setRequestIdentifier(auditTraceFilter.requestIdentifier);
 
         LogsConnector.newInstance().error(errorPayload, ex);
+
+        serviceMonitoringAudit.performAudit(errorPayload);
     }
 
     /*@ExceptionHandler(value = Exception.class)
