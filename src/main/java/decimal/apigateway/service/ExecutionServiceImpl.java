@@ -58,14 +58,18 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     LogsWriter logsWriter;
 
+
+
+
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException {
 
         requestValidator.validatePlainRequest(request, httpHeaders);
         httpHeaders.put("logsrequired", "Y");
         httpHeaders.put("loginid", "random_login_id");
+        Object objectNode= esbClient.executePlainRequest(request,httpHeaders);
 
-        return esbClient.executePlainRequest(request, httpHeaders);
+        return objectNode;
     }
 
     @Override
@@ -99,6 +103,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         if (logRequestResponse) {
             String requestBody = decryptedResponse.getResponse().toString();
             String maskRequestBody=JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
+
             auditPayload.getRequest().setRequestBody(maskRequestBody);
         } else {
             nodes.put("message", "It seems that request logs is not enabled for this api/service.");
@@ -106,6 +111,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         Object response = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
+
 
         if (logRequestResponse) {
             String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(response), maskKeys);

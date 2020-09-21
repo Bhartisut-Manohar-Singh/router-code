@@ -13,6 +13,7 @@ public class Constant {
     public static final String ADMIN_PORTAL_LOGGER = "adminportal";
     public static final String ESB = "esb";
     public static final String MULTIPART_FILES= "files";
+    public static final String MONITORING_MICRO_SERVICE = "VMONITORING-EXE";
 
     public static final String KEYS_TO_MASK = "keys_to_mask";
     public static final String INVALID_URI = "Invalid Request URI recieved from HttpServletRequest";
