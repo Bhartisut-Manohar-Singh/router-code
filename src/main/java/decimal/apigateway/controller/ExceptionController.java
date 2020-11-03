@@ -44,6 +44,9 @@ public class ExceptionController {
     private VahanaKPIMetrics vahanaKpiMetrics;
 
     @Autowired
+    LogsConnector logsConnector;
+
+    @Autowired
     ServiceMonitoringAudit serviceMonitoringAudit;
 
     @ExceptionHandler(value = RouterException.class)
@@ -61,8 +64,13 @@ public class ExceptionController {
             logger.error(e.getMessage(), e);
         }
 
-        createErrorPayload(ex);
-
+        try {
+            createErrorPayload(ex);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
        return new ResponseEntity<>(ex.getResponse(), HttpStatus.BAD_REQUEST);
     }
 
@@ -74,8 +82,13 @@ public class ExceptionController {
         String status = Constant.FAILURE_STATUS;
 
         MicroserviceResponse microserviceResponse = new MicroserviceResponse(status, message, errorResponse);
-
-        createErrorPayload(exception);
+          try {
+              createErrorPayload(exception);
+          }
+          catch (Exception e)
+          {
+              e.printStackTrace();
+          }
 
         return new ResponseEntity<>(microserviceResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -120,7 +133,8 @@ public class ExceptionController {
 
         errorPayload.setRequestIdentifier(auditTraceFilter.requestIdentifier);
 
-        LogsConnector.newInstance().error(errorPayload, ex);
+
+        logsConnector.error(errorPayload, ex);
 
         serviceMonitoringAudit.performAudit(errorPayload);
     }
