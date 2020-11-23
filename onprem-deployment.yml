@@ -101,9 +101,9 @@ spec:
           ports:
             - containerPort: 9000
           imagePullPolicy: Always
-          resources:
-            requests:
-              cpu: 200m
+          #resources:
+            #requests:
+              #cpu: 200m
           volumeMounts:
             - mountPath: /usr/deployment/
               name: router-volume
@@ -132,22 +132,3 @@ spec:
               serviceName: router
               servicePort: 9000
 
----
-
-apiVersion: autoscaling/v2beta1
-kind: HorizontalPodAutoscaler
-metadata:
-  name: api
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: api
-  minReplicas: 1
-  maxReplicas: 3
-
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        targetAverageUtilization: 90

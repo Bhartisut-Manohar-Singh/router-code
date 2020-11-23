@@ -247,6 +247,59 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     @Override
+    public Object executeFileRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String mediaDataObjects, MultipartFile[] files) throws RouterException, IOException {
+
+        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
+
+        String requestURI = httpServletRequest.getRequestURI();
+
+        String basePath = path + "/dynamic-router/" + serviceName;
+
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        for (MultipartFile file : files) {
+            body.add(Constant.MULTIPART_FILES, new MultipartInputStreamFileResource(file.getInputStream(), file.getOriginalFilename()));
+        }
+        HttpHeaders headers = new HttpHeaders();
+
+        httpHeaders.forEach((key,value)-> headers.add(key,value));
+
+        body.add("mediaDataObjects", mediaDataObjects);
+
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        String mapping = requestURI.replaceAll(basePath, "");
+
+        String serviceUrl = "http://" + serviceName + getContextPath(serviceName) + mapping;
+
+        auditTraceFilter.requestIdentifier.setArn(serviceUrl);
+
+        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
+
+        MicroserviceResponse dynamicResponse = new MicroserviceResponse();
+        if (exchange.getStatusCode().value() == 200) {
+            dynamicResponse.setStatus(Constant.SUCCESS_STATUS);
+
+        } else {
+            dynamicResponse.setStatus(Constant.FAILURE_STATUS);
+        }
+
+        dynamicResponse.setResponse(exchange.getBody());
+
+        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
+
+        Map<String, String> finalResponseMap = new HashMap<>();
+        finalResponseMap.put("response", encryptedResponse.getMessage());
+
+        return finalResponseMap;
+
+
+    }
+
+
+    @Override
     public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, JsonProcessingException {
 
         AuditPayload auditPayload=logsWriter.initializeLog(request,httpHeaders);
