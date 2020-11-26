@@ -349,7 +349,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String mapping = requestURI.replaceAll(basePath, "");
 
-        String serviceUrl = "http://" + serviceName + contextPath == null ? "" : contextPath + mapping;
+        String serviceUrl = "http://" + serviceName + (contextPath == null ? "" : contextPath) + mapping;
 
         return serviceUrl;
     }
