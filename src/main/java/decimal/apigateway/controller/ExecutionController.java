@@ -81,6 +81,24 @@ public class ExecutionController
 
     }
 
+    @PostMapping(value = "dynamic-router/upload-file/{serviceName}/**",consumes = "multipart/form-data")
+    public Object executeFileRequest(
+            @RequestPart String request,
+            @RequestHeader Map<String, String> httpHeaders,
+            @PathVariable String serviceName,
+            @RequestPart(Constant.MULTIPART_FILES) MultipartFile[] files,
+            @RequestPart("mediaDataObjects") String mediaDataObjects,
+            HttpServletRequest httpServletRequest) throws Exception {
+
+        System.out.println("------------------------------------------------------------------------------------------");
+        System.out.println("REQUEST: "+ request);
+        System.out.println("File Size= "+files.length);
+        System.out.println("====================Headers for dynamic-router/DMS=============================");
+        httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
+        return executionService.executeFileRequest(httpServletRequest,request,httpHeaders,serviceName,mediaDataObjects,files);
+
+    }
+
 
 
 

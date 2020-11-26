@@ -154,9 +154,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), updateHttpHeaders);
 
-        String requestURI = httpServletRequest.getRequestURI();
-
         String basePath = path + "/engine/v1/dynamic-router/" + serviceName;
+
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath);
 
         HttpHeaders httpHeaders1 = new HttpHeaders();
 
@@ -167,10 +167,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         String actualRequest = jsonNode.get("requestData").toString();
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
-
-        String mapping = requestURI.replaceAll(basePath, "");
-
-        String serviceUrl = "http://" + serviceName + getContextPath(serviceName) + mapping;
 
         auditTraceFilter.requestIdentifier.setArn(serviceUrl);
 
@@ -198,10 +194,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
 
-        String requestURI = httpServletRequest.getRequestURI();
-
         String basePath = path + "/engine/v1/dynamic-router/upload-gateway/" + serviceName;
 
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         for (MultipartFile file : files) {
@@ -217,10 +212,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        String mapping = requestURI.replaceAll(basePath, "");
-
-        String serviceUrl = "http://" + serviceName + getContextPath(serviceName) + mapping;
 
         auditTraceFilter.requestIdentifier.setArn(serviceUrl);
 
@@ -251,10 +242,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
 
-        String requestURI = httpServletRequest.getRequestURI();
+        String basePath = path + "/engine/v1/dynamic-router/upload-file/" + serviceName;
 
-        String basePath = path + "/dynamic-router/" + serviceName;
-
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         for (MultipartFile file : files) {
@@ -269,10 +259,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        String mapping = requestURI.replaceAll(basePath, "");
-
-        String serviceUrl = "http://" + serviceName + getContextPath(serviceName) + mapping;
 
         auditTraceFilter.requestIdentifier.setArn(serviceUrl);
 
@@ -316,18 +302,9 @@ public class ExecutionServiceImpl implements ExecutionService {
         requestData.setHeaders(updateHttpHeaders.toSingleValueMap());
         auditPayload.setRequest(requestData);
 
-        String requestURI = httpServletRequest.getRequestURI();
-
-        if(StringUtils.isEmpty(requestURI))
-        {
-            throw new RouterException(Constant.FAILURE_STATUS,Constant.INVALID_URI,null);
-        }
-
         String basePath = path + "/engine/v1/dynamic-router/plain/" + serviceName;
 
-        String mapping = requestURI.replaceAll(basePath, "");
-
-        String serviceUrl = "http://" + serviceName + getContextPath(serviceName) + mapping;
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath);
 
         auditPayload.getRequestIdentifier().setArn(serviceUrl);
 
@@ -346,7 +323,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
 
-    private String getContextPath(String serviceName) throws RouterException {
+    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath) throws RouterException {
 
         String contextPath = "";
 
@@ -356,6 +333,10 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         List<ServiceInstance> instances = discoveryClient.getInstances(serviceName.toLowerCase());
 
+        if(StringUtils.isEmpty(requestURI))
+        {
+            throw new RouterException(Constant.FAILURE_STATUS,Constant.INVALID_URI,null);
+        }
 
         if (instances.isEmpty()) {
             throw new RouterException(Constant.FAILURE_STATUS, "Service with name: " + serviceName + " is not registered with discovery server", null);
@@ -366,6 +347,10 @@ public class ExecutionServiceImpl implements ExecutionService {
             contextPath = metadata.get("context-path");
         }
 
-        return contextPath == null ? "" : contextPath;
+        String mapping = requestURI.replaceAll(basePath, "");
+
+        String serviceUrl = "http://" + serviceName + contextPath == null ? "" : contextPath + mapping;
+
+        return serviceUrl;
     }
 }
