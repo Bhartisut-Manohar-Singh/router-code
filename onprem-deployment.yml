@@ -60,6 +60,7 @@ data:
     management.endpoint.health.show-details=always
     management.metrices.export.prometheus.enabled=true
 
+   
     #metricsName=api-gateway
     isHttpTracingEnabled=true
     host=172.30.0.215
