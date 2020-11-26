@@ -81,7 +81,7 @@ public class ExecutionController
 
     }
 
-    @PostMapping(value = "dynamic-router/{serviceName}/**",consumes = "multipart/form-data")
+    @PostMapping(value = "dynamic-router/upload-file/{serviceName}/**",consumes = "multipart/form-data")
     public Object executeFileRequest(
             @RequestPart String request,
             @RequestHeader Map<String, String> httpHeaders,
