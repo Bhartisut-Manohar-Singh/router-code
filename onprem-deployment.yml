@@ -39,6 +39,7 @@ data:
     eureka.instance.lease-renewal-interval-in-seconds=2
     eureka.instance.lease-expiration-duration-in-seconds=5
     eureka.client.registry-fetch-interval-seconds=5
+    eureka.instance.metadata-map.context-path=${server.servlet.context-path}
 
     feign.client.config.default.connectTimeout= 160000000
     feign.client.config.default.readTimeout= 160000000
