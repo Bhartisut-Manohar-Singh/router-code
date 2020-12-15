@@ -7,8 +7,10 @@ metadata:
   labels:
     app: router
 spec:
+  type: NodePort
   ports:
-    -  port: 9000
+    -  nodePort: 31782
+       port: 9000
        targetPort: 9000
        protocol: TCP
   selector:
