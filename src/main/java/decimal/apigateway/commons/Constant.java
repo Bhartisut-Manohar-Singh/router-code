@@ -12,15 +12,13 @@ public class Constant {
     public static final String AUDIT_LOGGER = "audit";
     public static final String ADMIN_PORTAL_LOGGER = "adminportal";
     public static final String ESB = "esb";
-    public static final String VALIDATION_TYPE_CLIENT_SECRET = "CLIENT_SECRET";
-    public static final String VALIDATION_TYPE_SERVICE_NAME = "SERVICE_NAME";
-    public static final String VALIDATION_TYPE_IP = "IP";
-    public static final String VALIDATION_TYPE_HEADERS = "HEADERS";
-    public static final String VALIDATION_TYPE_TXN_KEy = "TXN_KEY";
-    public static final String SAVE = "SAVE";
-    public static final String LOGS_TOPIC = "LOGS";
     public static final String MULTIPART_FILES= "files";
-    public static final String MULTIPART_DATA= "data";
+    public static final String MONITORING_MICRO_SERVICE = "VMONITORING-EXE";
 
     public static final String KEYS_TO_MASK = "keys_to_mask";
+    public static final String INVALID_URI = "Invalid Request URI recieved from HttpServletRequest";
+    public static final String ROUTER_ERROR_TYPE_VALIDATION = "VALIDATION";
+    public static final String INVALID_SERVICE_NAME = "Invalid Service Name";
+
+    public static final String ROUTER_SERVICE_NOT_FOUND = "Service Name Not Found";
 }

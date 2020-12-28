@@ -6,6 +6,7 @@ import decimal.logs.model.AuditPayload;
 import decimal.logs.model.Request;
 import decimal.logs.model.RequestIdentifier;
 import decimal.logs.model.Response;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -15,6 +16,10 @@ import java.util.function.Predicate;
 
 @Service
 public class LogsWriter {
+
+    @Autowired
+    LogsConnector logsConnector;
+
     public AuditPayload initializeLog(String request, Map<String, String> httpHeaders)
     {
         AuditPayload auditPayload = new AuditPayload();
@@ -40,7 +45,7 @@ public class LogsWriter {
         auditPayload.setResponseTimestamp(Instant.now());
         auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().toEpochMilli() - auditPayload.getRequestTimestamp().toEpochMilli());
 
-        LogsConnector.newInstance().audit(auditPayload);
+        logsConnector.audit(auditPayload);
     }
 
     private Predicate<String> isNotNullAndNotEmpty = (str) -> str != null && !str.isEmpty();

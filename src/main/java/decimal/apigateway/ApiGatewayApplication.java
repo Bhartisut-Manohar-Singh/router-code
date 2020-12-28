@@ -8,6 +8,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.client.RestTemplate;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -27,7 +28,11 @@ public class ApiGatewayApplication {
 
     @Bean
     @LoadBalanced
-    public RestTemplate restTemplate(){
-        return new RestTemplate();
+    public RestTemplate restTemplate()
+    {
+        RestTemplate template = new RestTemplate();
+        template.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+
+        return template;
     }
 }
