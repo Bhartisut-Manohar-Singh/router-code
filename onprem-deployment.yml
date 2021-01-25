@@ -48,6 +48,10 @@ data:
 
     feign.client.config.default.logger-level=FULL
 
+
+
+    # Enable multipart uploads
+
     spring.servlet.multipart.enabled=true
     # Threshold after which files are written to disk.
     spring.servlet.multipart.file-size-threshold=1000MB
