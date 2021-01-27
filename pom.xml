@@ -8,6 +8,7 @@
         <version>2.1.4.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
+    
     <groupId>decimal</groupId>
     <artifactId>api-gateway</artifactId>
     <version>1.0</version>
