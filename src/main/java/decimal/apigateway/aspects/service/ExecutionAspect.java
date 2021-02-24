@@ -16,10 +16,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Aspect
@@ -29,12 +32,44 @@ public class ExecutionAspect {
     @Autowired
     private VahanaKPIMetrics vahanaKpiMetrics;
 
+    @Value("${dms.default.servicename}")
+    private String dmsDefaultServiceName;
+
+    @Value("${dynamic.router.default.servicename}")
+    private String dynamicDefaultServiceName;
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final static ObjectMapper mapper = new ObjectMapper();
 
     @Pointcut(value = "execution(* decimal.apigateway.service.ExecutionServiceImpl.*(..)) && args(request, httpHeaders)", argNames = "request, httpHeaders")
     public void beforeMethod(String request, Map<String, String> httpHeaders) {
+    }
+
+
+    @Before(value =  "execution(* decimal.apigateway.controller.ExecutionController.executeService(..)) || execution(* decimal.apigateway.controller.ExecutionController.executeServicePlain(..))")
+    public void setServiceName(JoinPoint joinPoint) {
+
+            Object[] args = joinPoint.getArgs();
+            Map<String,String> httpHeaders = (Map<String, String>) args[2];
+
+            if(StringUtils.isEmpty(httpHeaders.get("servicename")) || httpHeaders.get("servicename").equals("undefined"))
+            httpHeaders.put("servicename",dynamicDefaultServiceName);
+
+            args[2] = httpHeaders;
+    }
+
+    @Before(value =  "execution(* decimal.apigateway.controller.ExecutionController.executeMultipartRequest(..)) || execution(* decimal.apigateway.controller.ExecutionController.executeFileRequest(..))")
+    public void setServiceNameForDMS(JoinPoint joinPoint) {
+
+        Object[] args = joinPoint.getArgs();
+        Map<String,String> httpHeaders = (Map<String, String>) args[1];
+
+        if(StringUtils.isEmpty(httpHeaders.get("servicename")) || httpHeaders.get("servicename").equals("undefined"))
+            httpHeaders.put("servicename",dmsDefaultServiceName);
+
+        args[1] = httpHeaders;
+
     }
 
     @Before(value = "beforeMethod(request, httpHeaders)", argNames = "request, httpHeaders")
