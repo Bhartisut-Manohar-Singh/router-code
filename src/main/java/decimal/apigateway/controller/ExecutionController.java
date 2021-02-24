@@ -4,6 +4,8 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +20,12 @@ public class ExecutionController
 {
     @Autowired
     ExecutionService executionService;
+
+    @Value("${dms.default.servicename}")
+    private String dmsDefaultServiceName;
+
+    @Value("${dynamic.router.default.servicename}")
+    private String dynamicDefaultServiceName;
 
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException {
@@ -52,6 +60,8 @@ public class ExecutionController
 
         System.out.println("====================Headers for dynamic-router=============================");
         httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
+        if(StringUtils.isEmpty(httpHeaders.get("servicename")) || httpHeaders.get("servicename").equals("undefined"))
+                httpHeaders.put("servicename",dynamicDefaultServiceName);
         return executionService.executeDynamicRequest(httpServletRequest, request, httpHeaders, serviceName);
     }
 
@@ -60,6 +70,8 @@ public class ExecutionController
 
         System.out.println("====================Headers for dynamic-router/plain=============================");
         httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
+        if(StringUtils.isEmpty(httpHeaders.get("servicename")) || httpHeaders.get("servicename").equals("undefined"))
+            httpHeaders.put("servicename",dynamicDefaultServiceName);
         return executionService.executeDynamicRequestPlain(httpServletRequest, request, httpHeaders, serviceName);
     }
 
@@ -77,6 +89,8 @@ public class ExecutionController
         System.out.println("File Size= "+files.length);
         System.out.println("====================Headers for dynamic-router/upload=============================");
         httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
+        if(StringUtils.isEmpty(httpHeaders.get("servicename")) || httpHeaders.get("servicename").equals("undefined"))
+            httpHeaders.put("servicename",dmsDefaultServiceName);
         return executionService.executeMultipartRequest(httpServletRequest,request,httpHeaders,serviceName,uploadRequest,files);
 
     }
@@ -95,6 +109,8 @@ public class ExecutionController
         System.out.println("File Size= "+files.length);
         System.out.println("====================Headers for dynamic-router/DMS=============================");
         httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
+        if(StringUtils.isEmpty(httpHeaders.get("servicename")) || httpHeaders.get("servicename").equals("undefined"))
+            httpHeaders.put("servicename",dmsDefaultServiceName);
         return executionService.executeFileRequest(httpServletRequest,request,httpHeaders,serviceName,mediaDataObjects,files);
 
     }

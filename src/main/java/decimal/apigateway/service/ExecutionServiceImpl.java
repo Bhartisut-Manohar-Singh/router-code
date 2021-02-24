@@ -58,12 +58,6 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     LogsWriter logsWriter;
 
-    @Value("${dms.default.servicename}")
-    private String dmsDefaultServiceName;
-
-    @Value("${dynamic.router.default.servicename}")
-    private String dynamicDefaultServiceName;
-
 
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException {
@@ -172,7 +166,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
 
-        auditTraceFilter.requestIdentifier.setArn(dynamicDefaultServiceName);
+       // auditTraceFilter.requestIdentifier.setArn(serviceUrl);
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
@@ -217,7 +211,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        auditTraceFilter.requestIdentifier.setArn(dmsDefaultServiceName);
+       // auditTraceFilter.requestIdentifier.setArn(serviceUrl);
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
@@ -264,7 +258,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        auditTraceFilter.requestIdentifier.setArn(dmsDefaultServiceName);
+       // auditTraceFilter.requestIdentifier.setArn(serviceUrl);
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
@@ -310,7 +304,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath);
 
-        auditPayload.getRequestIdentifier().setArn(dynamicDefaultServiceName);
+      //  auditPayload.getRequestIdentifier().setArn(serviceUrl);
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
