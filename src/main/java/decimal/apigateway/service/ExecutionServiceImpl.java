@@ -315,7 +315,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         responseData.setResponse(objectMapper.writeValueAsString(dynamicResponse));
         auditPayload.setRequest(requestData);
         auditPayload.setResponse(responseData);
-       // LogsConnector.newInstance().audit(auditPayload);
+        LogsConnector.newInstance().audit(auditPayload);
 
         return dynamicResponse;
     }
