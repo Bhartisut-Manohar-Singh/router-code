@@ -114,13 +114,13 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         if (logRequestResponse) {
 
-            Set<String> businessKeySet = getBusinessKey(response);
+            List<String> businessKeySet = getBusinessKey(response);
             String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(response), maskKeys);
             auditPayload.getResponse().setResponse(responseBody);
             System.out.println("===============================Business Set================================");
 
             System.out.println(objectMapper.writeValueAsString(businessKeySet));
-            auditPayload.getRequestIdentifier().setBusinessFilter((List<String>) businessKeySet);
+            auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
 
 
         } else {
@@ -360,7 +360,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         return serviceUrl;
     }
 
-    private Set<String> getBusinessKey(Object response)
+    private List<String> getBusinessKey(Object response)
     {
         Set<String> bussinessKeySet = new LinkedHashSet<>();
 
@@ -384,7 +384,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             e.printStackTrace();
         }
 
-        return bussinessKeySet;
+        return new ArrayList<>(bussinessKeySet) ;
 
     }
 }
