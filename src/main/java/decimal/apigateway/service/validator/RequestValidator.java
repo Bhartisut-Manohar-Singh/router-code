@@ -53,9 +53,9 @@ public class RequestValidator {
 
         RequestValidationTypes[] requestValidationTypes = { CLIENT_SECRET,IP};
 
-       // for (RequestValidationTypes plainRequestValidation : requestValidationTypes) {
-         //   securityClient.validate(request, httpHeaders, plainRequestValidation.name());
-        //}
+        for (RequestValidationTypes plainRequestValidation : requestValidationTypes) {
+            securityClient.validate(request, httpHeaders, plainRequestValidation.name());
+        }
     }
 
     @Autowired
