@@ -362,7 +362,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     private List<String> getBusinessKey(Object response)
     {
-        Set<String> bussinessKeySet = new LinkedHashSet<>();
+        Set<String> businessKeySet = new LinkedHashSet<>();
 
         try {
             Map<String,Object> map = objectMapper.readValue(objectMapper.writeValueAsString(response), Map.class);
@@ -372,9 +372,9 @@ public class ExecutionServiceImpl implements ExecutionService {
             {
                 List<Map<String, Object>> recordsList = (List<Map<String, Object>>) value.get("records");
                 recordsList.forEach(records -> {
-                            String primaryKey = records.get("primary_key").toString();
-                            if (primaryKey != null && !primaryKey.isEmpty())
-                                bussinessKeySet.add(primaryKey);
+
+                            if (!StringUtils.isEmpty(records.get("primary_key")))
+                                Collections.addAll(businessKeySet, records.get("primary_key").toString().split("~"));
 
                         }
                 );
@@ -384,7 +384,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             e.printStackTrace();
         }
 
-        return new ArrayList<>(bussinessKeySet) ;
+        return new ArrayList<>(businessKeySet) ;
 
     }
 }
