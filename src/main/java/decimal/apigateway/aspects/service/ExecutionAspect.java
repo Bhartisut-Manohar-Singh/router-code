@@ -32,12 +32,6 @@ public class ExecutionAspect {
     @Autowired
     private VahanaKPIMetrics vahanaKpiMetrics;
 
-    @Value("${dms.default.servicename}")
-    private String dmsDefaultServiceName;
-
-    @Value("${dynamic.router.default.servicename}")
-    private String dynamicDefaultServiceName;
-
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final static ObjectMapper mapper = new ObjectMapper();
@@ -46,36 +40,9 @@ public class ExecutionAspect {
     public void beforeMethod(String request, Map<String, String> httpHeaders) {
     }
 
-
-    @Before(value =  "execution(* decimal.apigateway.controller.ExecutionController.executeService(..)) || execution(* decimal.apigateway.controller.ExecutionController.executeServicePlain(..))")
-    public void setServiceName(JoinPoint joinPoint) {
-
-            Object[] args = joinPoint.getArgs();
-            Map<String,String> httpHeaders = (Map<String, String>) args[2];
-
-            if(StringUtils.isEmpty(httpHeaders.get("servicename")) || httpHeaders.get("servicename").equals("undefined"))
-            httpHeaders.put("servicename",dynamicDefaultServiceName);
-
-            args[2] = httpHeaders;
-    }
-
-    @Before(value =  "execution(* decimal.apigateway.controller.ExecutionController.executeMultipartRequest(..)) || execution(* decimal.apigateway.controller.ExecutionController.executeFileRequest(..))")
-    public void setServiceNameForDMS(JoinPoint joinPoint) {
-
-        Object[] args = joinPoint.getArgs();
-        Map<String,String> httpHeaders = (Map<String, String>) args[1];
-
-        if(StringUtils.isEmpty(httpHeaders.get("servicename")) || httpHeaders.get("servicename").equals("undefined"))
-            httpHeaders.put("servicename",dmsDefaultServiceName);
-
-        args[1] = httpHeaders;
-
-    }
-
     @Before(value = "beforeMethod(request, httpHeaders)", argNames = "request, httpHeaders")
-    public void initializeLogs( String request, Map<String, String> httpHeaders) {
+    public void initializeLogs(String request, Map<String, String> httpHeaders) {
         // Register Vahana Metrics
-
         try {
             this.registerMetrics(request, httpHeaders);
         } catch (Exception e) {
@@ -123,3 +90,4 @@ public class ExecutionAspect {
 
 
 }
+
