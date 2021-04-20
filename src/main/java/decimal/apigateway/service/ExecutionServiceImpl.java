@@ -59,8 +59,6 @@ public class ExecutionServiceImpl implements ExecutionService {
     LogsWriter logsWriter;
 
 
-
-
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException {
 
@@ -103,7 +101,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         if (logRequestResponse) {
             String requestBody = decryptedResponse.getResponse().toString();
             String maskRequestBody=JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
-
             auditPayload.getRequest().setRequestBody(maskRequestBody);
         } else {
             nodes.put("message", "It seems that request logs is not enabled for this api/service.");
@@ -112,11 +109,20 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Object response = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
 
+        System.out.println("===============================Execute Request================================");
+        System.out.println(objectMapper.writeValueAsString(response));
 
         if (logRequestResponse) {
-            String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(response), maskKeys);
 
+            List<String> businessKeySet = getBusinessKey(response);
+            String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(response), maskKeys);
             auditPayload.getResponse().setResponse(responseBody);
+            System.out.println("===============================Business Set================================");
+
+            System.out.println(objectMapper.writeValueAsString(businessKeySet));
+            auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
+
+
         } else {
             nodes.put("message", "It seems that response logs is not enabled for this api/service.");
             auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(nodes));
@@ -352,5 +358,33 @@ public class ExecutionServiceImpl implements ExecutionService {
         String serviceUrl = "http://" + serviceName + (contextPath == null ? "" : contextPath) + mapping;
 
         return serviceUrl;
+    }
+
+    private List<String> getBusinessKey(Object response)
+    {
+        Set<String> businessKeySet = new LinkedHashSet<>();
+
+        try {
+            Map<String,Object> map = objectMapper.readValue(objectMapper.writeValueAsString(response), Map.class);
+
+            Map<String, Map<String, Object>> servicesMap = (Map<String, Map<String, Object>>) map.get("services");
+            servicesMap.forEach((key, value) ->
+            {
+                List<Map<String, Object>> recordsList = (List<Map<String, Object>>) value.get("records");
+                recordsList.forEach(records -> {
+
+                            if (!StringUtils.isEmpty(records.get("primary_key")))
+                                Collections.addAll(businessKeySet, records.get("primary_key").toString().split("~"));
+
+                        }
+                );
+            });
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>(businessKeySet) ;
+
     }
 }
