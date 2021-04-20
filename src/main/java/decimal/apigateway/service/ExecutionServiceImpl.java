@@ -219,7 +219,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-       // auditTraceFilter.requestIdentifier.setArn(serviceUrl);
+        auditTraceFilter.requestIdentifier.setArn(serviceUrl);
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
@@ -266,7 +266,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-       // auditTraceFilter.requestIdentifier.setArn(serviceUrl);
+        auditTraceFilter.requestIdentifier.setArn(serviceUrl);
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
