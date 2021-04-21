@@ -33,7 +33,6 @@ public class ApiGatewayApplication {
     {
         RestTemplate template = new RestTemplate();
         template.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-
         return template;
     }
 }
