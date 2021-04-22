@@ -154,6 +154,8 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeDynamicRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
 
+        AuditPayload auditPayload = logsWriter.initializeLog(request, httpHeaders);
+
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
@@ -171,6 +173,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         JsonNode jsonNode = objectMapper.readValue(decryptedResponse.getResponse().toString(), JsonNode.class);
 
         String actualRequest = jsonNode.get("requestData").toString();
+        auditPayload.getRequest().setRequestBody(actualRequest);
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
 
@@ -181,6 +184,9 @@ public class ExecutionServiceImpl implements ExecutionService {
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         dynamicResponse.setStatus(Constant.SUCCESS_STATUS);
         dynamicResponse.setResponse(exchange.getBody());
+
+        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
+        auditPayload.getResponse().setResponse(Constant.SUCCESS_STATUS);
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
