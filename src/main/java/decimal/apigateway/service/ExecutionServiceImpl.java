@@ -34,8 +34,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
-import static decimal.apigateway.commons.Constant.FAILURE_STATUS;
-import static decimal.apigateway.commons.Constant.SUCCESS_STATUS;
+import static decimal.apigateway.commons.Constant.*;
 
 @Service
 public class ExecutionServiceImpl implements ExecutionService {
@@ -76,7 +75,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        AuditPayload auditPayload = logsWriter.initializeLog(request, httpHeaders);
+        AuditPayload auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         Map<String, String> updatedHttpHeaders = requestValidator.validateRequest(request, httpHeaders, auditPayload);
 
@@ -157,7 +156,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeDynamicRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
 
-        AuditPayload auditPayload = logsWriter.initializeLog(request, httpHeaders);
+        AuditPayload auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
 
@@ -219,7 +218,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
 
-        AuditPayload auditPayload = logsWriter.initializeLog(uploadRequest, httpHeaders);
+        AuditPayload auditPayload = logsWriter.initializeLog(uploadRequest,MULTIPART, httpHeaders);
 
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
 
@@ -278,7 +277,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeFileRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String mediaDataObjects, MultipartFile[] files) throws RouterException, IOException {
 
-        AuditPayload auditPayload = logsWriter.initializeLog(mediaDataObjects, httpHeaders);
+        AuditPayload auditPayload = logsWriter.initializeLog(mediaDataObjects,MULTIPART, httpHeaders);
 
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
 
@@ -336,7 +335,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, JsonProcessingException {
 
-        AuditPayload auditPayload=logsWriter.initializeLog(request,httpHeaders);
+        AuditPayload auditPayload=logsWriter.initializeLog(request,JSON,httpHeaders);
         requestValidator.validatePlainDynamicRequest(request, httpHeaders);
 
         HttpHeaders updateHttpHeaders = new HttpHeaders();
