@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
+import static decimal.apigateway.commons.Constant.SUCCESS_STATUS;
+
 @Service
 public class ExecutionServiceImpl implements ExecutionService {
 
@@ -130,7 +132,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(response, httpHeaders);
 
-        if (!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
+        if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
             throw new RouterException(decryptedResponse.getResponse());
         }
@@ -191,21 +193,22 @@ public class ExecutionServiceImpl implements ExecutionService {
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
-        dynamicResponse.setStatus(Constant.SUCCESS_STATUS);
+        dynamicResponse.setStatus(SUCCESS_STATUS);
         dynamicResponse.setResponse(exchange.getBody());
 
         System.out.println("==========================final response decrypted===============================================");
         System.out.println(objectMapper.writeValueAsString(exchange.getBody()));
 
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setResponse(Constant.SUCCESS_STATUS);
+        auditPayload.getResponse().setStatus(SUCCESS_STATUS);
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
-        if (!Constant.SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
+        if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
             throw new RouterException(decryptedResponse.getResponse());
         }
 
+        logsWriter.updateLog(auditPayload);
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
 
@@ -243,7 +246,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200) {
-            dynamicResponse.setStatus(Constant.SUCCESS_STATUS);
+            dynamicResponse.setStatus(SUCCESS_STATUS);
 
         } else {
             dynamicResponse.setStatus(Constant.FAILURE_STATUS);
@@ -290,7 +293,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200) {
-            dynamicResponse.setStatus(Constant.SUCCESS_STATUS);
+            dynamicResponse.setStatus(SUCCESS_STATUS);
 
         } else {
             dynamicResponse.setStatus(Constant.FAILURE_STATUS);
@@ -335,7 +338,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
-        dynamicResponse.setStatus(Constant.SUCCESS_STATUS);
+        dynamicResponse.setStatus(SUCCESS_STATUS);
         dynamicResponse.setResponse(exchange.getBody());
         responseData.setTimestamp(Instant.now());
         responseData.setResponse(objectMapper.writeValueAsString(dynamicResponse));
