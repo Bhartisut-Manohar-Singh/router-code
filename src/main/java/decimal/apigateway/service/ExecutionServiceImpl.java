@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
+import static decimal.apigateway.commons.Constant.FAILURE_STATUS;
 import static decimal.apigateway.commons.Constant.SUCCESS_STATUS;
 
 @Service
@@ -188,7 +189,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         System.out.println("==================================setting arn=========================================================");
         System.out.println(serviceUrl);
-        auditTraceFilter.requestIdentifier.setArn(serviceUrl);
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
@@ -219,6 +219,8 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
 
+        AuditPayload auditPayload = logsWriter.initializeLog(uploadRequest, httpHeaders);
+
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
 
         String basePath = path + "/engine/v1/dynamic-router/upload-gateway/" + serviceName;
@@ -237,22 +239,31 @@ public class ExecutionServiceImpl implements ExecutionService {
         body.add("uploadRequest", uploadRequest);
 
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        auditPayload.getRequest().setRequestBody(uploadRequest);
+        auditPayload.getRequest().setMethod("POST");
+        auditPayload.getRequest().setHeaders(httpHeaders);
+
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        auditTraceFilter.requestIdentifier.setArn(serviceUrl);
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200) {
             dynamicResponse.setStatus(SUCCESS_STATUS);
+            auditPayload.getResponse().setStatus(SUCCESS_STATUS);
 
         } else {
-            dynamicResponse.setStatus(Constant.FAILURE_STATUS);
+            dynamicResponse.setStatus(FAILURE_STATUS);
+            auditPayload.getResponse().setStatus(FAILURE_STATUS);
+
         }
 
+        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
+
         dynamicResponse.setResponse(exchange.getBody());
+
+        logsWriter.updateLog(auditPayload);
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
@@ -266,6 +277,8 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     @Override
     public Object executeFileRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String mediaDataObjects, MultipartFile[] files) throws RouterException, IOException {
+
+        AuditPayload auditPayload = logsWriter.initializeLog(mediaDataObjects, httpHeaders);
 
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
 
@@ -283,23 +296,31 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         body.add("mediaDataObjects", mediaDataObjects);
 
+        auditPayload.getRequest().setRequestBody(mediaDataObjects);
+        auditPayload.getRequest().setMethod("POST");
+        auditPayload.getRequest().setHeaders(httpHeaders);
+
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        auditTraceFilter.requestIdentifier.setArn(serviceUrl);
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200) {
             dynamicResponse.setStatus(SUCCESS_STATUS);
+            auditPayload.getResponse().setStatus(SUCCESS_STATUS);
 
         } else {
-            dynamicResponse.setStatus(Constant.FAILURE_STATUS);
+            dynamicResponse.setStatus(FAILURE_STATUS);
+            auditPayload.getResponse().setStatus(FAILURE_STATUS);
         }
+        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
 
         dynamicResponse.setResponse(exchange.getBody());
+
+        logsWriter.updateLog(auditPayload);
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
@@ -362,11 +383,11 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         if(StringUtils.isEmpty(requestURI))
         {
-            throw new RouterException(Constant.FAILURE_STATUS,Constant.INVALID_URI,null);
+            throw new RouterException(FAILURE_STATUS,Constant.INVALID_URI,null);
         }
 
         if (instances.isEmpty()) {
-            throw new RouterException(Constant.FAILURE_STATUS, "Service with name: " + serviceName + " is not registered with discovery server", null);
+            throw new RouterException(FAILURE_STATUS, "Service with name: " + serviceName + " is not registered with discovery server", null);
         }
 
         for (ServiceInstance serviceInstance : instances) {
