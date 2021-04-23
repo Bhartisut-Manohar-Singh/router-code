@@ -111,17 +111,13 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Object response = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
 
-        System.out.println("===============================Execute Request================================");
-        System.out.println(objectMapper.writeValueAsString(response));
 
         if (logRequestResponse) {
 
             List<String> businessKeySet = getBusinessKey(response);
             String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(response), maskKeys);
             auditPayload.getResponse().setResponse(responseBody);
-            System.out.println("===============================Business Set================================");
 
-            System.out.println(objectMapper.writeValueAsString(businessKeySet));
             auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
 
 
