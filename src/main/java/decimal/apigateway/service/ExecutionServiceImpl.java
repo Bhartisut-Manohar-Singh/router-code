@@ -200,7 +200,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         System.out.println(objectMapper.writeValueAsString(exchange.getBody()));
 
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setStatus(SUCCESS_STATUS);
+        auditPayload.getResponse().setStatus("200");
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
@@ -253,11 +253,11 @@ public class ExecutionServiceImpl implements ExecutionService {
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200) {
             dynamicResponse.setStatus(SUCCESS_STATUS);
-            auditPayload.getResponse().setStatus(SUCCESS_STATUS);
+            auditPayload.getResponse().setStatus("200");
 
         } else {
             dynamicResponse.setStatus(FAILURE_STATUS);
-            auditPayload.getResponse().setStatus(FAILURE_STATUS);
+            auditPayload.getResponse().setStatus("200");
 
         }
 
@@ -314,11 +314,11 @@ public class ExecutionServiceImpl implements ExecutionService {
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200) {
             dynamicResponse.setStatus(SUCCESS_STATUS);
-            auditPayload.getResponse().setStatus(SUCCESS_STATUS);
+            auditPayload.getResponse().setStatus("200");
 
         } else {
             dynamicResponse.setStatus(FAILURE_STATUS);
-            auditPayload.getResponse().setStatus(FAILURE_STATUS);
+            auditPayload.getResponse().setStatus("200");
         }
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
 
