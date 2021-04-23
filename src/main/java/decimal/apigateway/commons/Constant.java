@@ -19,6 +19,9 @@ public class Constant {
     public static final String INVALID_URI = "Invalid Request URI recieved from HttpServletRequest";
     public static final String ROUTER_ERROR_TYPE_VALIDATION = "VALIDATION";
     public static final String INVALID_SERVICE_NAME = "Invalid Service Name";
+    public static final String MULTIPART = "MULTIPART";
+    public static final String JSON = "JSON";
+
 
     public static final String ROUTER_SERVICE_NOT_FOUND = "Service Name Not Found";
 }

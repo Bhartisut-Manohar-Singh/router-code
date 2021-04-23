@@ -7,6 +7,7 @@ import decimal.logs.model.Request;
 import decimal.logs.model.RequestIdentifier;
 import decimal.logs.model.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -14,18 +15,27 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import static decimal.apigateway.commons.Constant.MULTIPART;
+
 @Service
 public class LogsWriter {
 
     @Autowired
     LogsConnector logsConnector;
 
-    public AuditPayload initializeLog(String request, Map<String, String> httpHeaders)
+    @Value("${dms.default.servicename}")
+    private String dmsDefaultServiceName;
+
+    @Value("${dynamic.router.default.servicename}")
+    private String dynamicDefaultServiceName;
+
+
+    public AuditPayload initializeLog(String request,String requestType, Map<String, String> httpHeaders)
     {
         AuditPayload auditPayload = new AuditPayload();
         auditPayload.setRequestTimestamp(Instant.now());
 
-        RequestIdentifier requestIdentifier = getRequestIdentifier(httpHeaders);
+        RequestIdentifier requestIdentifier = getRequestIdentifier(httpHeaders,requestType);
 
         auditPayload.setRequestIdentifier(requestIdentifier);
 
@@ -50,7 +60,7 @@ public class LogsWriter {
 
     private Predicate<String> isNotNullAndNotEmpty = (str) -> str != null && !str.isEmpty();
 
-    private RequestIdentifier getRequestIdentifier(Map<String, String> requestHeaders) {
+    private RequestIdentifier getRequestIdentifier(Map<String, String> requestHeaders,String requestType) {
         RequestIdentifier requestIdentifier = new RequestIdentifier();
 
 
@@ -73,6 +83,10 @@ public class LogsWriter {
         }
 
         String arn = isNotNullAndNotEmpty.test(serviceName) ? serviceName : apiName;
+
+
+        if(arn.equalsIgnoreCase("undefined"))
+        arn = requestType.equals(MULTIPART)?dmsDefaultServiceName:dynamicDefaultServiceName;
 
         String finalTraceId = isNotNullAndNotEmpty.test(traceId) ? traceId : (isNotNullAndNotEmpty.test(requestId) ? requestId : UUID.randomUUID().toString());
 
