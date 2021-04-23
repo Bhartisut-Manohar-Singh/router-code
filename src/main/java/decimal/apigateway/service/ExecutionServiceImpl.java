@@ -171,15 +171,13 @@ public class ExecutionServiceImpl implements ExecutionService {
         HttpHeaders httpHeaders1 = new HttpHeaders();
 
         updateHttpHeaders.forEach(httpHeaders1::add);
-        System.out.println("====================Headers for dynamic-router=============================");
-        updateHttpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
+
 
         JsonNode jsonNode = objectMapper.readValue(decryptedResponse.getResponse().toString(), JsonNode.class);
 
         String actualRequest = jsonNode.get("requestData").toString();
 
-        System.out.println("===================================decrypted  request ==============================================");
-        System.out.println(actualRequest);
+
         auditPayload.getRequest().setHeaders(updateHttpHeaders);
         auditPayload.getRequest().setRequestBody(actualRequest);
         auditPayload.getRequest().setMethod("POST");
@@ -187,8 +185,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
 
-        System.out.println("==================================setting arn=========================================================");
-        System.out.println(serviceUrl);
+
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
@@ -196,8 +193,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         dynamicResponse.setStatus(SUCCESS_STATUS);
         dynamicResponse.setResponse(exchange.getBody());
 
-        System.out.println("==========================final response decrypted===============================================");
-        System.out.println(objectMapper.writeValueAsString(exchange.getBody()));
 
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
         auditPayload.getResponse().setStatus("200");
