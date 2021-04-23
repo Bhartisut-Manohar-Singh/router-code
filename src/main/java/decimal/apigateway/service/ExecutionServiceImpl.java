@@ -184,6 +184,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setHeaders(updateHttpHeaders);
         auditPayload.getRequest().setRequestBody(actualRequest);
         auditPayload.getRequest().setMethod("POST");
+        auditPayload.getRequest().setUri(serviceUrl);
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
 
@@ -242,6 +243,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setRequestBody(uploadRequest);
         auditPayload.getRequest().setMethod("POST");
         auditPayload.getRequest().setHeaders(httpHeaders);
+        auditPayload.getRequest().setUri(serviceUrl);
+
 
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
@@ -299,6 +302,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setRequestBody(mediaDataObjects);
         auditPayload.getRequest().setMethod("POST");
         auditPayload.getRequest().setHeaders(httpHeaders);
+        auditPayload.getRequest().setUri(serviceUrl);
+
 
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
