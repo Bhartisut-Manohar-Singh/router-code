@@ -23,6 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
 
+import static decimal.apigateway.commons.Constant.JSON;
+
 @Service
 @CrossOrigin
 public class RegistrationServiceImpl implements RegistrationService {
@@ -92,7 +94,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public Object  authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
-        AuditPayload auditPayload = logsWriter.initializeLog(request, httpHeaders);
+        AuditPayload auditPayload = logsWriter.initializeLog(request,JSON, httpHeaders);
 
         MicroserviceResponse microserviceResponse = requestValidator.validateAuthentication(request, httpHeaders);
 

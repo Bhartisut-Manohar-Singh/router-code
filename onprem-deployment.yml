@@ -7,8 +7,10 @@ metadata:
   labels:
     app: router
 spec:
+  type: NodePort
   ports:
-    -  port: 9000
+    -  nodePort: 31782
+       port: 9000
        targetPort: 9000
        protocol: TCP
   selector:
@@ -39,6 +41,7 @@ data:
     eureka.instance.lease-renewal-interval-in-seconds=2
     eureka.instance.lease-expiration-duration-in-seconds=5
     eureka.client.registry-fetch-interval-seconds=5
+    eureka.instance.metadata-map.context-path=${server.servlet.context-path}
 
     feign.client.config.default.connectTimeout= 160000000
     feign.client.config.default.readTimeout= 160000000
@@ -46,7 +49,9 @@ data:
     feign.client.config.default.logger-level=FULL
 
 
+
     # Enable multipart uploads
+
     spring.servlet.multipart.enabled=true
     # Threshold after which files are written to disk.
     spring.servlet.multipart.file-size-threshold=1000MB
@@ -62,14 +67,14 @@ data:
     management.endpoint.health.show-details=always
     management.metrices.export.prometheus.enabled=true
 
+   
     #metricsName=api-gateway
-
     isHttpTracingEnabled=true
     host=172.30.0.215
     service=api-gateway
     region=dev
 
-    logging-agent-url=logging-agent:9051
+    logging-agent-url=http://logging-agent:9051
 
 
 

@@ -26,13 +26,13 @@ public class ApiGatewayApplication {
         SpringApplication.run(ApiGatewayApplication.class, args);
     }
 
+
     @Bean
     @LoadBalanced
     public RestTemplate restTemplate()
     {
         RestTemplate template = new RestTemplate();
         template.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-
         return template;
     }
 }
