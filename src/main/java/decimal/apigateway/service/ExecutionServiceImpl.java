@@ -73,6 +73,11 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setHeaders(httpHeaders);
 
         Object objectNode= esbClient.executePlainRequest(request,httpHeaders);
+        System.out.println("===========================================plain response from esb=========================");
+        System.out.println(objectMapper.writeValueAsString(objectNode));
+        System.out.println("===========================================plain response from esb=========================");
+
+
         List<String> businessKeySet = getBusinessKey(objectNode);
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(objectNode));
 
