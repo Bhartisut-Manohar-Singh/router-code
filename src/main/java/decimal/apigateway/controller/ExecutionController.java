@@ -1,5 +1,6 @@
 package decimal.apigateway.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionService;
@@ -20,7 +21,7 @@ public class ExecutionController
     ExecutionService executionService;
 
     @PostMapping("gatewayProcessor")
-    public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException {
+    public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
         System.out.println("====================Headers for gatewayProcessor=============================");
         httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
         return executionService.executePlainRequest(request, httpHeaders);
@@ -28,8 +29,7 @@ public class ExecutionController
 
     @PostMapping("execute/{orgId}/{appId}/{serviceName}/{version}")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String orgId,
-                                      @PathVariable String appId, @PathVariable String serviceName, @PathVariable String version) throws RouterException
-    {
+                                      @PathVariable String appId, @PathVariable String serviceName, @PathVariable String version) throws RouterException, JsonProcessingException {
         httpHeaders.put("servicename", serviceName);
         httpHeaders.put("orgid", orgId);
         httpHeaders.put("appid", appId);

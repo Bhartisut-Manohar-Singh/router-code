@@ -62,12 +62,25 @@ public class ExecutionServiceImpl implements ExecutionService {
 
 
     @Override
-    public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException {
+    public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
+
+        AuditPayload auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         requestValidator.validatePlainRequest(request, httpHeaders);
         httpHeaders.put("logsrequired", "Y");
         httpHeaders.put("loginid", "random_login_id");
+        auditPayload.getRequest().setRequestBody(request);
+        auditPayload.getRequest().setHeaders(httpHeaders);
+
         Object objectNode= esbClient.executePlainRequest(request,httpHeaders);
+        List<String> businessKeySet = getBusinessKey(objectNode);
+        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(objectNode));
+
+        auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
+        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
+        auditPayload.getResponse().setTimestamp(Instant.now());
+
+        logsWriter.updateLog(auditPayload);
 
         return objectNode;
     }
@@ -192,6 +205,8 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
         auditPayload.getResponse().setStatus("200");
+        auditPayload.getResponse().setTimestamp(Instant.now());
+
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
@@ -253,6 +268,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
+        auditPayload.getResponse().setTimestamp(Instant.now());
+
 
         dynamicResponse.setResponse(exchange.getBody());
 
@@ -312,6 +329,8 @@ public class ExecutionServiceImpl implements ExecutionService {
             auditPayload.getResponse().setStatus("200");
         }
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
+        auditPayload.getResponse().setTimestamp(Instant.now());
+
 
         dynamicResponse.setResponse(exchange.getBody());
 
