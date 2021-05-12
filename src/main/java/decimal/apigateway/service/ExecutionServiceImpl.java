@@ -421,17 +421,28 @@ public class ExecutionServiceImpl implements ExecutionService {
         return serviceUrl;
     }
 
-    private List<String> getBusinessKey(Object response)
+    public static List<String> getBusinessKey(Object response)
     {
+        ObjectMapper objectMapper=new ObjectMapper();
         Set<String> businessKeySet = new LinkedHashSet<>();
+        Map<String, Object> servicesMap=new LinkedHashMap<>();
 
         try {
             Map<String,Object> map = objectMapper.readValue(objectMapper.writeValueAsString(response), Map.class);
 
-            Map<String, Map<String, Object>> servicesMap = (Map<String, Map<String, Object>>) map.get("services");
+
+            if(map.containsKey("services")) {
+                servicesMap = (Map<String, Object>) map.get("services");
+            }
+            else{
+                servicesMap = map;
+            }
+
+
             servicesMap.forEach((key, value) ->
             {
-                List<Map<String, Object>> recordsList = (List<Map<String, Object>>) value.get("records");
+                Map<String,Object> valueMap = (Map<String, Object>) value;
+                List<Map<String, Object>> recordsList = (List<Map<String, Object>>) valueMap.get("records");
                 recordsList.forEach(records -> {
 
                             if (!StringUtils.isEmpty(records.get("primary_key")))
@@ -448,4 +459,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         return new ArrayList<>(businessKeySet) ;
 
     }
+
+
+
+
 }
