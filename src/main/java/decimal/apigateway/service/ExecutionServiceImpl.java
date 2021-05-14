@@ -62,12 +62,30 @@ public class ExecutionServiceImpl implements ExecutionService {
 
 
     @Override
-    public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException {
+    public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
+
+        AuditPayload auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         requestValidator.validatePlainRequest(request, httpHeaders);
         httpHeaders.put("logsrequired", "Y");
         httpHeaders.put("loginid", "random_login_id");
+        auditPayload.getRequest().setRequestBody(request);
+        auditPayload.getRequest().setHeaders(httpHeaders);
+
         Object objectNode= esbClient.executePlainRequest(request,httpHeaders);
+        System.out.println("===========================================plain response from esb=========================");
+        System.out.println(objectMapper.writeValueAsString(objectNode));
+        System.out.println("===========================================plain response from esb=========================");
+
+
+        List<String> businessKeySet = getBusinessKey(objectNode);
+        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(objectNode));
+
+        auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
+        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
+        auditPayload.getResponse().setTimestamp(Instant.now());
+
+        logsWriter.updateLog(auditPayload);
 
         return objectNode;
     }
@@ -192,6 +210,8 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
         auditPayload.getResponse().setStatus("200");
+        auditPayload.getResponse().setTimestamp(Instant.now());
+
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
@@ -253,6 +273,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
+        auditPayload.getResponse().setTimestamp(Instant.now());
+
 
         dynamicResponse.setResponse(exchange.getBody());
 
@@ -312,6 +334,8 @@ public class ExecutionServiceImpl implements ExecutionService {
             auditPayload.getResponse().setStatus("200");
         }
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
+        auditPayload.getResponse().setTimestamp(Instant.now());
+
 
         dynamicResponse.setResponse(exchange.getBody());
 
@@ -397,17 +421,28 @@ public class ExecutionServiceImpl implements ExecutionService {
         return serviceUrl;
     }
 
-    private List<String> getBusinessKey(Object response)
+    public static List<String> getBusinessKey(Object response)
     {
+        ObjectMapper objectMapper=new ObjectMapper();
         Set<String> businessKeySet = new LinkedHashSet<>();
+        Map<String, Object> servicesMap=new LinkedHashMap<>();
 
         try {
             Map<String,Object> map = objectMapper.readValue(objectMapper.writeValueAsString(response), Map.class);
 
-            Map<String, Map<String, Object>> servicesMap = (Map<String, Map<String, Object>>) map.get("services");
+
+            if(map.containsKey("services")) {
+                servicesMap = (Map<String, Object>) map.get("services");
+            }
+            else{
+                servicesMap = map;
+            }
+
+
             servicesMap.forEach((key, value) ->
             {
-                List<Map<String, Object>> recordsList = (List<Map<String, Object>>) value.get("records");
+                Map<String,Object> valueMap = (Map<String, Object>) value;
+                List<Map<String, Object>> recordsList = (List<Map<String, Object>>) valueMap.get("records");
                 recordsList.forEach(records -> {
 
                             if (!StringUtils.isEmpty(records.get("primary_key")))
@@ -424,4 +459,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         return new ArrayList<>(businessKeySet) ;
 
     }
+
+
+
+
 }
