@@ -7,10 +7,8 @@ metadata:
   labels:
     app: router
 spec:
-  type: NodePort
   ports:
-    -  nodePort: 31782
-       port: 9000
+    -  port: 9000
        targetPort: 9000
        protocol: TCP
   selector:
@@ -124,16 +122,19 @@ spec:
 
 
 ---
-apiVersion: extensions/v1beta1
+
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: router
 spec:
   rules:
-    - http:
-        paths:
-          - path: /router
-            backend:
-              serviceName: router
-              servicePort: 9000
-
+  - http:
+      paths:
+      - path: /router/
+        pathType: Prefix
+        backend:
+          service:
+            name: router
+            port:
+              number: 9000
