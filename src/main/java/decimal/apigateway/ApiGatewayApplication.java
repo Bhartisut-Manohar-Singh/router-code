@@ -23,7 +23,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class ApiGatewayApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ApiGatewayApplication.class, args); }
+        SpringApplication.run(ApiGatewayApplication.class, args);
+    }
 
 
     @Bean
@@ -32,7 +33,6 @@ public class ApiGatewayApplication {
     {
         RestTemplate template = new RestTemplate();
         template.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-
         return template;
     }
 }
