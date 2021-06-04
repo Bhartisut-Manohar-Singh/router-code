@@ -104,8 +104,11 @@ public class RequestValidator {
         String userName = response.getResponse().toString();
 
         httpHeaders.put("username", userName);
-        if(userName != null)
+        if(userName != null) {
+            System.out.println("==========================UserName==========================");
+            System.out.println(userName);
             auditTraceFilter.requestIdentifier.setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
+        }
 
         RequestValidationTypes[] requestValidationTypesArr = {APPLICATION, INACTIVE_SESSION, SESSION, IP, TXN_KEY, HASH};
 
