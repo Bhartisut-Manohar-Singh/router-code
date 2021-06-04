@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
+import decimal.apigateway.configuration.RestTemplateConfig;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.EsbClient;
@@ -165,7 +166,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     String path;
 
     @Autowired
-    RestTemplate restTemplate;
+    RestTemplateConfig restTemplate;
 
     @Override
     public Object executeDynamicRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
