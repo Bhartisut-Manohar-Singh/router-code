@@ -1,14 +1,12 @@
 package decimal.apigateway.configuration;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
@@ -28,7 +26,10 @@ public class RestTemplateConfig {
     int readTimeout;
 
     @Bean
-    public RestTemplate restTemplate() {
+    @LoadBalanced
+    public RestTemplate restTemplate()
+    {
+        RestTemplate template = new RestTemplate();
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
         connectionManager.setMaxTotal(maxHttpConnections);
         connectionManager.setDefaultMaxPerRoute(maxConnectionPerRoute);
@@ -46,6 +47,8 @@ public class RestTemplateConfig {
         requestFactory.setConnectTimeout(connectionTimeout);
         requestFactory.setHttpClient(httpClient);
 
-        return new RestTemplate(requestFactory);
+        template.setRequestFactory(requestFactory);
+
+        return template;
     }
 }
