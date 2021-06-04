@@ -68,40 +68,6 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     RestTemplate restTemplate;
 
-    @Value("${maxConnectionPerRoute}")
-    int maxConnectionPerRoute;
-
-    @Value("${maxHttpConnections}")
-    int maxHttpConnections;
-
-    @Value("${connectionTimeout}")
-    int connectionTimeout;
-
-    @Value("${readTimeout}")
-    int readTimeout;
-
-    @PostConstruct
-    public void enableConnectionPool() {
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-        connectionManager.setMaxTotal(maxHttpConnections);
-        connectionManager.setDefaultMaxPerRoute(maxConnectionPerRoute);
-
-        CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .setConnectionManager(connectionManager)
-                .build();
-
-
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-
-        requestFactory.setHttpClient(httpClient);
-
-        requestFactory.setReadTimeout(readTimeout);
-        requestFactory.setConnectTimeout(connectionTimeout);
-        requestFactory.setHttpClient(httpClient);
-
-        restTemplate.setRequestFactory(requestFactory);
-
-    }
 
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {

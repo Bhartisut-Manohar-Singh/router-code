@@ -1,5 +1,9 @@
 package decimal.apigateway;
 
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -22,17 +26,47 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @ComponentScan(basePackages = { "decimal.apigateway","decimal.common.micrometer"})
 public class ApiGatewayApplication {
 
+
     public static void main(String[] args) {
         SpringApplication.run(ApiGatewayApplication.class, args);
     }
 
 
+    @Value("${maxConnectionPerRoute}")
+    int maxConnectionPerRoute;
+
+    @Value("${maxHttpConnections}")
+    int maxHttpConnections;
+
+    @Value("${connectionTimeout}")
+    int connectionTimeout;
+
+    @Value("${readTimeout}")
+    int readTimeout;
     @Bean
     @LoadBalanced
     public RestTemplate restTemplate()
     {
         RestTemplate template = new RestTemplate();
-        template.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+        connectionManager.setMaxTotal(maxHttpConnections);
+        connectionManager.setDefaultMaxPerRoute(maxConnectionPerRoute);
+
+        CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .setConnectionManager(connectionManager)
+                .build();
+
+
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+
+        requestFactory.setHttpClient(httpClient);
+
+        requestFactory.setReadTimeout(readTimeout);
+        requestFactory.setConnectTimeout(connectionTimeout);
+        requestFactory.setHttpClient(httpClient);
+
+        template.setRequestFactory(requestFactory);
+
         return template;
     }
 }
