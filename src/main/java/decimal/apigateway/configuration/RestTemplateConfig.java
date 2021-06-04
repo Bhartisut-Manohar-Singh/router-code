@@ -24,6 +24,7 @@ public class RestTemplateConfig {
 
     @Value("${readTimeout}")
     int readTimeout;
+
     @Bean
     @LoadBalanced
     public RestTemplate restTemplate()
