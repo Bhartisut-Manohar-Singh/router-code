@@ -18,11 +18,16 @@ import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.Request;
 import decimal.logs.model.Response;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -30,6 +35,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.Instant;
@@ -61,6 +67,43 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     LogsWriter logsWriter;
 
+    @Autowired
+    RestTemplateConfig restTemplate;
+
+    @Value("${maxConnectionPerRoute}")
+    int maxConnectionPerRoute;
+
+    @Value("${maxHttpConnections}")
+    int maxHttpConnections;
+
+    @Value("${connectionTimeout}")
+    int connectionTimeout;
+
+    @Value("${readTimeout}")
+    int readTimeout;
+
+    @PostConstruct
+    public void enableConnectionPool() {
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+        connectionManager.setMaxTotal(maxHttpConnections);
+        connectionManager.setDefaultMaxPerRoute(maxConnectionPerRoute);
+
+        CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .setConnectionManager(connectionManager)
+                .build();
+
+
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+
+        requestFactory.setHttpClient(httpClient);
+
+        requestFactory.setReadTimeout(readTimeout);
+        requestFactory.setConnectTimeout(connectionTimeout);
+        requestFactory.setHttpClient(httpClient);
+
+        restTemplate.setRequestFactory(requestFactory);
+
+    }
 
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
@@ -164,9 +207,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     @Value("${server.servlet.context-path}")
     String path;
-
-    @Autowired
-    RestTemplateConfig restTemplate;
 
     @Override
     public Object executeDynamicRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {

@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
+
 @Configuration
 public class RestTemplateConfig extends RestTemplate{
 
@@ -25,7 +27,12 @@ public class RestTemplateConfig extends RestTemplate{
     int readTimeout;
 
     @Bean
-    public RestTemplate restTemplate() {
+    public RestTemplate template() {
+        return new RestTemplate();
+    }
+
+    @PostConstruct
+    public void enableConnectionPool() {
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
         connectionManager.setMaxTotal(maxHttpConnections);
         connectionManager.setDefaultMaxPerRoute(maxConnectionPerRoute);
@@ -43,6 +50,7 @@ public class RestTemplateConfig extends RestTemplate{
         requestFactory.setConnectTimeout(connectionTimeout);
         requestFactory.setHttpClient(httpClient);
 
-        return new RestTemplate(requestFactory);
+        template.setRequestFactory(requestFactory);
+
     }
 }
