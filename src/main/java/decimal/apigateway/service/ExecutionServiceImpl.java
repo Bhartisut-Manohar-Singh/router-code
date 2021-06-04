@@ -172,7 +172,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         AuditPayload auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
-        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
+        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders, auditPayload);
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
@@ -232,7 +232,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         AuditPayload auditPayload = logsWriter.initializeLog(uploadRequest,MULTIPART, httpHeaders);
 
-        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
+        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders,auditPayload);
 
         String basePath = path + "/engine/v1/dynamic-router/upload-gateway/" + serviceName;
 
@@ -295,7 +295,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         AuditPayload auditPayload = logsWriter.initializeLog(mediaDataObjects,MULTIPART, httpHeaders);
 
-        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
+        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders,auditPayload);
 
         String basePath = path + "/engine/v1/dynamic-router/upload-file/" + serviceName;
 
