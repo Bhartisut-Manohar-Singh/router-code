@@ -92,7 +92,7 @@ public class RequestValidator {
         return httpHeaders;
     }
 
-    public Map<String, String> validateDynamicRequest(String request, Map<String, String> httpHeaders) {
+    public Map<String, String> validateDynamicRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) {
 
         String clientId = httpHeaders.get("clientid");
 
@@ -104,8 +104,9 @@ public class RequestValidator {
         String userName = response.getResponse().toString();
 
         httpHeaders.put("username", userName);
-        if(userName != null)
-            auditTraceFilter.requestIdentifier.setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
+        if(userName != null) {
+            auditPayload.getRequestIdentifier().setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
+        }
 
         RequestValidationTypes[] requestValidationTypesArr = {APPLICATION, INACTIVE_SESSION, SESSION, IP, TXN_KEY, HASH};
 

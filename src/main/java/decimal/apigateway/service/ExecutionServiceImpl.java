@@ -60,6 +60,8 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     LogsWriter logsWriter;
 
+    @Autowired
+    RestTemplate restTemplate;
 
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
@@ -164,15 +166,12 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Value("${server.servlet.context-path}")
     String path;
 
-    @Autowired
-    RestTemplate restTemplate;
-
     @Override
     public Object executeDynamicRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
 
         AuditPayload auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
-        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
+        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders, auditPayload);
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
@@ -232,7 +231,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         AuditPayload auditPayload = logsWriter.initializeLog(uploadRequest,MULTIPART, httpHeaders);
 
-        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
+        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders,auditPayload);
 
         String basePath = path + "/engine/v1/dynamic-router/upload-gateway/" + serviceName;
 
@@ -295,7 +294,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         AuditPayload auditPayload = logsWriter.initializeLog(mediaDataObjects,MULTIPART, httpHeaders);
 
-        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders);
+        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders,auditPayload);
 
         String basePath = path + "/engine/v1/dynamic-router/upload-file/" + serviceName;
 

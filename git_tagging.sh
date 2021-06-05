@@ -2,7 +2,7 @@
 BRANCH_NAME=${1}
 MAJOR_VERSION=1
 MINOR_VERSION=0
-GIT_REPO=https://devops.decimaltech.net/root/tpg-vconnect-config.git
+GIT_REPO=https://devops.decimaltech.net/vConnect/tpg-api-gateway.git
 GIT_USER=charvee.punia
 GIT_PASS=Decimal1964
         
