@@ -34,12 +34,12 @@ data:
     server.compression.mime-types=application/json,application/xml,text/html,text/xml,text/plain
 
     server.servlet.context-path=/router
-    eureka.client.service-url.defaultZone=http://discover-server:8761/eureka
+    eureka.client.service-url.defaultZone=http://discovery-server:8761/eureka
     eureka.instance.prefer-ip-address=true
     eureka.instance.lease-renewal-interval-in-seconds=2
     eureka.instance.lease-expiration-duration-in-seconds=5
     eureka.client.registry-fetch-interval-seconds=5
-    eureka.client.enabled=false
+    #eureka.client.enabled=false
 
 
     feign.client.config.default.logger-level=FULL
