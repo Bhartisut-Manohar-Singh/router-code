@@ -41,8 +41,6 @@ data:
     eureka.client.registry-fetch-interval-seconds=5
     eureka.client.enabled=false
 
-    feign.client.config.default.connectTimeout= 160000000
-    feign.client.config.default.readTimeout= 160000000
 
     feign.client.config.default.logger-level=FULL
 
@@ -75,7 +73,18 @@ data:
     dms.default.servicename = DMS_SERVICE_REQUEST
 
     logging-agent-url=http://logging-agent:9051
+    
+    #Feign Properties
+    feign.httpclient.maxConnections= 50
+    feign.httpclient.maxConnectionsPerRoute = 25
+    feign.client.config.default.connectTimeout= 120000
+    feign.client.config.default.readTimeout= 120000
 
+    # Connection Pool Details for HTTP
+    maxConnectionPerRoute=25
+    maxHttpConnections=50
+    connectionTimeout = 30000
+    readTimeout  =  30000
 
 
 
