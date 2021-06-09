@@ -39,7 +39,7 @@ data:
     eureka.instance.lease-renewal-interval-in-seconds=2
     eureka.instance.lease-expiration-duration-in-seconds=5
     eureka.client.registry-fetch-interval-seconds=5
-    #eureka.client.enabled=false
+    eureka.client.enabled=false
 
 
     feign.client.config.default.logger-level=FULL
