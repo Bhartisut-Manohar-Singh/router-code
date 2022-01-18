@@ -200,6 +200,8 @@ public class ExecutionServiceImpl implements ExecutionService {
 
 
 
+        System.out.println("====================Final Headers=============================");
+        httpHeaders1.forEach((key, value) -> System.out.println(key + " " + value));
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
