@@ -6,8 +6,6 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.ServiceMonitoringAudit;
-import decimal.common.micrometer.ConstantUtil;
-import decimal.common.micrometer.VahanaKPIMetrics;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.ErrorPayload;
@@ -16,19 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpServerErrorException;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
 
@@ -39,9 +30,6 @@ public class ExceptionController {
     ObjectMapper mapper;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    @Autowired
-    private VahanaKPIMetrics vahanaKpiMetrics;
 
     @Autowired
     LogsConnector logsConnector;
@@ -55,12 +43,13 @@ public class ExceptionController {
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
 
         ERROR_LOGGER.error("Error response: " + ex.getResponse());
+        ex.printStackTrace();
 
         try {
             String errorMsg = ex.getErrorMessage() != null && !ex.getErrorMessage().equals("") ? ex.getErrorMessage() : "Generic Error Msg";
             String errorCode = ex.getErrorCode() != null && !ex.getErrorCode().equals("") ? ex.getErrorCode() : "Generic ErrorCode";
-            this.vahanaKpiMetrics.persistMetrics(ConstantUtil.FAILURE_STATUS, errorCode ,errorMsg ,  System.currentTimeMillis(), new Long(mapper.writeValueAsString(ex).getBytes().length));
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error(e.getMessage(), e);
         }
 
@@ -76,6 +65,7 @@ public class ExceptionController {
 
     @ExceptionHandler(value =  HttpServerErrorException.class)
     public ResponseEntity<Object> handleHttpServerErrorException(HttpServerErrorException exception){
+        exception.printStackTrace();
         String errorResponse = exception.getResponseBodyAsString();
 
         String message = "Some error occurred when executing request";
@@ -96,7 +86,7 @@ public class ExceptionController {
     @Autowired
     AuditTraceFilter auditTraceFilter;
     private void createErrorPayload(Exception ex) {
-
+        ex.printStackTrace();
         SystemError systemError = new SystemError();
 
         if(ex instanceof RouterException)

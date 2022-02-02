@@ -290,6 +290,8 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeFileRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String mediaDataObjects, MultipartFile[] files) throws RouterException, IOException {
 
+        System.out.println("==========================================Inside DMS Service Layer=========================================" );
+
         AuditPayload auditPayload = logsWriter.initializeLog(mediaDataObjects,MULTIPART, httpHeaders);
 
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders,auditPayload);
@@ -319,7 +321,11 @@ public class ExecutionServiceImpl implements ExecutionService {
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
 
+        System.out.println("==========================================Calling DMS Upload Api=========================================" );
+
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
+
+        System.out.println("==========================================Returned From DMS Upload Api=========================================" );
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200) {

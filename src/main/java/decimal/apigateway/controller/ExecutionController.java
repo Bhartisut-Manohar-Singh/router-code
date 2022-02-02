@@ -88,6 +88,7 @@ public class ExecutionController
         System.out.println("REQUEST: "+ request);
         System.out.println("File Size= "+files.length);
         System.out.println("===============================Dynamic-router/DMS=============================");
+        httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
         return executionService.executeFileRequest(httpServletRequest,request,httpHeaders,serviceName,mediaDataObjects,files);
 
     }

@@ -1,5 +1,6 @@
 package decimal.apigateway.aspects.service;
 
+/*
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.common.micrometer.ConstantUtil;
 import decimal.common.micrometer.VahanaKPIMetrics;
@@ -48,3 +49,4 @@ public class ExceptionAspect {
         }
     }
 }
+*/
