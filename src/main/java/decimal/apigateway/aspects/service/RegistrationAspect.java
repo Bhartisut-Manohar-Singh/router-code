@@ -1,5 +1,6 @@
 package decimal.apigateway.aspects.service;
 
+/*
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
 import decimal.common.micrometer.ConstantUtil;
@@ -77,3 +78,4 @@ public class RegistrationAspect {
 
     }
 }
+*/
