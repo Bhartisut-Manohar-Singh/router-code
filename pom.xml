@@ -64,12 +64,7 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
-        <!---   Common Jar Dependecy -->
-        <dependency>
-            <groupId>decimal</groupId>
-            <artifactId>tpg-common</artifactId>
-            <version>1.0</version>
-        </dependency>
+
 
 
         <!--        Swagger Dependency-->
