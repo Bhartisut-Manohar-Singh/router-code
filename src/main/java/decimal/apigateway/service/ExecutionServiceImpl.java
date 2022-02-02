@@ -205,8 +205,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
 
-
-
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
