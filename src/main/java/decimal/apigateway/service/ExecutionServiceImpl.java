@@ -95,9 +95,8 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        AuditPayload auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
-
-        Map<String, String> updatedHttpHeaders = requestValidator.validateRequest(request, httpHeaders, auditPayload);
+        AuditPayload auditPayload = null;
+        Map<String, String> updatedHttpHeaders = requestValidator.validateRequest(request, httpHeaders);
 
         String logsRequired = updatedHttpHeaders.get("logsrequired");
         String serviceLog = updatedHttpHeaders.get("serviceLogs");
@@ -113,6 +112,13 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         boolean logRequestResponse = "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog);
 
+        if (logRequestResponse) {
+            auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders);
+            auditPayload.getRequestIdentifier().setLoginId(updatedHttpHeaders.get("loginid"));
+
+
+        }
+
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
         MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
@@ -126,7 +132,6 @@ public class ExecutionServiceImpl implements ExecutionService {
             auditPayload.getRequest().setRequestBody(maskRequestBody);
         } else {
             nodes.put("message", "It seems that request logs is not enabled for this api/service.");
-            auditPayload.getRequest().setRequestBody(objectMapper.writeValueAsString(nodes));
         }
 
         Object response = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
@@ -143,19 +148,21 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         } else {
             nodes.put("message", "It seems that response logs is not enabled for this api/service.");
-            auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(nodes));
         }
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(response, httpHeaders);
 
         if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
-            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            if (logRequestResponse)
+                auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
             throw new RouterException(decryptedResponse.getResponse());
         }
 
-        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
+        if (logRequestResponse)
+            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
 
-        logsWriter.updateLog(auditPayload);
+        if (logRequestResponse)
+            logsWriter.updateLog(auditPayload);
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
@@ -197,8 +204,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setUri(serviceUrl);
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
-
-
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 

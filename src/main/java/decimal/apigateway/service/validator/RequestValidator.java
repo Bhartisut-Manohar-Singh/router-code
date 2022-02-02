@@ -61,7 +61,7 @@ public class RequestValidator {
     @Autowired
     AuditTraceFilter auditTraceFilter;
 
-    public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) throws RouterException {
+    public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders) throws RouterException {
         String clientId = httpHeaders.get("clientid");
 
         httpHeaders.put("orgid", clientId.split(Constant.TILD_SPLITTER)[0]);
@@ -78,8 +78,6 @@ public class RequestValidator {
         httpHeaders.put("scopeToCheck", size > 3 ? "SECURE" : "OPEN");
 
         httpHeaders.put("loginid", userName.split(Constant.TILD_SPLITTER)[2]);
-
-        auditPayload.getRequestIdentifier().setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
 
         response = securityClient.validateExecutionRequest(request, httpHeaders);
 
