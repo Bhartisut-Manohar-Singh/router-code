@@ -22,8 +22,7 @@ public class ExecutionController
 
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
-        System.out.println("====================Headers for gatewayProcessor=============================");
-        httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
+        System.out.println("==============================Gateway Processor=============================");
         return executionService.executePlainRequest(request, httpHeaders);
     }
 
@@ -35,31 +34,27 @@ public class ExecutionController
         httpHeaders.put("appid", appId);
         httpHeaders.put("version", version);
 
-        System.out.println("====================Headers for execute=============================");
-        httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
+        System.out.println("==========================Execute=============================");
         return executionService.executePlainRequest(request, httpHeaders);
     }
 
     @PostMapping("gateway")
     public Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
-        System.out.println("====================Headers for gateway=============================");
-        httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
+        System.out.println("======================Gateway=============================");
         return executionService.executeRequest(request, httpHeaders);
     }
 
     @PostMapping(value = "dynamic-router/{serviceName}/**")
     public Object executeService(@RequestBody String request, HttpServletRequest httpServletRequest, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName) throws IOException, RouterException {
 
-        System.out.println("====================Headers for dynamic-router=============================");
-        httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
+        System.out.println("=============================Dynamic-router=============================");
         return executionService.executeDynamicRequest(httpServletRequest, request, httpHeaders, serviceName);
     }
 
     @PostMapping(value = "dynamic-router/plain/{serviceName}/**")
     public Object executeServicePlain(@RequestBody String request, HttpServletRequest httpServletRequest, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName) throws IOException, RouterException {
 
-        System.out.println("====================Headers for dynamic-router/plain=============================");
-        httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
+        System.out.println("============================Dynamic-router/plain=============================");
         return executionService.executeDynamicRequestPlain(httpServletRequest, request, httpHeaders, serviceName);
     }
 
@@ -75,8 +70,7 @@ public class ExecutionController
         System.out.println("------------------------------------------------------------------------------------------");
         System.out.println("REQUEST: "+ request);
         System.out.println("File Size= "+files.length);
-        System.out.println("====================Headers for dynamic-router/upload=============================");
-        httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
+        System.out.println("===============================Dynamic-router/upload=============================");
         return executionService.executeMultipartRequest(httpServletRequest,request,httpHeaders,serviceName,uploadRequest,files);
 
     }
@@ -93,8 +87,7 @@ public class ExecutionController
         System.out.println("------------------------------------------------------------------------------------------");
         System.out.println("REQUEST: "+ request);
         System.out.println("File Size= "+files.length);
-        System.out.println("====================Headers for dynamic-router/DMS=============================");
-        httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
+        System.out.println("===============================Dynamic-router/DMS=============================");
         return executionService.executeFileRequest(httpServletRequest,request,httpHeaders,serviceName,mediaDataObjects,files);
 
     }
