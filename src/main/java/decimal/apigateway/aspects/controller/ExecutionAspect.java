@@ -21,7 +21,7 @@ public class ExecutionAspect {
     @Autowired
     ObjectMapper objectMapper;
 
-    @Before(value = "execution(* decimal.apigateway.controller.ExecutionController.*(..) || execution(* decimal.apigateway.controller.RegistrationController.*(..)) && args(request,httpHeaders)")
+    @Before(value = "(execution(* decimal.apigateway.controller.ExecutionController.*(..)) && args(request,httpHeaders)) || (execution(* decimal.apigateway.controller.RegistrationController.*(..)) && args(request,httpHeaders))")
     public void insertForGateway(String request, Map<String, String> httpHeaders) throws IOException {
 
 
