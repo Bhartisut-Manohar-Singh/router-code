@@ -7,10 +7,9 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
@@ -21,23 +20,24 @@ public class ExecutionAspect {
     @Autowired
     ObjectMapper objectMapper;
 
-    @Before(value = "(execution(* decimal.apigateway.controller.ExecutionController.*(..)) && args(request,httpHeaders)) || (execution(* decimal.apigateway.controller.RegistrationController.*(..)) && args(request,httpHeaders))")
+    @Before(value = "(execution(* decimal.apigateway.service.ExecutionServiceImpl.*(..)) && args(request,httpHeaders)) ")
     public void insertForGateway(String request, Map<String, String> httpHeaders) throws IOException {
 
-
-        this.insertHeaders(request, httpHeaders);
-
-    }
-
-    /*
-    @Before(value = "execution(* decimal.apigateway.controller.ExecutionController.executePlainRequest(..)) && args(request,httpHeaders,orgId,appId,serviceName,version)")
-    public void insertForPlainRequest(String request, Map<String, String> httpHeaders,String orgId, String appId, String serviceName,String version) throws IOException {
-
         this.insertHeaders(request, httpHeaders);
 
     }
 
 
+
+    @Pointcut(value = "execution(* decimal.apigateway.controller.RegistrationController.*(..)) && args(request, httpHeaders, response)", argNames = "request, httpHeaders, response")
+    public void beforeMethod(String request, Map<String, String> httpHeaders, HttpServletResponse response) {
+    }
+
+    @Before(value = "beforeMethod(request, httpHeaders, response)", argNames = "request, httpHeaders, response")
+    public void insert(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
+
+        this.insertHeaders(request,httpHeaders);
+    }
 
 
     @Before(value = "execution(* decimal.apigateway.controller.ExecutionController.executeService(..)) && args(request,httpServletRequest,httpHeaders,serviceName) || execution(* decimal.apigateway.controller.ExecutionController.executeServicePlain(..)) && args(request,httpServletRequest,httpHeaders,serviceName)")
@@ -47,15 +47,7 @@ public class ExecutionAspect {
 
     }
 
-    @Before(value = "execution(* decimal.apigateway.controller.ExecutionController.executeMultipartRequest(..)) && args(request,httpHeaders,serviceName,files,uploadRequest,httpServletRequest) || execution(* decimal.apigateway.controller.ExecutionController.executeFileRequest(..)) && args(request,httpHeaders,serviceName,files,uploadRequest,httpServletRequest)")
-    public void insertForMultiPart(String request, Map<String, String> httpHeaders, String serviceName, MultipartFile[] files,String uploadRequest,HttpServletRequest httpServletRequest) throws IOException {
 
-        this.insertHeaders(request, httpHeaders);
-
-    }
-
-
-     */
     private void insertHeaders(String request, Map<String, String> httpHeaders) throws IOException {
 
         System.out.println("---------------------------------------------Inside header insert----------------------");
