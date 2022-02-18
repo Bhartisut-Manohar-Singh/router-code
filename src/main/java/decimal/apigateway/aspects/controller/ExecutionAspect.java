@@ -20,7 +20,7 @@ public class ExecutionAspect {
     @Autowired
     ObjectMapper objectMapper;
 
-    @Before(value = "(execution(* decimal.apigateway.service.ExecutionServiceImpl.*(..)) && args(request,httpHeaders)) ")
+    @Before(value = "(execution(* decimal.apigateway.service.ExecutionServiceImpl.executePlainRequest(..)) && args(request,httpHeaders)) || (execution(* decimal.apigateway.service.ExecutionServiceImpl.executeRequest(..)) && args(request,httpHeaders))")
     public void insertForGateway(String request, Map<String, String> httpHeaders) throws IOException {
 
         this.insertHeaders(request, httpHeaders);
@@ -50,8 +50,9 @@ public class ExecutionAspect {
 
     private void insertHeaders(String request, Map<String, String> httpHeaders) throws IOException {
 
+        System.out.println("-------------inside insert-----------------------------");
         if(request.contains("interfaces")){
-            System.out.println("---------------------------------------------Inside header insert----------------------"+request);
+            System.out.println("---------------------------------------------request----------------------"+request);
 
             JsonNode jsonNode = objectMapper.readTree(request);
 
