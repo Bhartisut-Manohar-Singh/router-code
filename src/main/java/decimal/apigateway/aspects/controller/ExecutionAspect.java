@@ -50,10 +50,12 @@ public class ExecutionAspect {
 
     private void insertHeaders(String request, Map<String, String> httpHeaders) throws IOException {
 
-        System.out.println("---------------------------------------------Inside header insert----------------------");
         if(request.contains("interfaces")){
+            System.out.println("---------------------------------------------Inside header insert----------------------"+request);
 
             JsonNode jsonNode = objectMapper.readTree(request);
+
+            System.out.println(jsonNode);
 
             httpHeaders.put("applicationVersion",jsonNode.has("APPLICATION_VERSION")?jsonNode.get("APPLICATION_VERSION").textValue():"");
 
@@ -63,6 +65,7 @@ public class ExecutionAspect {
 
             httpHeaders.put("imeiNo",jsonNode.has("IMEI_NO")?jsonNode.get("IMEI_NO").textValue():"");
 
+            System.out.println(httpHeaders);
 
         }
     }
