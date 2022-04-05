@@ -92,21 +92,21 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setHeaders(httpHeaders);
 
 
-        ResponseEntity responseEntity= esbClient.executePlainRequest(request,httpHeaders);
+        ResponseEntity<Object> responseEntity= esbClient.executePlainRequest(request,httpHeaders);
 
-        Object objectNode = responseEntity.getBody();
+         Object responseBody = responseEntity.getBody();
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").toString());
 
         System.out.println("===========================================plain response from esb=========================");
-        System.out.println(objectMapper.writeValueAsString(objectNode));
+        System.out.println();
         System.out.println("===========================================plain response from esb=========================");
 
 
-        List<String> businessKeySet = getBusinessKey(objectNode);
-        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(objectNode));
+        List<String> businessKeySet = getBusinessKey(responseBody);
+        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(responseBody));
 
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
@@ -114,7 +114,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         logsWriter.updateLog(auditPayload);
 
-        return objectNode;
+        return responseBody;
     }
 
     @Override
@@ -154,7 +154,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             auditPayload.getRequest().setRequestBody(objectMapper.writeValueAsString(nodes));
         }
 
-        ResponseEntity responseEntity = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
+        ResponseEntity<Object> responseEntity = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
         HttpHeaders responseHeaders = responseEntity.getHeaders();
 
         if(responseHeaders!=null && responseHeaders.containsKey("status"))

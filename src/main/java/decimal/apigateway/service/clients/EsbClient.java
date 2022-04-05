@@ -13,8 +13,8 @@ import java.util.Map;
 public interface EsbClient {
 
     @PostMapping(value = Constant.ESB + "/service-executor/execute", consumes = "application/json")
-    ResponseEntity executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
+    ResponseEntity<Object> executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
 
     @PostMapping(value = Constant.ESB + "/service-executor/execute-plain", consumes = "application/json")
-    ResponseEntity executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
+    ResponseEntity<Object> executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
 }
