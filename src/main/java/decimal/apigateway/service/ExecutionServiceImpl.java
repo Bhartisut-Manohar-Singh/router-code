@@ -74,7 +74,14 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setRequestBody(request);
         auditPayload.getRequest().setHeaders(httpHeaders);
 
-        Object objectNode= esbClient.executePlainRequest(request,httpHeaders);
+        ResponseEntity responseEntity= esbClient.executePlainRequest(request,httpHeaders);
+
+        Object objectNode = responseEntity.getBody();
+
+        HttpHeaders responseHeaders = responseEntity.getHeaders();
+        if(responseHeaders!=null && responseHeaders.containsKey("status"))
+            auditPayload.setStatus(responseHeaders.get("status").toString());
+
         System.out.println("===========================================plain response from esb=========================");
         System.out.println(objectMapper.writeValueAsString(objectNode));
         System.out.println("===========================================plain response from esb=========================");
@@ -129,13 +136,16 @@ public class ExecutionServiceImpl implements ExecutionService {
             auditPayload.getRequest().setRequestBody(objectMapper.writeValueAsString(nodes));
         }
 
-        Object response = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
+        ResponseEntity responseEntity = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
+        HttpHeaders responseHeaders = responseEntity.getHeaders();
 
+        if(responseHeaders!=null && responseHeaders.containsKey("status"))
+            auditPayload.setStatus(responseHeaders.get("status").toString());
 
         if (logRequestResponse) {
 
-            List<String> businessKeySet = getBusinessKey(response);
-            String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(response), maskKeys);
+            List<String> businessKeySet = getBusinessKey(responseEntity.getBody());
+            String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys);
             auditPayload.getResponse().setResponse(responseBody);
 
             auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
@@ -146,7 +156,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(nodes));
         }
 
-        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(response, httpHeaders);
+        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(responseEntity.getBody(), httpHeaders);
 
         if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));

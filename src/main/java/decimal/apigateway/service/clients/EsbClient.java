@@ -2,6 +2,7 @@ package decimal.apigateway.service.clients;
 
 import decimal.apigateway.commons.Constant;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -12,8 +13,8 @@ import java.util.Map;
 public interface EsbClient {
 
     @PostMapping(value = Constant.ESB + "/service-executor/execute", consumes = "application/json")
-    Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
+    ResponseEntity executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
 
     @PostMapping(value = Constant.ESB + "/service-executor/execute-plain", consumes = "application/json")
-    Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
+    ResponseEntity executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
 }

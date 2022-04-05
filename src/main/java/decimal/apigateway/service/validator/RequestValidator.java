@@ -34,17 +34,14 @@ public class RequestValidator {
         return securityClient.validateRegistration(request, httpHeaders).getResponse();
     }
 
-    public void validatePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException {
+    public Object validatePlainRequest(String request, Map<String, String> httpHeaders,String serviceName) throws RouterException {
 
         httpHeaders.put("scopeToCheck", "PUBLIC");
         httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
         httpHeaders.put("username", httpHeaders.get("clientid"));
 
-        RequestValidationTypes[] requestValidationTypes = {HEADERS, CLIENT_SECRET, IP, SERVICE_NAME, SERVICE_SCOPE};
+        return securityClient.validatePlainRequest(request, httpHeaders,serviceName).getResponse();
 
-        for (RequestValidationTypes plainRequestValidation : requestValidationTypes) {
-            securityClient.validate(request, httpHeaders, plainRequestValidation.name());
-        }
     }
 
     public void validatePlainDynamicRequest(String request, Map<String, String> httpHeaders) throws RouterException {

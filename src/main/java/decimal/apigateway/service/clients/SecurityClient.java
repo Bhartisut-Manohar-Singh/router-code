@@ -33,4 +33,7 @@ public interface SecurityClient
 
     @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/validateExecutionRequest")
     MicroserviceResponse validateExecutionRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
+
+    @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/validatePlainRequest/{serviceName}")
+    MicroserviceResponse validatePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName);
 }
