@@ -34,13 +34,13 @@ public class RequestValidator {
         return securityClient.validateRegistration(request, httpHeaders).getResponse();
     }
 
-    public Object validatePlainRequest(String request, Map<String, String> httpHeaders,String serviceName) throws RouterException {
+    public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders,String serviceName) throws RouterException {
 
         httpHeaders.put("scopeToCheck", "PUBLIC");
         httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
         httpHeaders.put("username", httpHeaders.get("clientid"));
 
-        return securityClient.validatePlainRequest(request, httpHeaders,serviceName).getResponse();
+        return securityClient.validatePlainRequest(request, httpHeaders,serviceName);
 
     }
 

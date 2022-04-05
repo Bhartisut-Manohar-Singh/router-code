@@ -68,11 +68,29 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         AuditPayload auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
-        requestValidator.validatePlainRequest(request, httpHeaders);
-        httpHeaders.put("logsrequired", "Y");
+        MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
+        JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
+        Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"),HashMap.class);
+
+        httpHeaders.put("logsrequired", headers.get("logsrequired"));
+        httpHeaders.put("serviceLogs", headers.get("serviceLog"));
         httpHeaders.put("loginid", "random_login_id");
+        httpHeaders.put("keys_to_mask",headers.get("keys_to_mask"));
+
+        String keysToMask = headers.get("keys_to_mask");
+        List<String> maskKeys = new ArrayList<>();
+
+        if (keysToMask != null && !keysToMask.isEmpty()) {
+            String[] keysToMaskArr = keysToMask.split(",");
+            maskKeys = Arrays.asList(keysToMaskArr);
+        }
+
+        System.out.println("===========================================plain Headers from esb=========================");
+        System.out.println(objectMapper.writeValueAsString(httpHeaders));
+
         auditPayload.getRequest().setRequestBody(request);
         auditPayload.getRequest().setHeaders(httpHeaders);
+
 
         ResponseEntity responseEntity= esbClient.executePlainRequest(request,httpHeaders);
 
