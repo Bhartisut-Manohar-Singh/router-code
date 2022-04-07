@@ -122,6 +122,9 @@ public class RegistrationServiceImpl implements RegistrationService {
         httpHeaders.put("username", microserviceResponse.getMessage());
 
         Map<String, String> customData = microserviceResponse.getCustomData();
+        System.out.println("=============================Authentication Headers=================================");
+        System.out.println(objectMapper.writeValueAsString(customData));
+
         if(customData != null)
         {
             String logsRequired = customData.get("logsrequired");
@@ -143,11 +146,6 @@ public class RegistrationServiceImpl implements RegistrationService {
             String[] keysToMaskArr = keysToMask.split(",");
             maskKeys = Arrays.asList(keysToMaskArr);
         }
-
-        String logsRequired = httpHeaders.get("logsrequired");
-        String serviceLog = httpHeaders.get("servicelogs");
-
-        boolean logRequestResponse = "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog);
 
         Object plainRequest = microserviceResponse.getResponse();
 
