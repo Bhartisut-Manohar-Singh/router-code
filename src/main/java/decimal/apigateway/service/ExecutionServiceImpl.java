@@ -58,6 +58,9 @@ public class ExecutionServiceImpl implements ExecutionService {
     AuditTraceFilter auditTraceFilter;
 
     @Autowired
+    AuditPayload auditPayload;
+
+    @Autowired
     LogsWriter logsWriter;
 
     @Autowired
@@ -72,7 +75,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
 
-        AuditPayload auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
+        auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
         JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
@@ -131,7 +134,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        AuditPayload auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
+        auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         Map<String, String> updatedHttpHeaders = requestValidator.validateRequest(request, httpHeaders, auditPayload);
 
@@ -188,7 +191,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeDynamicRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
 
-        AuditPayload auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
+        auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         auditPayload.setLogRequestAndResponse(isHttpTracingEnabled);
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders, auditPayload);
@@ -247,7 +250,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
 
-        AuditPayload auditPayload = logsWriter.initializeLog(uploadRequest,MULTIPART, httpHeaders);
+        auditPayload = logsWriter.initializeLog(uploadRequest,MULTIPART, httpHeaders);
 
         auditPayload.setLogRequestAndResponse(isHttpTracingEnabled);
 
@@ -314,7 +317,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         System.out.println("==========================================Inside DMS Service Layer=========================================" );
 
-        AuditPayload auditPayload = logsWriter.initializeLog(mediaDataObjects,MULTIPART, httpHeaders);
+        auditPayload = logsWriter.initializeLog(mediaDataObjects,MULTIPART, httpHeaders);
 
         auditPayload.setLogRequestAndResponse(isHttpTracingEnabled);
 
@@ -382,7 +385,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, JsonProcessingException {
 
-        AuditPayload auditPayload=logsWriter.initializeLog(request,JSON,httpHeaders);
+        auditPayload=logsWriter.initializeLog(request,JSON,httpHeaders);
         auditPayload.setLogRequestAndResponse(isHttpTracingEnabled);
 
         requestValidator.validatePlainDynamicRequest(request, httpHeaders);

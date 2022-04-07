@@ -1,18 +1,23 @@
 package decimal.apigateway.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
+import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.ServiceMonitoringAudit;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.filters.AuditTraceFilter;
+import decimal.logs.masking.JsonMasker;
+import decimal.logs.model.AuditPayload;
 import decimal.logs.model.ErrorPayload;
 import decimal.logs.model.SystemError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,6 +26,7 @@ import org.springframework.web.client.HttpServerErrorException;
 
 import java.time.Instant;
 
+import static decimal.apigateway.commons.Constant.FAILURE_STATUS;
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
 
 @RestControllerAdvice
@@ -37,8 +43,16 @@ public class ExceptionController {
     @Autowired
     ServiceMonitoringAudit serviceMonitoringAudit;
 
+    @Autowired
+    AuditPayload auditPayload;
+
+    @Autowired
+    LogsWriter logsWriter;
+
     @ExceptionHandler(value = RouterException.class)
-    public ResponseEntity<Object> handleRouterException(RouterException ex) {
+    public ResponseEntity<Object> handleRouterException(RouterException ex) throws JsonProcessingException {
+
+        System.out.println("================================In Exception Controller==============================");
 
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
 
@@ -60,16 +74,25 @@ public class ExceptionController {
         {
             e.printStackTrace();
         }
-       return new ResponseEntity<>(ex.getResponse(), HttpStatus.BAD_REQUEST);
+        auditPayload.getResponse().setResponse(mapper.writeValueAsString(ex.getResponse()));
+        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+        auditPayload.getResponse().setTimestamp(Instant.now());
+
+        logsWriter.updateLog(auditPayload);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set("status",FAILURE_STATUS);
+       return new ResponseEntity<>(ex.getResponse(), responseHeaders,HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value =  HttpServerErrorException.class)
-    public ResponseEntity<Object> handleHttpServerErrorException(HttpServerErrorException exception){
+    public ResponseEntity<Object> handleHttpServerErrorException(HttpServerErrorException exception) throws JsonProcessingException {
+        System.out.println("================================In Exception Controller==============================");
         exception.printStackTrace();
+
         String errorResponse = exception.getResponseBodyAsString();
 
         String message = "Some error occurred when executing request";
-        String status = Constant.FAILURE_STATUS;
+        String status = FAILURE_STATUS;
 
         MicroserviceResponse microserviceResponse = new MicroserviceResponse(status, message, errorResponse);
           try {
@@ -80,7 +103,14 @@ public class ExceptionController {
               e.printStackTrace();
           }
 
-        return new ResponseEntity<>(microserviceResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        auditPayload.getResponse().setResponse(mapper.writeValueAsString(microserviceResponse));
+        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+        auditPayload.getResponse().setTimestamp(Instant.now());
+
+        logsWriter.updateLog(auditPayload);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set("status",FAILURE_STATUS);
+        return new ResponseEntity<>(microserviceResponse, responseHeaders,HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Autowired
