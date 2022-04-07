@@ -63,6 +63,12 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     RestTemplate restTemplate;
 
+    @Value("${isHttpTracingEnabled}")
+    boolean isHttpTracingEnabled;
+
+    @Value("${server.servlet.context-path}")
+    String path;
+
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
 
@@ -72,12 +78,15 @@ public class ExecutionServiceImpl implements ExecutionService {
         JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
         Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"),HashMap.class);
 
-        httpHeaders.put("logsrequired", headers.get("logsrequired"));
-        httpHeaders.put("serviceLogs", headers.get("serviceLog"));
-        httpHeaders.put("loginid", "random_login_id");
+        String logsRequired = headers.get("logsrequired");
+        String serviceLog = headers.get("serviceLogs");
+        String keysToMask = headers.get("keys_to_mask");
+
+        httpHeaders.put("logsrequired",logsRequired);
+        httpHeaders.put("serviceLogs", serviceLog);
+        httpHeaders.put("loginid",headers.getOrDefault("loginid","random_login_id"));
         httpHeaders.put("keys_to_mask",headers.get("keys_to_mask"));
 
-        String keysToMask = headers.get("keys_to_mask");
         List<String> maskKeys = new ArrayList<>();
 
         if (keysToMask != null && !keysToMask.isEmpty()) {
@@ -85,10 +94,12 @@ public class ExecutionServiceImpl implements ExecutionService {
             maskKeys = Arrays.asList(keysToMaskArr);
         }
 
+        auditPayload.setLogRequestAndResponse(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
+
         System.out.println("===========================================plain Headers from esb=========================");
         System.out.println(objectMapper.writeValueAsString(httpHeaders));
 
-        auditPayload.getRequest().setRequestBody(request);
+        auditPayload.getRequest().setRequestBody(JsonMasker.maskMessage(request, maskKeys));
         auditPayload.getRequest().setHeaders(httpHeaders);
 
 
@@ -105,9 +116,9 @@ public class ExecutionServiceImpl implements ExecutionService {
         System.out.println("===========================================plain response from esb=========================");
 
 
-        List<String> businessKeySet = getBusinessKey(responseBody);
-        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(responseBody));
 
+        List<String> businessKeySet = getBusinessKey(responseBody);
+        auditPayload.getResponse().setResponse(JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys));
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
         auditPayload.getResponse().setTimestamp(Instant.now());
@@ -136,23 +147,14 @@ public class ExecutionServiceImpl implements ExecutionService {
             maskKeys = Arrays.asList(keysToMaskArr);
         }
 
-        boolean logRequestResponse = "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog);
+        auditPayload.setLogRequestAndResponse(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
         MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
 
-
-        ObjectNode nodes = objectMapper.createObjectNode();
-
-        if (logRequestResponse) {
-            String requestBody = decryptedResponse.getResponse().toString();
-            String maskRequestBody=JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
-            auditPayload.getRequest().setRequestBody(maskRequestBody);
-        } else {
-            nodes.put("message", "It seems that request logs is not enabled for this api/service.");
-            auditPayload.getRequest().setRequestBody(objectMapper.writeValueAsString(nodes));
-        }
+        String maskRequestBody=JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
+        auditPayload.getRequest().setRequestBody(maskRequestBody);
 
         ResponseEntity<Object> responseEntity = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
         HttpHeaders responseHeaders = responseEntity.getHeaders();
@@ -160,19 +162,11 @@ public class ExecutionServiceImpl implements ExecutionService {
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").toString());
 
-        if (logRequestResponse) {
+        List<String> businessKeySet = getBusinessKey(responseEntity.getBody());
+        String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys);
+        auditPayload.getResponse().setResponse(responseBody);
+        auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
 
-            List<String> businessKeySet = getBusinessKey(responseEntity.getBody());
-            String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys);
-            auditPayload.getResponse().setResponse(responseBody);
-
-            auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
-
-
-        } else {
-            nodes.put("message", "It seems that response logs is not enabled for this api/service.");
-            auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(nodes));
-        }
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(responseEntity.getBody(), httpHeaders);
 
@@ -191,14 +185,12 @@ public class ExecutionServiceImpl implements ExecutionService {
         return finalResponseMap;
     }
 
-    @Value("${server.servlet.context-path}")
-    String path;
-
     @Override
     public Object executeDynamicRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
 
         AuditPayload auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
+        auditPayload.setLogRequestAndResponse(isHttpTracingEnabled);
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders, auditPayload);
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
@@ -256,6 +248,8 @@ public class ExecutionServiceImpl implements ExecutionService {
     public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
 
         AuditPayload auditPayload = logsWriter.initializeLog(uploadRequest,MULTIPART, httpHeaders);
+
+        auditPayload.setLogRequestAndResponse(isHttpTracingEnabled);
 
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders,auditPayload);
 
@@ -322,6 +316,8 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         AuditPayload auditPayload = logsWriter.initializeLog(mediaDataObjects,MULTIPART, httpHeaders);
 
+        auditPayload.setLogRequestAndResponse(isHttpTracingEnabled);
+
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders,auditPayload);
 
         String basePath = path + "/engine/v1/dynamic-router/upload-file/" + serviceName;
@@ -387,6 +383,8 @@ public class ExecutionServiceImpl implements ExecutionService {
     public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, JsonProcessingException {
 
         AuditPayload auditPayload=logsWriter.initializeLog(request,JSON,httpHeaders);
+        auditPayload.setLogRequestAndResponse(isHttpTracingEnabled);
+
         requestValidator.validatePlainDynamicRequest(request, httpHeaders);
 
         HttpHeaders updateHttpHeaders = new HttpHeaders();
