@@ -49,6 +49,9 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Autowired
     LogsWriter logsWriter;
 
+    @Autowired
+    AuditPayload auditPayload;
+
     @Value("${isHttpTracingEnabled}")
     boolean isHttpTracingEnabled;
 
@@ -62,7 +65,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
-        AuditPayload auditPayload = logsWriter.initializeLog(request,JSON, httpHeaders);
+        auditPayload = logsWriter.initializeLog(request,JSON, httpHeaders);
 
         auditPayload.setLogRequestAndResponse(isHttpTracingEnabled);
 
@@ -115,7 +118,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public Object  authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
-        AuditPayload auditPayload = logsWriter.initializeLog(request,JSON, httpHeaders);
+        auditPayload = logsWriter.initializeLog(request,JSON, httpHeaders);
 
         MicroserviceResponse microserviceResponse = requestValidator.validateAuthentication(request, httpHeaders);
 
