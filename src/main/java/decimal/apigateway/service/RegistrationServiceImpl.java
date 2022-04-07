@@ -81,7 +81,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
-            auditPayload.setStatus(responseHeaders.get("status").toString());
+            auditPayload.setStatus(responseHeaders.get("status").get(0));
 
         MicroserviceResponse registerResponse = objectMapper.convertValue(responseEntity.getBody(),MicroserviceResponse.class);
         Map<String, Object> rsaKeysMap = objectMapper.convertValue(registerResponse.getResponse(), new TypeReference<Map<String, Object>>() {
