@@ -112,7 +112,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
-            auditPayload.setStatus(responseHeaders.get("status").toString());
+            auditPayload.setStatus(responseHeaders.get("status").get(0));
 
         System.out.println("===========================================plain response from esb=========================");
         System.out.println();
@@ -163,7 +163,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         HttpHeaders responseHeaders = responseEntity.getHeaders();
 
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
-            auditPayload.setStatus(responseHeaders.get("status").toString());
+            auditPayload.setStatus(responseHeaders.get("status").get(0));
 
         List<String> businessKeySet = getBusinessKey(responseEntity.getBody());
         String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys);
@@ -223,14 +223,22 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
-        MicroserviceResponse dynamicResponse = new MicroserviceResponse();
-        dynamicResponse.setStatus(SUCCESS_STATUS);
-        dynamicResponse.setResponse(exchange.getBody());
-
-
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setStatus("200");
         auditPayload.getResponse().setTimestamp(Instant.now());
+        MicroserviceResponse dynamicResponse = new MicroserviceResponse();
+        if (exchange.getStatusCode().value() == 200) {
+            auditPayload.setStatus(SUCCESS_STATUS);
+            auditPayload.getResponse().setStatus("200");
+            dynamicResponse.setStatus(SUCCESS_STATUS);
+
+        } else {
+            auditPayload.setStatus(FAILURE_STATUS);
+            dynamicResponse.setStatus(FAILURE_STATUS);
+            auditPayload.getResponse().setStatus(String.valueOf(exchange.getStatusCode().value()));
+
+        }
+
+        dynamicResponse.setResponse(exchange.getBody());
 
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
@@ -283,20 +291,20 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
+        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
+        auditPayload.getResponse().setTimestamp(Instant.now());
+
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200) {
+            auditPayload.setStatus(SUCCESS_STATUS);
             dynamicResponse.setStatus(SUCCESS_STATUS);
             auditPayload.getResponse().setStatus("200");
 
         } else {
+            auditPayload.setStatus(FAILURE_STATUS);
             dynamicResponse.setStatus(FAILURE_STATUS);
-            auditPayload.getResponse().setStatus("200");
-
+            auditPayload.getResponse().setStatus(String.valueOf(exchange.getStatusCode().value()));
         }
-
-        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
-
 
         dynamicResponse.setResponse(exchange.getBody());
 
@@ -354,17 +362,21 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         System.out.println("==========================================Returned From DMS Upload Api=========================================" );
 
+        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
+        auditPayload.getResponse().setTimestamp(Instant.now());
+
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200) {
+            auditPayload.setStatus(SUCCESS_STATUS);
             dynamicResponse.setStatus(SUCCESS_STATUS);
             auditPayload.getResponse().setStatus("200");
 
         } else {
+            auditPayload.setStatus(FAILURE_STATUS);
             dynamicResponse.setStatus(FAILURE_STATUS);
-            auditPayload.getResponse().setStatus("200");
+            auditPayload.getResponse().setStatus(String.valueOf(exchange.getStatusCode().value()));
         }
-        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+
 
 
         dynamicResponse.setResponse(exchange.getBody());
@@ -410,7 +422,19 @@ public class ExecutionServiceImpl implements ExecutionService {
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
-        dynamicResponse.setStatus(SUCCESS_STATUS);
+
+        auditPayload.getResponse().setTimestamp(Instant.now());
+        if (exchange.getStatusCode().value() == 200) {
+            auditPayload.setStatus(SUCCESS_STATUS);
+            dynamicResponse.setStatus(SUCCESS_STATUS);
+            auditPayload.getResponse().setStatus("200");
+
+        } else {
+            auditPayload.setStatus(FAILURE_STATUS);
+            dynamicResponse.setStatus(FAILURE_STATUS);
+            auditPayload.getResponse().setStatus(String.valueOf(exchange.getStatusCode().value()));
+        }
+
         dynamicResponse.setResponse(exchange.getBody());
         responseData.setTimestamp(Instant.now());
         responseData.setResponse(objectMapper.writeValueAsString(dynamicResponse));
