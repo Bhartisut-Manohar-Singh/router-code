@@ -59,7 +59,6 @@ public class LogsManagementConfiguration {
     @Bean
     public AuditTraceFilter auditTraceFilter() {
         List<String> registeredUrls = new ArrayList<>();
-        registeredUrls.add("execute");
         registeredUrls.add("logout");
         registeredUrls.add("forceLogout");
 
