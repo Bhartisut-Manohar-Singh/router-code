@@ -82,7 +82,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"),HashMap.class);
 
         String logsRequired = headers.get("logsrequired");
-        String serviceLog = headers.get("serviceLogs");
+        String serviceLog = headers.get("serviceLog");
         String keysToMask = headers.get("keys_to_mask");
 
         httpHeaders.put("logsrequired",logsRequired);
