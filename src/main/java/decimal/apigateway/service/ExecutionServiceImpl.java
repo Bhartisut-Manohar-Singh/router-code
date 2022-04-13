@@ -89,7 +89,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         httpHeaders.put("serviceLogs", serviceLog);
         httpHeaders.put("loginid",headers.getOrDefault("loginid","random_login_id"));
         httpHeaders.put("keys_to_mask",headers.get("keys_to_mask"));
-
+        httpHeaders.put("executionsource","API-GATEWAY");
         List<String> maskKeys = new ArrayList<>();
 
         if (keysToMask != null && !keysToMask.isEmpty()) {
