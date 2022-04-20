@@ -15,7 +15,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableAspectJAutoProxy
 @EnableAsync
 @EnableSwagger2
-@ComponentScan(basePackages = { "decimal.apigateway","decimal.common.micrometer"})
+@ComponentScan(basePackages = { "decimal.apigateway","decimal.logs"})
 public class ApiGatewayApplication {
 
     public static void main(String[] args) {
