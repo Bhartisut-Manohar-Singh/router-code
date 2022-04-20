@@ -85,6 +85,7 @@ public class RequestValidator {
         httpHeaders.put("logsrequired", customData.get("appLogs"));
         httpHeaders.put("serviceLogs", customData.get("serviceLog"));
         httpHeaders.put(Constant.KEYS_TO_MASK, customData.get(Constant.KEYS_TO_MASK));
+        httpHeaders.put("logpurgedays",customData.get("logpurgedays"));
 
         return httpHeaders;
     }

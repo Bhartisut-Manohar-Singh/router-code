@@ -84,10 +84,13 @@ public class ExecutionServiceImpl implements ExecutionService {
         String logsRequired = headers.get("logsrequired");
         String serviceLog = headers.get("serviceLog");
         String keysToMask = headers.get("keys_to_mask");
+        String logPurgeDays =  headers.get("logpurgedays");
 
+        auditTraceFilter.setPurgeDays(logPurgeDays);
         httpHeaders.put("logsrequired",logsRequired);
         httpHeaders.put("serviceLogs", serviceLog);
         httpHeaders.put("loginid",headers.getOrDefault("loginid","random_login_id"));
+        httpHeaders.put("logpurgedays",logPurgeDays);
         httpHeaders.put("keys_to_mask",headers.get("keys_to_mask"));
         httpHeaders.put("executionsource","API-GATEWAY");
         List<String> maskKeys = new ArrayList<>();
@@ -142,6 +145,9 @@ public class ExecutionServiceImpl implements ExecutionService {
         String serviceLog = updatedHttpHeaders.get("serviceLogs");
 
         String keysToMask = updatedHttpHeaders.get(Constant.KEYS_TO_MASK);
+        String logPurgeDays =  updatedHttpHeaders.get("logpurgedays");
+
+        auditTraceFilter.setPurgeDays(logPurgeDays);
 
         List<String> maskKeys = new ArrayList<>();
 

@@ -132,9 +132,12 @@ public class RegistrationServiceImpl implements RegistrationService {
         {
             String logsRequired = customData.get("logsrequired");
             String serviceLog = customData.get("serviceLogs");
+            String logPurgeDays =  customData.get("logpurgedays");
+            auditTraceFilter.setPurgeDays(logPurgeDays);
             httpHeaders.put(Constant.KEYS_TO_MASK, customData.get(Constant.KEYS_TO_MASK));
             httpHeaders.put("logsrequired", logsRequired);
             httpHeaders.put("servicelogs", serviceLog);
+            httpHeaders.put("logpurgedays",logPurgeDays);
             auditPayload.setLogRequestAndResponse(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
 
         }
