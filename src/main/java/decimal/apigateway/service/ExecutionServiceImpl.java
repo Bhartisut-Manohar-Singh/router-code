@@ -233,10 +233,11 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
+        HttpHeaders headers = exchange.getHeaders();
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
         auditPayload.getResponse().setTimestamp(Instant.now());
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
-        if (exchange.getStatusCode().value() == 200) {
+        if (exchange.getStatusCode().value() == 200 && (headers.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(headers.get("status").get(0)) : true)) {
             auditPayload.setStatus(SUCCESS_STATUS);
             auditPayload.getResponse().setStatus("200");
             dynamicResponse.setStatus(SUCCESS_STATUS);
