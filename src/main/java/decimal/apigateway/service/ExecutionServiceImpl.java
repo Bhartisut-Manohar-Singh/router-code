@@ -214,7 +214,11 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         updateHttpHeaders.forEach(httpHeaders1::add);
 
+        if (serviceUrl.contains("/service-executor/execute-plain"))
+        {
+            httpHeaders1.put("executionsource", Collections.singletonList("API-GATEWAY"));
 
+        }
         JsonNode jsonNode = objectMapper.readValue(decryptedResponse.getResponse().toString(), JsonNode.class);
 
         String actualRequest = jsonNode.get("requestData").toString();
@@ -411,7 +415,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         HttpHeaders updateHttpHeaders = new HttpHeaders();
         httpHeaders.forEach(updateHttpHeaders::set);
 
-        HttpEntity<String> requestEntity = new HttpEntity<>(request, updateHttpHeaders);
+
         Request requestData=new Request();
         Response responseData=new Response();
         requestData.setTimestamp(Instant.now());
@@ -422,6 +426,13 @@ public class ExecutionServiceImpl implements ExecutionService {
         String basePath = path + "/engine/v1/dynamic-router/plain/" + serviceName;
 
         String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath);
+
+        if (serviceUrl.contains("/service-executor/execute-plain"))
+        {
+            updateHttpHeaders.put("executionsource", Collections.singletonList("API-GATEWAY"));
+
+        }
+        HttpEntity<String> requestEntity = new HttpEntity<>(request, updateHttpHeaders);
 
         auditPayload.getRequestIdentifier().setArn(serviceUrl);
 
