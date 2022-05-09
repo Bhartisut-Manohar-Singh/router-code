@@ -24,7 +24,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpServerErrorException;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 import static decimal.apigateway.commons.Constant.FAILURE_STATUS;
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
@@ -77,7 +80,7 @@ public class ExceptionController {
         auditPayload.getResponse().setResponse(mapper.writeValueAsString(ex.getResponse()));
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
         auditPayload.getResponse().setTimestamp(Instant.now());
-
+        auditPayload.setStatus(FAILURE_STATUS);
         logsWriter.updateLog(auditPayload);
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("status",FAILURE_STATUS);
@@ -106,6 +109,7 @@ public class ExceptionController {
         auditPayload.getResponse().setResponse(mapper.writeValueAsString(microserviceResponse));
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
         auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.setStatus(FAILURE_STATUS);
 
         logsWriter.updateLog(auditPayload);
         HttpHeaders responseHeaders = new HttpHeaders();
@@ -159,9 +163,8 @@ public class ExceptionController {
         serviceMonitoringAudit.performAudit(errorPayload);
     }
 
-    /*@ExceptionHandler(value = Exception.class)
-    public ResponseEntity<Object> handleException(Exception ex, HttpServletRequest req)
-    {
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<Object> handleException(Exception ex, HttpServletRequest req) throws JsonProcessingException {
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
 
         System.out.println("Is instance of RouterException " + (ex instanceof RouterException));
@@ -174,6 +177,15 @@ public class ExceptionController {
 
         createErrorPayload(ex);
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }*/
+        auditPayload.getResponse().setResponse(mapper.writeValueAsString(errorResponse));
+        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.setStatus(FAILURE_STATUS);
+
+        logsWriter.updateLog(auditPayload);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set("status",FAILURE_STATUS);
+
+        return new ResponseEntity<>(errorResponse, responseHeaders,HttpStatus.BAD_REQUEST);
+    }
 }
