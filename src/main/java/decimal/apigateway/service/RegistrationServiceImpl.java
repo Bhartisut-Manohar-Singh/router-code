@@ -125,8 +125,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         httpHeaders.put("username", microserviceResponse.getMessage());
 
         Map<String, String> customData = microserviceResponse.getCustomData();
-        System.out.println("=============================Authentication Headers=================================");
-        System.out.println(objectMapper.writeValueAsString(customData));
 
         if(customData != null)
         {

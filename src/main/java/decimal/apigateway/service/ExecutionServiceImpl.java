@@ -102,9 +102,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         auditPayload.setLogRequestAndResponse(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
 
-        System.out.println("===========================================plain Headers from esb=========================");
-        System.out.println(objectMapper.writeValueAsString(httpHeaders));
-
         auditPayload.getRequest().setRequestBody(JsonMasker.maskMessage(request, maskKeys));
         auditPayload.getRequest().setHeaders(httpHeaders);
 
@@ -116,12 +113,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         HttpHeaders responseHeaders = responseEntity.getHeaders();
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
-
-        System.out.println("===========================================plain response from esb=========================");
-        System.out.println();
-        System.out.println("===========================================plain response from esb=========================");
-
-
 
         List<String> businessKeySet = getBusinessKey(responseBody);
         auditPayload.getResponse().setResponse(JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys));
