@@ -180,14 +180,16 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(finalResponse, httpHeaders);
 
+        if (!encryptedResponse.getStatus().equalsIgnoreCase(Constant.SUCCESS_STATUS)) {
+            return new ResponseEntity<>(authenticateResponse.getResponse(), HttpStatus.BAD_REQUEST);
+        }
+
         ObjectNode node = objectMapper.createObjectNode();
 
         node.put("Authorization", authResponse.get("jwtToken").toString());
         response.addHeader("Authorization", authResponse.get("jwtToken").toString());
 
-        if (!encryptedResponse.getStatus().equalsIgnoreCase(Constant.SUCCESS_STATUS)) {
-            return new ResponseEntity<>(authenticateResponse.getResponse(), HttpStatus.BAD_REQUEST);
-        }
+
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
