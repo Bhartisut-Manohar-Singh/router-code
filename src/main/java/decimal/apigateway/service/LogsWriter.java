@@ -54,7 +54,6 @@ public class LogsWriter {
 
         auditPayload.setResponseTimestamp(Instant.now());
         auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().toEpochMilli() - auditPayload.getRequestTimestamp().toEpochMilli());
-
         logsConnector.audit(auditPayload);
     }
 
