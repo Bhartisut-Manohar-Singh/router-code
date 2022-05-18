@@ -149,6 +149,13 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         auditPayload.setLogRequestAndResponse(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
 
+        if (logRequestResponse) {
+            auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders);
+            auditPayload.getRequestIdentifier().setLoginId(updatedHttpHeaders.get("loginid"));
+
+
+        }
+
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
         MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
@@ -171,13 +178,16 @@ public class ExecutionServiceImpl implements ExecutionService {
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(responseEntity.getBody(), httpHeaders);
 
         if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
-            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            if (logRequestResponse)
+                auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
             throw new RouterException(decryptedResponse.getResponse());
         }
 
-        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
+        if (logRequestResponse)
+            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
 
-        logsWriter.updateLog(auditPayload);
+        if (logRequestResponse)
+            logsWriter.updateLog(auditPayload);
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
