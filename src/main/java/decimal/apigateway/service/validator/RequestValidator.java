@@ -103,6 +103,10 @@ public class RequestValidator {
 
         httpHeaders.put("username", userName);
 
+        if(userName != null) {
+            auditPayload.getRequestIdentifier().setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
+        }
+
         RequestValidationTypes[] requestValidationTypesArr = {APPLICATION, INACTIVE_SESSION, SESSION, IP, TXN_KEY, HASH};
 
         for (RequestValidationTypes requestValidationTypes : requestValidationTypesArr) {
