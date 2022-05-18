@@ -130,7 +130,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
-        Map<String, String> updatedHttpHeaders = requestValidator.validateRequest(request, httpHeaders, auditPayload);
+        Map<String, String> updatedHttpHeaders = requestValidator.validateRequest(request, httpHeaders,auditPayload);
 
         String logsRequired = updatedHttpHeaders.get("logsrequired");
         String serviceLog = updatedHttpHeaders.get("serviceLogs");
@@ -148,13 +148,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         auditPayload.setLogRequestAndResponse(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
-
-        if (logRequestResponse) {
-            auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders);
-            auditPayload.getRequestIdentifier().setLoginId(updatedHttpHeaders.get("loginid"));
-
-
-        }
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
@@ -178,16 +171,12 @@ public class ExecutionServiceImpl implements ExecutionService {
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(responseEntity.getBody(), httpHeaders);
 
         if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
-            if (logRequestResponse)
-                auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+
             throw new RouterException(decryptedResponse.getResponse());
         }
-
-        if (logRequestResponse)
-            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
-
-        if (logRequestResponse)
-            logsWriter.updateLog(auditPayload);
+        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
+        logsWriter.updateLog(auditPayload);
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
