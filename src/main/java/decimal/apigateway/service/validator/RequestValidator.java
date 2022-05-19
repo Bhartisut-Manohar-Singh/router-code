@@ -34,17 +34,14 @@ public class RequestValidator {
         return securityClient.validateRegistration(request, httpHeaders).getResponse();
     }
 
-    public void validatePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException {
+    public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders,String serviceName) throws RouterException {
 
         httpHeaders.put("scopeToCheck", "PUBLIC");
         httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
         httpHeaders.put("username", httpHeaders.get("clientid"));
 
-        RequestValidationTypes[] requestValidationTypes = {HEADERS, CLIENT_SECRET, IP, SERVICE_NAME, SERVICE_SCOPE};
+        return securityClient.validatePlainRequest(request, httpHeaders,serviceName);
 
-        for (RequestValidationTypes plainRequestValidation : requestValidationTypes) {
-            securityClient.validate(request, httpHeaders, plainRequestValidation.name());
-        }
     }
 
     public void validatePlainDynamicRequest(String request, Map<String, String> httpHeaders) throws RouterException {
@@ -61,7 +58,7 @@ public class RequestValidator {
     @Autowired
     AuditTraceFilter auditTraceFilter;
 
-    public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders) throws RouterException {
+    public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) throws RouterException {
         String clientId = httpHeaders.get("clientid");
 
         httpHeaders.put("orgid", clientId.split(Constant.TILD_SPLITTER)[0]);
@@ -79,6 +76,8 @@ public class RequestValidator {
 
         httpHeaders.put("loginid", userName.split(Constant.TILD_SPLITTER)[2]);
 
+        auditPayload.getRequestIdentifier().setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
+
         response = securityClient.validateExecutionRequest(request, httpHeaders);
 
         Map<String, String> customData = response.getCustomData();
@@ -86,6 +85,7 @@ public class RequestValidator {
         httpHeaders.put("logsrequired", customData.get("appLogs"));
         httpHeaders.put("serviceLogs", customData.get("serviceLog"));
         httpHeaders.put(Constant.KEYS_TO_MASK, customData.get(Constant.KEYS_TO_MASK));
+        httpHeaders.put("logpurgedays",customData.get("logpurgedays"));
 
         return httpHeaders;
     }
@@ -102,6 +102,7 @@ public class RequestValidator {
         String userName = response.getResponse().toString();
 
         httpHeaders.put("username", userName);
+
         if(userName != null) {
             auditPayload.getRequestIdentifier().setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
         }
