@@ -78,7 +78,7 @@ public class ExceptionController {
             e.printStackTrace();
         }
 
-        if(auditPayload != null) {
+        if(auditPayload != null && auditPayload.getResponse()!=null) {
             auditPayload.getResponse().setResponse(ex.getResponse() != null ? mapper.writeValueAsString(ex.getResponse()) : "");
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
             auditPayload.getResponse().setTimestamp(Instant.now());
@@ -109,10 +109,12 @@ public class ExceptionController {
               e.printStackTrace();
           }
 
-        auditPayload.getResponse().setResponse(microserviceResponse.getResponse() != null ? mapper.writeValueAsString(microserviceResponse) : "");
-        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
-        auditPayload.setStatus(FAILURE_STATUS);
+        if(auditPayload != null && auditPayload.getResponse()!=null) {
+            auditPayload.getResponse().setResponse(microserviceResponse.getResponse() != null ? mapper.writeValueAsString(microserviceResponse) : "");
+            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+            auditPayload.getResponse().setTimestamp(Instant.now());
+            auditPayload.setStatus(FAILURE_STATUS);
+        }
 
         logsWriter.updateLog(auditPayload);
         HttpHeaders responseHeaders = new HttpHeaders();
