@@ -77,7 +77,7 @@ public class ExceptionController {
         {
             e.printStackTrace();
         }
-        auditPayload.getResponse().setResponse(mapper.writeValueAsString(ex.getResponse()));
+        auditPayload.getResponse().setResponse(ex.getResponse() != null ? mapper.writeValueAsString(ex.getResponse()): "");
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
         auditPayload.getResponse().setTimestamp(Instant.now());
         auditPayload.setStatus(FAILURE_STATUS);
@@ -106,7 +106,7 @@ public class ExceptionController {
               e.printStackTrace();
           }
 
-        auditPayload.getResponse().setResponse(mapper.writeValueAsString(microserviceResponse));
+        auditPayload.getResponse().setResponse(microserviceResponse.getResponse() != null ? mapper.writeValueAsString(microserviceResponse) : "");
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
         auditPayload.getResponse().setTimestamp(Instant.now());
         auditPayload.setStatus(FAILURE_STATUS);

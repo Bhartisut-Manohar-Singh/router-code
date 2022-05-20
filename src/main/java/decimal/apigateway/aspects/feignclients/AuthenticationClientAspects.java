@@ -32,12 +32,7 @@ public class AuthenticationClientAspects {
     @Around("feignClients(responseEntity, httpHeaders)")
     public MicroserviceResponse initiateEndpointForRegistration(ProceedingJoinPoint proceedingJoinPoint, ResponseEntity<Object> responseEntity, Map<String, String> httpHeaders) throws Throwable {
         ResponseEntity<Object> responseEntity1 = (ResponseEntity<Object>) proceedingJoinPoint.proceed();
-        System.out.println("=======================================Feign Response=====================");
-        System.out.println(objectMapper.writeValueAsString(responseEntity1.getBody()));
         MicroserviceResponse response = objectMapper.convertValue(responseEntity1.getBody(),MicroserviceResponse.class);
-        System.out.println("=======================================Micro Response=====================");
-        System.out.println(objectMapper.writeValueAsString(response));
-
         String status = response.getStatus();
 
         if (!Constant.SUCCESS_STATUS.equalsIgnoreCase(status)) {
