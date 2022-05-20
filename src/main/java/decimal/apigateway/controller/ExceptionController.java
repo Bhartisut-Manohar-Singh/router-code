@@ -77,11 +77,14 @@ public class ExceptionController {
         {
             e.printStackTrace();
         }
-        auditPayload.getResponse().setResponse(ex.getResponse() != null ? mapper.writeValueAsString(ex.getResponse()): "");
-        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
-        auditPayload.setStatus(FAILURE_STATUS);
-        logsWriter.updateLog(auditPayload);
+
+        if(auditPayload != null) {
+            auditPayload.getResponse().setResponse(ex.getResponse() != null ? mapper.writeValueAsString(ex.getResponse()) : "");
+            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            auditPayload.getResponse().setTimestamp(Instant.now());
+            auditPayload.setStatus(FAILURE_STATUS);
+            logsWriter.updateLog(auditPayload);
+        }
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("status",FAILURE_STATUS);
        return new ResponseEntity<>(ex.getResponse(), responseHeaders,HttpStatus.BAD_REQUEST);
