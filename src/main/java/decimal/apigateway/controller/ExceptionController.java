@@ -77,11 +77,14 @@ public class ExceptionController {
         {
             e.printStackTrace();
         }
-        auditPayload.getResponse().setResponse(mapper.writeValueAsString(ex.getResponse()));
-        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
-        auditPayload.setStatus(FAILURE_STATUS);
-        logsWriter.updateLog(auditPayload);
+
+        if(auditPayload != null && auditPayload.getResponse()!=null) {
+            auditPayload.getResponse().setResponse(ex.getResponse() != null ? mapper.writeValueAsString(ex.getResponse()) : "");
+            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            auditPayload.getResponse().setTimestamp(Instant.now());
+            auditPayload.setStatus(FAILURE_STATUS);
+            logsWriter.updateLog(auditPayload);
+        }
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("status",FAILURE_STATUS);
        return new ResponseEntity<>(ex.getResponse(), responseHeaders,HttpStatus.BAD_REQUEST);
@@ -106,12 +109,13 @@ public class ExceptionController {
               e.printStackTrace();
           }
 
-        auditPayload.getResponse().setResponse(mapper.writeValueAsString(microserviceResponse));
-        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
-        auditPayload.setStatus(FAILURE_STATUS);
-
-        logsWriter.updateLog(auditPayload);
+        if(auditPayload != null && auditPayload.getResponse()!=null) {
+            auditPayload.getResponse().setResponse(microserviceResponse.getResponse() != null ? mapper.writeValueAsString(microserviceResponse) : "");
+            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+            auditPayload.getResponse().setTimestamp(Instant.now());
+            auditPayload.setStatus(FAILURE_STATUS);
+            logsWriter.updateLog(auditPayload);
+        }
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("status",FAILURE_STATUS);
         return new ResponseEntity<>(microserviceResponse, responseHeaders,HttpStatus.INTERNAL_SERVER_ERROR);
@@ -163,7 +167,7 @@ public class ExceptionController {
         serviceMonitoringAudit.performAudit(errorPayload);
     }
 
-    @ExceptionHandler(value = Exception.class)
+/*    @ExceptionHandler(value = Exception.class)
     public ResponseEntity<Object> handleException(Exception ex, HttpServletRequest req) throws JsonProcessingException {
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
 
@@ -187,5 +191,5 @@ public class ExceptionController {
         responseHeaders.set("status",FAILURE_STATUS);
 
         return new ResponseEntity<>(errorResponse, responseHeaders,HttpStatus.BAD_REQUEST);
-    }
+    }*/
 }
