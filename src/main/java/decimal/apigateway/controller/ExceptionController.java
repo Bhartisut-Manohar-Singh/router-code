@@ -114,9 +114,8 @@ public class ExceptionController {
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
             auditPayload.getResponse().setTimestamp(Instant.now());
             auditPayload.setStatus(FAILURE_STATUS);
+            logsWriter.updateLog(auditPayload);
         }
-
-        logsWriter.updateLog(auditPayload);
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("status",FAILURE_STATUS);
         return new ResponseEntity<>(microserviceResponse, responseHeaders,HttpStatus.INTERNAL_SERVER_ERROR);
