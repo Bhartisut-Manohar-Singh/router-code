@@ -163,7 +163,7 @@ public class ExceptionController {
         serviceMonitoringAudit.performAudit(errorPayload);
     }
 
-    @ExceptionHandler(value = Exception.class)
+/*    @ExceptionHandler(value = Exception.class)
     public ResponseEntity<Object> handleException(Exception ex, HttpServletRequest req) throws JsonProcessingException {
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
 
@@ -187,5 +187,5 @@ public class ExceptionController {
         responseHeaders.set("status",FAILURE_STATUS);
 
         return new ResponseEntity<>(errorResponse, responseHeaders,HttpStatus.BAD_REQUEST);
-    }
+    }*/
 }
