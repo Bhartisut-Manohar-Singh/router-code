@@ -480,6 +480,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             Map<String, String> metadata = serviceInstance.getMetadata();
             contextPath = metadata.get("context-path");
             System.out.println("=============================Context Path============================");
+            metadata.forEach((k,v) -> System.out.println(k+" : "+v));
             System.out.println(contextPath);
         }
 
