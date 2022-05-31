@@ -479,6 +479,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         for (ServiceInstance serviceInstance : instances) {
             Map<String, String> metadata = serviceInstance.getMetadata();
             contextPath = metadata.get("context-path");
+            System.out.println("=============================Context Path============================");
+            System.out.println(contextPath);
         }
 
         String mapping = requestURI.replaceAll(basePath, "");
