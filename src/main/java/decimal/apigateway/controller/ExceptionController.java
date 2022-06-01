@@ -58,7 +58,6 @@ public class ExceptionController {
     public ResponseEntity<Object> handleRouterException(RouterException ex) throws JsonProcessingException {
 
         System.out.println("================================In Router Exception==============================");
-        System.out.println(mapper.writeValueAsString(ex.getResponse()));
 
         boolean isLogoutSuccess = false;
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);

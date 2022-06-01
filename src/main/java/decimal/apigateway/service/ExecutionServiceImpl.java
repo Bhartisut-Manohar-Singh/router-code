@@ -463,8 +463,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         List<String> services = discoveryClient.getServices();
 
-        services.forEach(System.out::println);
-
         List<ServiceInstance> instances = discoveryClient.getInstances(serviceName.toLowerCase());
 
         if(StringUtils.isEmpty(requestURI))
@@ -479,9 +477,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         for (ServiceInstance serviceInstance : instances) {
             Map<String, String> metadata = serviceInstance.getMetadata();
             contextPath = metadata.get("context-path");
-            System.out.println("=============================Context Path============================");
-            metadata.forEach((k,v) -> System.out.println(k+" : "+v));
-            System.out.println(contextPath);
         }
 
         String mapping = requestURI.replaceAll(basePath, "");
