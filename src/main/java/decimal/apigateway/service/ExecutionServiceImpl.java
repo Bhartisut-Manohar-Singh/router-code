@@ -463,8 +463,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         List<String> services = discoveryClient.getServices();
 
-        services.forEach(System.out::println);
-
         List<ServiceInstance> instances = discoveryClient.getInstances(serviceName.toLowerCase());
 
         if(StringUtils.isEmpty(requestURI))

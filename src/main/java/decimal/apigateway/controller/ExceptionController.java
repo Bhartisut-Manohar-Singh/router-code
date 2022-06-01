@@ -1,6 +1,7 @@
 package decimal.apigateway.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
@@ -30,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static decimal.apigateway.commons.Constant.FAILURE_STATUS;
+import static decimal.apigateway.commons.Constant.SUCCESS_STATUS;
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
 
 @RestControllerAdvice
@@ -55,8 +57,9 @@ public class ExceptionController {
     @ExceptionHandler(value = RouterException.class)
     public ResponseEntity<Object> handleRouterException(RouterException ex) throws JsonProcessingException {
 
-        System.out.println("================================In Exception Controller==============================");
+        System.out.println("================================In Router Exception==============================");
 
+        boolean isLogoutSuccess = false;
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
 
         ERROR_LOGGER.error("Error response: " + ex.getResponse());
@@ -78,15 +81,21 @@ public class ExceptionController {
             e.printStackTrace();
         }
 
+        if(ex.getResponse() != null)
+        {
+            JsonNode jsonNode = mapper.convertValue(ex.getResponse(),JsonNode.class);
+            isLogoutSuccess =  jsonNode.hasNonNull("status") ? jsonNode.get("status").asText().equalsIgnoreCase("625") : false;
+        }
+
         if(auditPayload != null && auditPayload.getResponse()!=null) {
             auditPayload.getResponse().setResponse(ex.getResponse() != null ? mapper.writeValueAsString(ex.getResponse()) : "");
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
             auditPayload.getResponse().setTimestamp(Instant.now());
-            auditPayload.setStatus(FAILURE_STATUS);
+            auditPayload.setStatus(isLogoutSuccess ? SUCCESS_STATUS : FAILURE_STATUS);
             logsWriter.updateLog(auditPayload);
         }
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("status",FAILURE_STATUS);
+        responseHeaders.set("status",isLogoutSuccess ? SUCCESS_STATUS : FAILURE_STATUS);
        return new ResponseEntity<>(ex.getResponse(), responseHeaders,HttpStatus.BAD_REQUEST);
     }
 
