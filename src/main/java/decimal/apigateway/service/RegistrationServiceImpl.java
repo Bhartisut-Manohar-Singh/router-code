@@ -128,8 +128,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         if(customData != null)
         {
-            String logsRequired = customData.get("logsrequired");
-            String serviceLog = customData.get("serviceLogs");
+            String logsRequired = customData.get("appLogs");
+            String serviceLog = customData.get("serviceLog");
             String logPurgeDays =  customData.get("logpurgedays");
             auditTraceFilter.setPurgeDays(logPurgeDays);
             httpHeaders.put(Constant.KEYS_TO_MASK, customData.get(Constant.KEYS_TO_MASK));
