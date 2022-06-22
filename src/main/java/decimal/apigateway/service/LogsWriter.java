@@ -9,6 +9,7 @@ import decimal.logs.model.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.annotation.RequestScope;
 
 import java.time.Instant;
 import java.util.Map;
@@ -18,6 +19,7 @@ import java.util.function.Predicate;
 import static decimal.apigateway.commons.Constant.MULTIPART;
 
 @Service
+@RequestScope
 public class LogsWriter {
 
     @Autowired
