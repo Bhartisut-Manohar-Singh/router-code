@@ -27,6 +27,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +38,7 @@ import java.util.*;
 import static decimal.apigateway.commons.Constant.*;
 
 @Service
+@RequestScope
 public class ExecutionServiceImpl implements ExecutionService {
 
     @Autowired
