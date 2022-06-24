@@ -25,6 +25,9 @@ public class LogsWriter {
     @Autowired
     LogsConnector logsConnector;
 
+    @Autowired
+    AuditPayload auditPayload;
+
     @Value("${dms.default.servicename}")
     private String dmsDefaultServiceName;
 
@@ -34,7 +37,6 @@ public class LogsWriter {
 
     public AuditPayload initializeLog(String request,String requestType, Map<String, String> httpHeaders)
     {
-        AuditPayload auditPayload = new AuditPayload();
         auditPayload.setRequestTimestamp(Instant.now());
 
         RequestIdentifier requestIdentifier = getRequestIdentifier(httpHeaders,requestType);
