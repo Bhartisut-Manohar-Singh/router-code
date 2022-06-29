@@ -17,6 +17,7 @@ import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.Request;
 import decimal.logs.model.Response;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
@@ -38,7 +39,7 @@ import java.util.*;
 import static decimal.apigateway.commons.Constant.*;
 
 @Service
-@RequestScope
+@Log
 public class ExecutionServiceImpl implements ExecutionService {
 
     @Autowired
@@ -223,6 +224,8 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
 
+        log.info("===============================Dyanmic Router URL==========================");
+        log.info(serviceUrl);
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         HttpHeaders headers = exchange.getHeaders();
