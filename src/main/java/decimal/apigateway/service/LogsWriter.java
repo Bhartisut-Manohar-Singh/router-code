@@ -19,6 +19,7 @@ import java.util.function.Predicate;
 import static decimal.apigateway.commons.Constant.MULTIPART;
 
 @Service
+@RequestScope
 public class LogsWriter {
 
     @Autowired
