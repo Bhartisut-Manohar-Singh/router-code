@@ -47,6 +47,13 @@ public class LogsWriter {
 
         auditPayload.getRequest().setHeaders(httpHeaders);
 
+        System.out.println("===================================First Audit Payload===============================");
+        try {
+            System.out.println(new ObjectMapper().writeValueAsString(auditPayload));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
         return auditPayload;
     }
 

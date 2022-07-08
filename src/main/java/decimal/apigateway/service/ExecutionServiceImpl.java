@@ -133,6 +133,13 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
+        System.out.println("===================================Second Audit Payload===============================");
+        try {
+            System.out.println(new ObjectMapper().writeValueAsString(auditPayload));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
         Map<String, String> updatedHttpHeaders = requestValidator.validateRequest(request, httpHeaders,auditPayload);
 
         String logsRequired = updatedHttpHeaders.get("logsrequired");
