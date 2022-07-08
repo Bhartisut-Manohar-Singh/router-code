@@ -29,6 +29,7 @@ public class LogsManagementConfiguration {
         auditPayload.setRequest(new Request());
         auditPayload.setResponse(new Response());
         return auditPayload;
+
     }
 
     @Bean
