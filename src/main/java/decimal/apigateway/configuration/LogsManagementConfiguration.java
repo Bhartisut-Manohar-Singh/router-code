@@ -25,7 +25,11 @@ public class LogsManagementConfiguration {
     @Bean
     @RequestScope
     public AuditPayload auditPayload() {
-        return new AuditPayload();
+        AuditPayload auditPayload = new AuditPayload();
+        auditPayload.setRequest(new Request());
+        auditPayload.setResponse(new Response());
+        return auditPayload;
+
     }
 
     @Bean
