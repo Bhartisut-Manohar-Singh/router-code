@@ -21,7 +21,6 @@ import java.util.function.Predicate;
 import static decimal.apigateway.commons.Constant.MULTIPART;
 
 @Service
-@RequestScope
 public class LogsWriter {
 
     @Autowired
@@ -48,11 +47,6 @@ public class LogsWriter {
         auditPayload.getRequest().setHeaders(httpHeaders);
 
         System.out.println("===================================First Audit Payload===============================");
-        try {
-            System.out.println(new ObjectMapper().writeValueAsString(auditPayload));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
 
         return auditPayload;
     }
@@ -62,11 +56,10 @@ public class LogsWriter {
         auditPayload.setResponseTimestamp(Instant.now());
         auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().toEpochMilli() - auditPayload.getRequestTimestamp().toEpochMilli());
         System.out.println("===================================Audit Payload===============================");
-        try {
-            System.out.println(new ObjectMapper().writeValueAsString(auditPayload));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        System.out.println(auditPayload.getStatus());
+        System.out.println(auditPayload.getTimeTaken());
+        System.out.println(auditPayload.getRequestTimestamp());
+
         logsConnector.audit(auditPayload);
     }
 
