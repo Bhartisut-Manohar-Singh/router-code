@@ -8,6 +8,7 @@ import decimal.logs.model.AuditPayload;
 import decimal.logs.model.Request;
 import decimal.logs.model.RequestIdentifier;
 import decimal.logs.model.Response;
+import org.bouncycastle.cert.ocsp.Req;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -44,7 +45,12 @@ public class LogsWriter {
 
         auditPayload.setRequestIdentifier(requestIdentifier);
 
-        auditPayload.getRequest().setHeaders(httpHeaders);
+        Request requestObj= new Request();
+        requestObj.setHeaders(httpHeaders);
+        auditPayload.setRequest(requestObj);
+
+        Response response = new Response();
+        auditPayload.setResponse(response);
 
         System.out.println("===================================First Audit Payload===============================");
 
