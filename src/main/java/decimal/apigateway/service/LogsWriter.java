@@ -1,5 +1,7 @@
 package decimal.apigateway.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.constant.LogsIdentifier;
 import decimal.logs.model.AuditPayload;
@@ -25,6 +27,9 @@ public class LogsWriter {
     @Autowired
     LogsConnector logsConnector;
 
+    @Autowired
+    private AuditPayload auditPayload;
+
     @Value("${dms.default.servicename}")
     private String dmsDefaultServiceName;
 
@@ -34,29 +39,23 @@ public class LogsWriter {
 
     public AuditPayload initializeLog(String request,String requestType, Map<String, String> httpHeaders)
     {
-        AuditPayload auditPayload = new AuditPayload();
         auditPayload.setRequestTimestamp(Instant.now());
 
         RequestIdentifier requestIdentifier = getRequestIdentifier(httpHeaders,requestType);
 
         auditPayload.setRequestIdentifier(requestIdentifier);
 
-        Request requestObj = new Request();
-        requestObj.setHeaders(httpHeaders);
-
-        auditPayload.setRequest(requestObj);
-
-        Response response = new Response();
-        auditPayload.setResponse(response);
+        auditPayload.getRequest().setHeaders(httpHeaders);
 
         return auditPayload;
     }
 
     public void updateLog(AuditPayload auditPayload){
-
         auditPayload.setResponseTimestamp(Instant.now());
         auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().toEpochMilli() - auditPayload.getRequestTimestamp().toEpochMilli());
-        logsConnector.audit(auditPayload);
+
+        AuditPayload auditPayloadFinal =new AuditPayload(auditPayload.getRequestTimestamp(),auditPayload.getResponseTimestamp(),auditPayload.getTimeTaken(),auditPayload.getRequest(),auditPayload.getResponse(),auditPayload.getStatus(),auditPayload.getRequestIdentifier(),auditPayload.isLogRequestAndResponse());
+        logsConnector.audit(auditPayloadFinal);
     }
 
     private Predicate<String> isNotNullAndNotEmpty = (str) -> str != null && !str.isEmpty();
