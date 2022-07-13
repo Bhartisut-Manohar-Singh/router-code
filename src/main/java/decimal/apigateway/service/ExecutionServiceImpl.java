@@ -134,11 +134,9 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         System.out.println("===================================Second Audit Payload===============================");
-        try {
-            System.out.println(new ObjectMapper().writeValueAsString(auditPayload));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+
+            System.out.println(auditPayload.getRequestTimestamp());
+
 
         Map<String, String> updatedHttpHeaders = requestValidator.validateRequest(request, httpHeaders,auditPayload);
 
