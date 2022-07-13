@@ -22,7 +22,7 @@ public class LogsManagementConfiguration {
     @Value("${logging-agent-url}")
     String lsvUrl;
 
- /*   @Bean
+    @Bean
     @RequestScope
     public AuditPayload auditPayload() {
         AuditPayload auditPayload = new AuditPayload();
@@ -30,7 +30,7 @@ public class LogsManagementConfiguration {
         auditPayload.setResponse(new Response());
         return auditPayload;
 
-    }*/
+    }
 
     @Bean
     @RequestScope

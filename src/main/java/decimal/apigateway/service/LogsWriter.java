@@ -8,7 +8,6 @@ import decimal.logs.model.AuditPayload;
 import decimal.logs.model.Request;
 import decimal.logs.model.RequestIdentifier;
 import decimal.logs.model.Response;
-import org.bouncycastle.cert.ocsp.Req;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,6 +21,7 @@ import java.util.function.Predicate;
 import static decimal.apigateway.commons.Constant.MULTIPART;
 
 @Service
+@RequestScope
 public class LogsWriter {
 
     @Autowired
@@ -45,28 +45,17 @@ public class LogsWriter {
 
         auditPayload.setRequestIdentifier(requestIdentifier);
 
-        Request requestObj= new Request();
-        requestObj.setHeaders(httpHeaders);
-        auditPayload.setRequest(requestObj);
-
-        Response response = new Response();
-        auditPayload.setResponse(response);
-
-        System.out.println("===================================First Audit Payload===============================");
+        auditPayload.getRequest().setHeaders(httpHeaders);
 
         return auditPayload;
     }
 
     public void updateLog(AuditPayload auditPayload){
-
         auditPayload.setResponseTimestamp(Instant.now());
         auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().toEpochMilli() - auditPayload.getRequestTimestamp().toEpochMilli());
-        System.out.println("===================================Audit Payload===============================");
-        System.out.println(auditPayload.getStatus());
-        System.out.println(auditPayload.getTimeTaken());
-        System.out.println(auditPayload.getRequestTimestamp());
 
-        logsConnector.audit(auditPayload);
+        AuditPayload auditPayloadFinal =new AuditPayload(auditPayload.getRequestTimestamp(),auditPayload.getResponseTimestamp(),auditPayload.getTimeTaken(),auditPayload.getRequest(),auditPayload.getResponse(),auditPayload.getStatus(),auditPayload.getRequestIdentifier(),auditPayload.isLogRequestAndResponse());
+        logsConnector.audit(auditPayloadFinal);
     }
 
     private Predicate<String> isNotNullAndNotEmpty = (str) -> str != null && !str.isEmpty();
