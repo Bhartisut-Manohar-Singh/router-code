@@ -428,6 +428,9 @@ public class ExecutionServiceImpl implements ExecutionService {
             updateHttpHeaders.put("executionsource", Collections.singletonList("API-GATEWAY"));
 
         }
+
+        log.info("===============================Dyanmic Router Plain URL==========================");
+        log.info(serviceUrl);
         HttpEntity<String> requestEntity = new HttpEntity<>(request, updateHttpHeaders);
 
         auditPayload.getRequestIdentifier().setArn(serviceUrl);
