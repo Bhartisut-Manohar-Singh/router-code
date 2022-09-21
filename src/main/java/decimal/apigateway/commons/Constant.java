@@ -21,7 +21,7 @@ public class Constant {
     public static final String INVALID_SERVICE_NAME = "Invalid Service Name";
     public static final String MULTIPART = "MULTIPART";
     public static final String JSON = "JSON";
-    public static final String IS_PAYLOAD_ENCRYPTED = "isPayloadEncrypted";
+    public static final String IS_PAYLOAD_ENCRYPTED = "ispayloadencrypted";
 
 
     public static final String ROUTER_HEADER_SECURITY_VERSION = "security-version";
