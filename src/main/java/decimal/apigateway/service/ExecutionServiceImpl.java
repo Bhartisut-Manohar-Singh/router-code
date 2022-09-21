@@ -31,7 +31,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.time.DateTimeException;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static decimal.apigateway.commons.Constant.*;
@@ -74,9 +76,10 @@ public class ExecutionServiceImpl implements ExecutionService {
     String path;
 
     @Override
-    public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
+    public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
+        boolean isPayloadEncrypted = httpHeaders.containsKey(IS_PAYLOAD_ENCRYPTED) &&  httpHeaders.get(IS_PAYLOAD_ENCRYPTED).equalsIgnoreCase("true");
 
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
         JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
@@ -88,12 +91,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         String logPurgeDays =  headers.get("logpurgedays");
 
         auditTraceFilter.setPurgeDays(logPurgeDays);
-        httpHeaders.put("logsrequired",logsRequired);
-        httpHeaders.put("serviceLogs", serviceLog);
-        httpHeaders.put("loginid",headers.getOrDefault("loginid","random_login_id"));
-        httpHeaders.put("logpurgedays",logPurgeDays);
-        httpHeaders.put("keys_to_mask",headers.get("keys_to_mask"));
-        httpHeaders.put("executionsource","API-GATEWAY");
+        httpHeaders = setHeaders(httpHeaders, headers, logsRequired, serviceLog, logPurgeDays);
         List<String> maskKeys = new ArrayList<>();
 
         if (keysToMask != null && !keysToMask.isEmpty()) {
@@ -101,8 +99,18 @@ public class ExecutionServiceImpl implements ExecutionService {
             maskKeys = Arrays.asList(keysToMaskArr);
         }
 
-        auditPayload.setLogRequestAndResponse(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
+        if (isPayloadEncrypted)
+        {
+            if (! httpHeaders.containsKey(ROUTER_HEADER_SECURITY_VERSION))
+                httpHeaders.put(ROUTER_HEADER_SECURITY_VERSION,"2");
 
+            JsonNode node = objectMapper.readValue(request, JsonNode.class);
+            MicroserviceResponse decryptedResponse = securityClient.decryptRequestWithoutSession(node.get("request").asText(), httpHeaders);
+            request = decryptedResponse.getResponse().toString();
+        }
+
+
+        auditPayload.setLogRequestAndResponse(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
         auditPayload.getRequest().setRequestBody(JsonMasker.maskMessage(request, maskKeys));
         auditPayload.getRequest().setHeaders(httpHeaders);
 
@@ -123,7 +131,27 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         logsWriter.updateLog(auditPayload);
 
+        if (isPayloadEncrypted)
+        {
+            MicroserviceResponse encryptedResponse = securityClient.encryptResponseWithoutSession(responseEntity.getBody(), httpHeaders);
+            Map<String, String> finalResponseMap = new HashMap<>();
+            finalResponseMap.put("response", encryptedResponse.getMessage());
+
+            return finalResponseMap;
+        }
+
         return responseBody;
+    }
+
+    private static Map<String, String> setHeaders(Map<String, String> httpHeaders, Map<String, String> headers, String logsRequired, String serviceLog, String logPurgeDays) {
+        httpHeaders.put("logsrequired", logsRequired);
+        httpHeaders.put("serviceLogs", serviceLog);
+        httpHeaders.put("loginid", headers.getOrDefault("loginid",String.valueOf(LocalDateTime.now())));
+        httpHeaders.put("logpurgedays", logPurgeDays);
+        httpHeaders.put("keys_to_mask", headers.get("keys_to_mask"));
+        httpHeaders.put("executionsource","API-GATEWAY");
+
+        return httpHeaders;
     }
 
     @Override
