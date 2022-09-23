@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
+import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.EsbClient;
@@ -78,12 +79,27 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
-        boolean isPayloadEncrypted = httpHeaders.containsKey(IS_PAYLOAD_ENCRYPTED) &&  httpHeaders.get(IS_PAYLOAD_ENCRYPTED).equalsIgnoreCase("true");
-
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
         JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
         Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"),HashMap.class);
+        boolean isPayloadEncrypted = httpHeaders.containsKey(IS_PAYLOAD_ENCRYPTED) &&  httpHeaders.get(IS_PAYLOAD_ENCRYPTED).equalsIgnoreCase("true");
+
+        if (isPayloadEncrypted)
+        {
+            if (! httpHeaders.containsKey(ROUTER_HEADER_SECURITY_VERSION))
+                httpHeaders.put(ROUTER_HEADER_SECURITY_VERSION,"2");
+
+            JsonNode node = objectMapper.readValue(request, JsonNode.class);
+
+            if(!node.hasNonNull("request"))
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",null);
+
+            MicroserviceResponse decryptedResponse = securityClient.decryptRequestWithoutSession(node.get("request").asText(), httpHeaders);
+            request = decryptedResponse.getResponse().toString();
+            httpHeaders.put(Headers.requestid.name(),decryptedResponse.getCustomData().get(Headers.requestid.name()));
+
+        }
+        auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         String logsRequired = headers.get("logsrequired");
         String serviceLog = headers.get("serviceLog");
@@ -98,17 +114,6 @@ public class ExecutionServiceImpl implements ExecutionService {
             String[] keysToMaskArr = keysToMask.split(",");
             maskKeys = Arrays.asList(keysToMaskArr);
         }
-
-        if (isPayloadEncrypted)
-        {
-            if (! httpHeaders.containsKey(ROUTER_HEADER_SECURITY_VERSION))
-                httpHeaders.put(ROUTER_HEADER_SECURITY_VERSION,"2");
-
-            JsonNode node = objectMapper.readValue(request, JsonNode.class);
-            MicroserviceResponse decryptedResponse = securityClient.decryptRequestWithoutSession(node.get("request").asText(), httpHeaders);
-            request = decryptedResponse.getResponse().toString();
-        }
-
 
         auditPayload.setLogRequestAndResponse(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
         auditPayload.getRequest().setRequestBody(JsonMasker.maskMessage(request, maskKeys));

@@ -21,6 +21,8 @@ public class Constant {
     public static final String INVALID_SERVICE_NAME = "Invalid Service Name";
     public static final String MULTIPART = "MULTIPART";
     public static final String JSON = "JSON";
+
+    public static final String INVALID_REQUEST_500 = "INVALID_REQUEST_500";
     public static final String IS_PAYLOAD_ENCRYPTED = "ispayloadencrypted";
 
 
