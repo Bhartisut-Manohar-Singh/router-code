@@ -92,7 +92,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
             if(!node.hasNonNull("request"))
-                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",null);
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",request);
 
             MicroserviceResponse decryptedResponse = securityClient.decryptRequestWithoutSession(node.get("request").asText(), httpHeaders);
             request = decryptedResponse.getResponse().toString();
