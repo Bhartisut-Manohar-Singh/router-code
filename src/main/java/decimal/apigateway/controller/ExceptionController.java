@@ -78,7 +78,6 @@ public class ExceptionController {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
         }
 
         if(ex.getResponse() != null)
