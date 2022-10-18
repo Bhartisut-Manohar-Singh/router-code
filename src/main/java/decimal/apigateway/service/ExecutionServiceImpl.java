@@ -92,10 +92,10 @@ public class ExecutionServiceImpl implements ExecutionService {
 
             JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
-            if(("Y").equalsIgnoreCase(isPayloadEncrypted) && !node.hasNonNull("request"))
+            if(("Y").equalsIgnoreCase(isPayloadEncrypted) && (!node.hasNonNull("request") || !httpHeaders.containsKey("txnKey")))
                 throw new RouterException(INVALID_REQUEST_500,"Please send a valid request","{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send encrypted payload.\"}");
 
-            if(("Y").equalsIgnoreCase(isDigitallySigned) && !httpHeaders.containsKey("signature"))
+            if(("Y").equalsIgnoreCase(isDigitallySigned) && !httpHeaders.containsKey("hash"))
                 throw new RouterException(INVALID_REQUEST_500,"Please send a valid request","{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send signature in Headers as your request is digitally signed.\"}");
 
             httpHeaders.put(IS_DIGITALLY_SIGNED,isDigitallySigned);
