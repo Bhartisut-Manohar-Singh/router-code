@@ -82,18 +82,24 @@ public class ExecutionServiceImpl implements ExecutionService {
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
         JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
         Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"),HashMap.class);
-        boolean isPayloadEncrypted = httpHeaders.containsKey(IS_PAYLOAD_ENCRYPTED) &&  httpHeaders.get(IS_PAYLOAD_ENCRYPTED).equalsIgnoreCase("true");
+        String isDigitallySigned = headers.get(IS_DIGITALLY_SIGNED);
+        String isPayloadEncrypted = headers.get(IS_PAYLOAD_ENCRYPTED);
 
-        if (isPayloadEncrypted)
+        if (("Y").equalsIgnoreCase(isPayloadEncrypted) || ("Y").equalsIgnoreCase(isDigitallySigned))
         {
             if (! httpHeaders.containsKey(ROUTER_HEADER_SECURITY_VERSION))
                 httpHeaders.put(ROUTER_HEADER_SECURITY_VERSION,"2");
 
             JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
-            if(!node.hasNonNull("request"))
-                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request","{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send a valid request\"}");
+            if(("Y").equalsIgnoreCase(isPayloadEncrypted) && !node.hasNonNull("request"))
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request","{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send encrypted payload.\"}");
 
+            if(("Y").equalsIgnoreCase(isDigitallySigned) && !httpHeaders.containsKey("signature"))
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request","{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send signature in Headers as your request is digitally signed.\"}");
+
+            httpHeaders.put(IS_DIGITALLY_SIGNED,isDigitallySigned);
+            httpHeaders.put(IS_PAYLOAD_ENCRYPTED,isPayloadEncrypted);
             MicroserviceResponse decryptedResponse = securityClient.decryptRequestWithoutSession(node.get("request").asText(), httpHeaders);
             request = decryptedResponse.getResponse().toString();
             httpHeaders.put(Headers.requestid.name(),decryptedResponse.getCustomData().get(Headers.requestid.name()));
@@ -136,7 +142,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         logsWriter.updateLog(auditPayload);
 
-        if (isPayloadEncrypted)
+        if (("Y").equalsIgnoreCase(isPayloadEncrypted))
         {
             MicroserviceResponse encryptedResponse = securityClient.encryptResponseWithoutSession(responseEntity.getBody(), httpHeaders);
             Map<String, String> finalResponseMap = new HashMap<>();
