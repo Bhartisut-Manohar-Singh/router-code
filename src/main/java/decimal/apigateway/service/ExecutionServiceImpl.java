@@ -96,13 +96,13 @@ public class ExecutionServiceImpl implements ExecutionService {
             JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
             if(("Y").equalsIgnoreCase(isPayloadEncrypted) && (!node.hasNonNull("request") || !httpHeaders.containsKey(Headers.txnkey.name())))
-                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request","{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send encrypted payload.\"}");
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send encrypted payload.\"}"));
 
             if(("Y").equalsIgnoreCase(isPayloadEncrypted) && !httpHeaders.containsKey(Headers.txnkey.name()))
-                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request","{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send txnkey in Headers as your request payload is encrypted.\"}");
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send txnkey in Headers as your request payload is encrypted.\"}"));
 
             if(("Y").equalsIgnoreCase(isDigitallySigned) && !httpHeaders.containsKey(Headers.hash.name()))
-                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request","{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send hash in Headers as your request is digitally signed.\"}");
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send hash in Headers as your request is digitally signed.\"}"));
 
             httpHeaders.put(IS_DIGITALLY_SIGNED,isDigitallySigned);
             httpHeaders.put(IS_PAYLOAD_ENCRYPTED,isPayloadEncrypted);
