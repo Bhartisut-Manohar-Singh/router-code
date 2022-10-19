@@ -35,7 +35,6 @@ public class RequestValidator {
     }
 
     public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders,String serviceName) throws RouterException {
-
         httpHeaders.put("scopeToCheck", "PUBLIC");
         httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
         httpHeaders.put("username", httpHeaders.get("clientid"));

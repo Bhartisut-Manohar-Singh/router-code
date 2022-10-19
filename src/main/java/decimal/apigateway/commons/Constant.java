@@ -22,6 +22,14 @@ public class Constant {
     public static final String MULTIPART = "MULTIPART";
     public static final String JSON = "JSON";
 
+    public static final String INVALID_REQUEST_500 = "INVALID_REQUEST_500";
+    public static final String IS_PAYLOAD_ENCRYPTED = "ispayloadencrypted";
+
+    public static final String CLIENT_SECRET = "clientsecret";
+
+    public static final String IS_DIGITALLY_SIGNED = "isdigitallysigned";
+
+    public static final String ROUTER_HEADER_SECURITY_VERSION = "security-version";
 
     public static final String ROUTER_SERVICE_NOT_FOUND = "Service Name Not Found";
 }
