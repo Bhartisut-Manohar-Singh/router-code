@@ -38,6 +38,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static decimal.apigateway.commons.Constant.*;
+import static decimal.apigateway.enums.RequestValidationTypes.CLIENT_SECRET;
 
 @Service
 @Log
@@ -102,6 +103,8 @@ public class ExecutionServiceImpl implements ExecutionService {
 
             httpHeaders.put(IS_DIGITALLY_SIGNED,isDigitallySigned);
             httpHeaders.put(IS_PAYLOAD_ENCRYPTED,isPayloadEncrypted);
+            httpHeaders.put(Headers.clientsecret.name(), headers.get(Headers.clientsecret.name()));
+
             MicroserviceResponse decryptedResponse = securityClient.decryptRequestWithoutSession(node.get("request").asText(), httpHeaders);
             request = decryptedResponse.getResponse().toString();
             httpHeaders.put(Headers.requestid.name(),decryptedResponse.getCustomData().get(Headers.requestid.name()));
