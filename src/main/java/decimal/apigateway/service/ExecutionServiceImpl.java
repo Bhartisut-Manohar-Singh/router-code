@@ -108,7 +108,9 @@ public class ExecutionServiceImpl implements ExecutionService {
             httpHeaders.put(IS_PAYLOAD_ENCRYPTED,isPayloadEncrypted);
             httpHeaders.put(Headers.clientsecret.name(), headers.get(Headers.clientsecret.name()));
 
-            MicroserviceResponse decryptedResponse = securityClient.decryptRequestWithoutSession(node.get("request").asText(), httpHeaders);
+            MicroserviceResponse decryptedResponse = securityClient.decryptRequestWithoutSession(("Y").equalsIgnoreCase(isPayloadEncrypted) ? node.get("request").asText() : request, httpHeaders);
+
+            if(("Y").equalsIgnoreCase(isPayloadEncrypted))
             request = decryptedResponse.getResponse().toString();
         }
 
