@@ -95,7 +95,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
             JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
-            if(("Y").equalsIgnoreCase(isPayloadEncrypted) && (!node.hasNonNull("request") || !httpHeaders.containsKey(Headers.txnkey.name())))
+            if(("Y").equalsIgnoreCase(isPayloadEncrypted) && (!node.hasNonNull("request")))
                 throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send encrypted payload.\"}"));
 
             if(("Y").equalsIgnoreCase(isPayloadEncrypted) && !httpHeaders.containsKey(Headers.txnkey.name()))
