@@ -107,8 +107,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
             MicroserviceResponse decryptedResponse = securityClient.decryptRequestWithoutSession(node.get("request").asText(), httpHeaders);
             request = decryptedResponse.getResponse().toString();
-            httpHeaders.put(Headers.requestid.name(),decryptedResponse.getCustomData().get(Headers.requestid.name()));
-
         }
 
         String logsRequired = headers.get("logsrequired");
