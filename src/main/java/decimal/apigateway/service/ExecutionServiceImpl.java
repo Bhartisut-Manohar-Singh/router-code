@@ -79,6 +79,8 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
+        auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
+
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
         JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
         Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"),HashMap.class);
@@ -92,7 +94,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
             JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
-            if(("Y").equalsIgnoreCase(isPayloadEncrypted) && (!node.hasNonNull("request") || !httpHeaders.containsKey("txnKey")))
+            if(("Y").equalsIgnoreCase(isPayloadEncrypted) && (!node.hasNonNull("request") || !httpHeaders.containsKey("txnkey")))
                 throw new RouterException(INVALID_REQUEST_500,"Please send a valid request","{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send encrypted payload.\"}");
 
             if(("Y").equalsIgnoreCase(isDigitallySigned) && !httpHeaders.containsKey("hash"))
@@ -105,7 +107,6 @@ public class ExecutionServiceImpl implements ExecutionService {
             httpHeaders.put(Headers.requestid.name(),decryptedResponse.getCustomData().get(Headers.requestid.name()));
 
         }
-        auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         String logsRequired = headers.get("logsrequired");
         String serviceLog = headers.get("serviceLog");
