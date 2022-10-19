@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface ExecutionService {
 
-    Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException;
+    Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException;
 
     Object executeRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException;
 

@@ -21,14 +21,14 @@ public class ExecutionController
     ExecutionService executionService;
 
     @PostMapping("gatewayProcessor")
-    public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
+    public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         System.out.println("==============================Gateway Processor=============================");
         return executionService.executePlainRequest(request, httpHeaders);
     }
 
     @PostMapping("execute/{orgId}/{appId}/{serviceName}/{version}")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String orgId,
-                                      @PathVariable String appId, @PathVariable String serviceName, @PathVariable String version) throws RouterException, JsonProcessingException {
+                                      @PathVariable String appId, @PathVariable String serviceName, @PathVariable String version) throws RouterException, IOException {
         httpHeaders.put("servicename", serviceName);
         httpHeaders.put("orgid", orgId);
         httpHeaders.put("appid", appId);

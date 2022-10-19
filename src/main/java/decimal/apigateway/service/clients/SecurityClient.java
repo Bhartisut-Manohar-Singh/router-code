@@ -22,6 +22,10 @@ public interface SecurityClient
     @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/generateAuthResponseHash")
     MicroserviceResponse generateAuthResponseHash(@RequestBody String finalResponse, @RequestHeader Map<String, String> httpHeaders);
 
+    @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/decryptRequestWithoutSession")
+    MicroserviceResponse decryptRequestWithoutSession(@RequestBody String finalResponse, @RequestHeader Map<String, String> httpHeaders);
+    @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/encryptResponseWithoutSession")
+    MicroserviceResponse encryptResponseWithoutSession(@RequestBody Object finalResponse, @RequestHeader Map<String, String> httpHeaders);
     @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/encryptResponse")
     MicroserviceResponse encryptResponse(@RequestBody Object finalResponse, @RequestHeader Map<String, String> httpHeaders);
 

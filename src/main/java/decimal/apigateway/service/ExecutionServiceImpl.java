@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
+import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.EsbClient;
@@ -31,10 +32,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.time.DateTimeException;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static decimal.apigateway.commons.Constant.*;
+import static decimal.apigateway.enums.RequestValidationTypes.CLIENT_SECRET;
 
 @Service
 @Log
@@ -74,13 +78,41 @@ public class ExecutionServiceImpl implements ExecutionService {
     String path;
 
     @Override
-    public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
+    public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
         JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
         Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"),HashMap.class);
+        String isDigitallySigned = headers.get(IS_DIGITALLY_SIGNED);
+        String isPayloadEncrypted = headers.get(IS_PAYLOAD_ENCRYPTED);
+
+        if (("Y").equalsIgnoreCase(isPayloadEncrypted) || ("Y").equalsIgnoreCase(isDigitallySigned))
+        {
+            if (! httpHeaders.containsKey(ROUTER_HEADER_SECURITY_VERSION))
+                httpHeaders.put(ROUTER_HEADER_SECURITY_VERSION,"2");
+
+            JsonNode node = objectMapper.readValue(request, JsonNode.class);
+
+            if(("Y").equalsIgnoreCase(isPayloadEncrypted) && (!node.hasNonNull("request")))
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send encrypted payload.\"}"));
+
+            if(("Y").equalsIgnoreCase(isPayloadEncrypted) && !httpHeaders.containsKey(Headers.txnkey.name()))
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send txnkey in Headers as your request payload is encrypted.\"}"));
+
+            if(("Y").equalsIgnoreCase(isDigitallySigned) && !httpHeaders.containsKey(Headers.hash.name()))
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send hash in Headers as your request is digitally signed.\"}"));
+
+            httpHeaders.put(IS_DIGITALLY_SIGNED,isDigitallySigned);
+            httpHeaders.put(IS_PAYLOAD_ENCRYPTED,isPayloadEncrypted);
+            httpHeaders.put(Headers.clientsecret.name(), headers.get(Headers.clientsecret.name()));
+
+            MicroserviceResponse decryptedResponse = securityClient.decryptRequestWithoutSession(("Y").equalsIgnoreCase(isPayloadEncrypted) ? node.get("request").asText() : request, httpHeaders);
+
+            if(("Y").equalsIgnoreCase(isPayloadEncrypted))
+            request = decryptedResponse.getResponse().toString();
+        }
 
         String logsRequired = headers.get("logsrequired");
         String serviceLog = headers.get("serviceLog");
@@ -88,12 +120,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         String logPurgeDays =  headers.get("logpurgedays");
 
         auditTraceFilter.setPurgeDays(logPurgeDays);
-        httpHeaders.put("logsrequired",logsRequired);
-        httpHeaders.put("serviceLogs", serviceLog);
-        httpHeaders.put("loginid",headers.getOrDefault("loginid","random_login_id"));
-        httpHeaders.put("logpurgedays",logPurgeDays);
-        httpHeaders.put("keys_to_mask",headers.get("keys_to_mask"));
-        httpHeaders.put("executionsource","API-GATEWAY");
+        httpHeaders = setHeaders(httpHeaders, headers, logsRequired, serviceLog, logPurgeDays);
         List<String> maskKeys = new ArrayList<>();
 
         if (keysToMask != null && !keysToMask.isEmpty()) {
@@ -102,7 +129,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         auditPayload.setLogRequestAndResponse(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
-
         auditPayload.getRequest().setRequestBody(JsonMasker.maskMessage(request, maskKeys));
         auditPayload.getRequest().setHeaders(httpHeaders);
 
@@ -123,7 +149,27 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         logsWriter.updateLog(auditPayload);
 
+        if (("Y").equalsIgnoreCase(isPayloadEncrypted))
+        {
+            MicroserviceResponse encryptedResponse = securityClient.encryptResponseWithoutSession(responseEntity.getBody(), httpHeaders);
+            Map<String, String> finalResponseMap = new HashMap<>();
+            finalResponseMap.put("response", encryptedResponse.getMessage());
+
+            return finalResponseMap;
+        }
+
         return responseBody;
+    }
+
+    private static Map<String, String> setHeaders(Map<String, String> httpHeaders, Map<String, String> headers, String logsRequired, String serviceLog, String logPurgeDays) {
+        httpHeaders.put("logsrequired", logsRequired);
+        httpHeaders.put("serviceLogs", serviceLog);
+        httpHeaders.put("loginid", headers.getOrDefault("loginid",String.valueOf(LocalDateTime.now())));
+        httpHeaders.put("logpurgedays", logPurgeDays);
+        httpHeaders.put("keys_to_mask", headers.get("keys_to_mask"));
+        httpHeaders.put("executionsource","API-GATEWAY");
+
+        return httpHeaders;
     }
 
     @Override
@@ -428,6 +474,9 @@ public class ExecutionServiceImpl implements ExecutionService {
             updateHttpHeaders.put("executionsource", Collections.singletonList("API-GATEWAY"));
 
         }
+
+        log.info("===============================Dyanmic Router Plain URL==========================");
+        log.info(serviceUrl);
         HttpEntity<String> requestEntity = new HttpEntity<>(request, updateHttpHeaders);
 
         auditPayload.getRequestIdentifier().setArn(serviceUrl);
