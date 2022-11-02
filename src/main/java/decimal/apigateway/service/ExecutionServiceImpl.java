@@ -128,7 +128,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             maskKeys = Arrays.asList(keysToMaskArr);
         }
 
-        auditPayload.setLogRequestAndResponse(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
+        auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
         auditPayload.getRequest().setRequestBody(JsonMasker.maskMessage(request, maskKeys));
         auditPayload.getRequest().setHeaders(httpHeaders);
 
@@ -194,7 +194,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             maskKeys = Arrays.asList(keysToMaskArr);
         }
 
-        auditPayload.setLogRequestAndResponse(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
+        auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
@@ -236,7 +236,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
-        auditPayload.setLogRequestAndResponse(isHttpTracingEnabled);
+        auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders, auditPayload);
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
@@ -310,7 +310,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         auditPayload = logsWriter.initializeLog(uploadRequest,MULTIPART, httpHeaders);
 
-        auditPayload.setLogRequestAndResponse(isHttpTracingEnabled);
+        auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
 
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders,auditPayload);
 
@@ -378,7 +378,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         auditPayload = logsWriter.initializeLog(mediaDataObjects,MULTIPART, httpHeaders);
 
-        auditPayload.setLogRequestAndResponse(isHttpTracingEnabled);
+        auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
 
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders,auditPayload);
 
@@ -450,7 +450,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, JsonProcessingException {
 
         auditPayload=logsWriter.initializeLog(request,JSON,httpHeaders);
-        auditPayload.setLogRequestAndResponse(isHttpTracingEnabled);
+        auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
 
         requestValidator.validatePlainDynamicRequest(request, httpHeaders);
 

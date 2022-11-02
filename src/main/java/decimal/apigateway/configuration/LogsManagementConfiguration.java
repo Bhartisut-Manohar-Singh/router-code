@@ -67,11 +67,6 @@ public class LogsManagementConfiguration {
         registeredUrls.add("forceLogout");
 
 
-        return new AuditTraceFilter("API-GATEWAY", isHttpTracingEnabled, registeredUrls, lsvUrl);
-    }
-
-    @Bean
-    public LogsConnector logsConnector(){
-        return  LogsConnector.newInstance(lsvUrl);
+        return new AuditTraceFilter("API-GATEWAY", isHttpTracingEnabled, registeredUrls);
     }
 }
