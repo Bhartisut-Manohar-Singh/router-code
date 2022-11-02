@@ -87,7 +87,7 @@ public class ExceptionController {
             isLogoutSuccess =  jsonNode.hasNonNull("status") ? jsonNode.get("status").asText().equalsIgnoreCase("625") : false;
         }
 
-      /*  if(auditPayload != null && auditPayload.getResponse()!=null) {
+      /* if(auditPayload != null && auditPayload.getResponse()!=null) {
             auditPayload.getResponse().setResponse(ex.getResponse() != null ? mapper.writeValueAsString(ex.getResponse()) : "");
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
             auditPayload.getResponse().setTimestamp(Instant.now());
