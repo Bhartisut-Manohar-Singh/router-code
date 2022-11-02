@@ -67,7 +67,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         auditPayload = logsWriter.initializeLog(request,JSON, httpHeaders);
 
-        auditPayload.setLogRequestAndResponse(isHttpTracingEnabled);
+        auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
 
         ObjectNode jsonNodes = objectMapper.convertValue(requestValidator.validateRegistrationRequest(request, httpHeaders), ObjectNode.class);
 
@@ -136,11 +136,11 @@ public class RegistrationServiceImpl implements RegistrationService {
             httpHeaders.put("logsrequired", logsRequired);
             httpHeaders.put("servicelogs", serviceLog);
             httpHeaders.put("logpurgedays",logPurgeDays);
-            auditPayload.setLogRequestAndResponse(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
+            auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
 
         }
         else
-            auditPayload.setLogRequestAndResponse(isHttpTracingEnabled);
+            auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
 
         String keysToMask = httpHeaders.get(Constant.KEYS_TO_MASK);
 
