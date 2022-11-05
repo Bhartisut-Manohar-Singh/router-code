@@ -67,6 +67,8 @@ public class LogsWriter {
         String clientId = requestHeaders.get(LogsIdentifier.clientid.name());
         String orgId = requestHeaders.get(LogsIdentifier.orgid.name());
         String appId = requestHeaders.get(LogsIdentifier.appid.name());
+        String logOrgId = requestHeaders.get(LogsIdentifier.logorgid.name());
+        String logAppId = requestHeaders.get(LogsIdentifier.logappid.name());
         String serviceName = requestHeaders.get(LogsIdentifier.servicename.name());
         String apiName = requestHeaders.get(LogsIdentifier.apiname.name());
 
@@ -103,6 +105,8 @@ public class LogsWriter {
 
         requestIdentifier.setOrgId(orgId);
         requestIdentifier.setAppId(appId);
+        requestIdentifier.setLogOrgId(logOrgId);
+        requestIdentifier.setLogAppId(logAppId);
         requestIdentifier.setSystemName("api-gateway");
         requestIdentifier.setArn(arn);
         requestIdentifier.setTraceId(finalTraceId);

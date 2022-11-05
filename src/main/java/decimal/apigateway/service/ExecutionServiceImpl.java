@@ -202,6 +202,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String maskRequestBody=JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
         auditPayload.getRequest().setRequestBody(maskRequestBody);
+        updatedHttpHeaders.put("executionsource","API-GATEWAY");
 
         ResponseEntity<Object> responseEntity = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
         HttpHeaders responseHeaders = responseEntity.getHeaders();
@@ -213,7 +214,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys);
         auditPayload.getResponse().setResponse(responseBody);
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
-
+        httpHeaders.put("executionsource","API-GATEWAY");
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(responseEntity.getBody(), httpHeaders);
 
@@ -251,11 +252,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         updateHttpHeaders.forEach(httpHeaders1::add);
 
-        if (serviceUrl.contains("/service-executor/execute-plain"))
-        {
-            httpHeaders1.put("executionsource", Collections.singletonList("API-GATEWAY"));
-
-        }
         JsonNode jsonNode = objectMapper.readValue(decryptedResponse.getResponse().toString(), JsonNode.class);
 
         String actualRequest = jsonNode.get("requestData").toString();
@@ -265,6 +261,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setRequestBody(actualRequest);
         auditPayload.getRequest().setMethod("POST");
         auditPayload.getRequest().setUri(serviceUrl);
+
+        httpHeaders1.put("executionsource", Collections.singletonList("API-GATEWAY"));
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
 
@@ -336,6 +334,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setUri(serviceUrl);
 
 
+        headers.put("executionsource", Collections.singletonList("API-GATEWAY"));
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
@@ -401,6 +400,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setHeaders(httpHeaders);
         auditPayload.getRequest().setUri(serviceUrl);
 
+
+        headers.put("executionsource", Collections.singletonList("API-GATEWAY"));
 
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
@@ -477,6 +478,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         log.info("===============================Dyanmic Router Plain URL==========================");
         log.info(serviceUrl);
+
+        updateHttpHeaders.put("executionsource", Collections.singletonList("API-GATEWAY"));
+
         HttpEntity<String> requestEntity = new HttpEntity<>(request, updateHttpHeaders);
 
         auditPayload.getRequestIdentifier().setArn(serviceUrl);
