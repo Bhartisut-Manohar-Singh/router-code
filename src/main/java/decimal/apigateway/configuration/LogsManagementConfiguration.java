@@ -1,5 +1,6 @@
 package decimal.apigateway.configuration;
 
+import decimal.apigateway.enums.Headers;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.filters.IdentifierFilter;
@@ -54,6 +55,8 @@ public class LogsManagementConfiguration {
         requestIdentifierMapper.mapTraceIdWithHeaderKey("requestid");
         requestIdentifierMapper.mapOrgIdWithHeaderKey("orgid");
         requestIdentifierMapper.mapAppIdWithHeaderKey("appid");
+        requestIdentifierMapper.mapLogOrgIdWithHeaderKey(Headers.logorgid.name());
+        requestIdentifierMapper.mapLogAppIdWithHeaderKey(Headers.logappid.name());
         return new IdentifierFilter(requestIdentifierMapper, isHttpTracingEnabled);
     }
 

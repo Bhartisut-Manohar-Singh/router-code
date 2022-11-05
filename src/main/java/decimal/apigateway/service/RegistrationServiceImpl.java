@@ -77,6 +77,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         auditPayload.getRequest().setRequestBody(request);
 
+        httpHeaders.put("executionsource","API-GATEWAY");
+
         ResponseEntity<Object> responseEntity = authenticationClient.register(request, httpHeaders);
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
@@ -160,6 +162,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         auditPayload.getRequestIdentifier().setLoginId(microserviceResponse.getMessage().split(Constant.TILD_SPLITTER)[2]);
 
+        httpHeaders.put("executionsource","API-GATEWAY");
+
         ResponseEntity<Object> responseEntity = authenticationClient.authenticate(plainRequest, httpHeaders);
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
@@ -222,6 +226,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             System.out.println("Security Failure!!!!!");
         }
 
+        httpHeaders.put("executionsource","API-GATEWAY");
         ResponseEntity<Object> responseEntity = authenticationClient.logout(httpHeaders);
         MicroserviceResponse microserviceResponse = objectMapper.convertValue(responseEntity.getBody(),MicroserviceResponse.class);
         return new ResponseEntity(microserviceResponse,responseEntity.getHeaders(),HttpStatus.OK);
@@ -229,6 +234,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public Object forceLogout(String request, Map<String, String> httpHeaders, HttpServletResponse response) {
+        httpHeaders.put("executionsource","API-GATEWAY");
         ResponseEntity<Object> responseEntity = authenticationClient.forceLogout(httpHeaders);
         MicroserviceResponse microserviceResponse = objectMapper.convertValue(responseEntity.getBody(),MicroserviceResponse.class);
         return new ResponseEntity(microserviceResponse,responseEntity.getHeaders(),HttpStatus.OK);
