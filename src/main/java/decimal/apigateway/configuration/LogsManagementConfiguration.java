@@ -67,6 +67,6 @@ public class LogsManagementConfiguration {
         registeredUrls.add("forceLogout");
 
 
-        return new AuditTraceFilter("API-GATEWAY", isHttpTracingEnabled, registeredUrls);
+        return new AuditTraceFilter("api-gateway", isHttpTracingEnabled, registeredUrls);
     }
 }
