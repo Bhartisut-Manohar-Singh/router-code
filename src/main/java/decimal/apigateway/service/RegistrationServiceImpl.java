@@ -190,6 +190,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         log.info("===============Line 190======================");
 
         if (!encryptedResponse.getStatus().equalsIgnoreCase(Constant.SUCCESS_STATUS)) {
+            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            logsWriter.updateLog(auditPayload);
             return new ResponseEntity<>(authenticateResponse.getResponse(), HttpStatus.BAD_REQUEST);
         }
 
