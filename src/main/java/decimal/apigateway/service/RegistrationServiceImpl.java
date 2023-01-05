@@ -13,6 +13,7 @@ import decimal.apigateway.service.validator.RequestValidator;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +30,7 @@ import static decimal.apigateway.commons.Constant.JSON;
 
 @Service
 @CrossOrigin
+@Log
 public class RegistrationServiceImpl implements RegistrationService {
 
     private SecurityClient securityClient;
@@ -185,6 +187,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(finalResponse, httpHeaders);
 
         if (!encryptedResponse.getStatus().equalsIgnoreCase(Constant.SUCCESS_STATUS)) {
+            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            logsWriter.updateLog(auditPayload);
             return new ResponseEntity<>(authenticateResponse.getResponse(), HttpStatus.BAD_REQUEST);
         }
 
@@ -199,7 +203,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         finalResponseMap.put("response", encryptedResponse.getMessage());
 
         MicroserviceResponse authResponseHash = securityClient.generateAuthResponseHash(finalResponse.toString(), httpHeaders);
-
         response.addHeader("hash", authResponseHash.getMessage());
 
         node.put("hash", authResponseHash.getMessage());
