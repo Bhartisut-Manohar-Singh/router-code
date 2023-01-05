@@ -181,13 +181,10 @@ public class RegistrationServiceImpl implements RegistrationService {
                 httpHeaders.get("servicename"),
                 objectMapper.writeValueAsString(authResponse));
 
-        log.info("===============Line 184======================");
          String maskedResponse = JsonMasker.maskMessage(finalResponse.toString(), maskKeys);
          auditPayload.getResponse().setResponse(maskedResponse);
-        log.info("===============Line 186======================");
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(finalResponse, httpHeaders);
-        log.info("===============Line 190======================");
 
         if (!encryptedResponse.getStatus().equalsIgnoreCase(Constant.SUCCESS_STATUS)) {
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
@@ -204,12 +201,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
-        log.info("===============Line 205======================");
 
         MicroserviceResponse authResponseHash = securityClient.generateAuthResponseHash(finalResponse.toString(), httpHeaders);
-        log.info("===============Line 208======================");
-        log.info("=====================================");
-
         response.addHeader("hash", authResponseHash.getMessage());
 
         node.put("hash", authResponseHash.getMessage());
@@ -217,7 +210,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
 
         logsWriter.updateLog(auditPayload);
-        log.info("=============Line 218========================");
 
         return finalResponseMap;
     }
