@@ -69,4 +69,12 @@ public class LogsManagementConfiguration {
 
         return new AuditTraceFilter("api-gateway", isHttpTracingEnabled, registeredUrls);
     }
+
+
+    @Bean
+    @RequestScope
+    public CustomPayload customPayload() {
+        return new CustomPayload();
+    }
+
 }
