@@ -18,6 +18,11 @@ public class RequestValidatorV2 {
         this.securityClient = securityClient;
     }
     public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) {
+        String clientId = httpHeaders.get("clientid");
+
+        httpHeaders.put("sourceOrgId", clientId.split(Constant.TILD_SPLITTER)[0]);
+        httpHeaders.put("sourceAppId", clientId.split(Constant.TILD_SPLITTER)[1]);
+
 
 
         MicroserviceResponse response =securityClient.validateExecutionRequestV2(request, httpHeaders);

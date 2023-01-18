@@ -17,15 +17,15 @@ public class ExecutionControllerV2 {
     @Autowired
     ExecutionServiceV2 executionServiceV2;
 
-    @PostMapping("gateway/{sourceAppId}/{sourceOrgId}/{destinationAppId}")
-    public Object executeRequest(@PathVariable String sourceAppId, @PathVariable String sourceOrgId,
-                                 @PathVariable String destinationAppId,
+    @PostMapping("gateway/{destinationAppId}/{serviceName}")
+    public Object executeRequest(@PathVariable String destinationAppId,@PathVariable String serviceName,
                                  @RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         System.out.println("======================Gateway=============================");
-        httpHeaders.put("sourceAppId", sourceAppId);
-        httpHeaders.put("sourceOrgId", sourceOrgId);
+        /*httpHeaders.put("sourceAppId", sourceAppId);
+        httpHeaders.put("sourceOrgId", sourceOrgId);*/
         httpHeaders.put("destinationAppId", destinationAppId);
-        return executionServiceV2.executeRequest(sourceAppId,sourceOrgId,destinationAppId, request, httpHeaders);
+        httpHeaders.put("serviceName",serviceName);
+        return executionServiceV2.executeRequest(destinationAppId,serviceName, request, httpHeaders);
 
     }
 }

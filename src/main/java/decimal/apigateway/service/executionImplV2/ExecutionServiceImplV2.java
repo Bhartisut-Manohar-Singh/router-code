@@ -58,7 +58,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     /*@Value("${server.servlet.context-path}")
     String path;*/
     @Override
-    public Object executeRequest(String sourceAppId,String sourceOrgId,String destinationAppId, String request, Map<String, String> httpHeaders) throws IOException, RouterException {
+    public Object executeRequest(String destinationAppId,String serviceNmae, String request, Map<String, String> httpHeaders) throws IOException, RouterException {
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
         Map<String, String> updatedHttpHeaders =requestValidatorV2.validateRequest(request, httpHeaders,auditPayload);
 

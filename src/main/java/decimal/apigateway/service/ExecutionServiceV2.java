@@ -6,5 +6,5 @@ import java.io.IOException;
 import java.util.Map;
 
 public interface ExecutionServiceV2 {
-    Object executeRequest(String sourceAppId, String sourceOrgId, String destinationAppId, String request, Map<String, String> httpHeaders) throws IOException, RouterException;
+    Object executeRequest( String destinationAppId,String serviceName, String request, Map<String, String> httpHeaders) throws IOException, RouterException;
 }
