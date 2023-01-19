@@ -516,6 +516,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath) throws RouterException {
 
         String contextPath = "";
+        int port = 0;
 
         List<String> services = discoveryClient.getServices();
 
@@ -532,13 +533,14 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         for (ServiceInstance serviceInstance : instances) {
             Map<String, String> metadata = serviceInstance.getMetadata();
+            port = serviceInstance.getPort();
             contextPath = metadata.get("context-path");
         }
 
         String mapping = requestURI.replaceAll(basePath, "");
 
-        String serviceUrl = "http://" + serviceName + (contextPath == null ? "" : contextPath) + mapping;
-
+        String serviceUrl = "http://" + serviceName.concat(Integer.toString(port)) + (contextPath == null ? "" : contextPath) + mapping;
+        log.info(" === service url === " + serviceUrl);
         return serviceUrl;
     }
 
