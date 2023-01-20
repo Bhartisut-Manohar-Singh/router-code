@@ -537,26 +537,20 @@ public class ExecutionServiceImpl implements ExecutionService {
             throw new RouterException(FAILURE_STATUS, "Service with name: " + serviceName + " is not registered with discovery server", null);
         }
 
-        log.info(" ==== basePath ==== " + basePath);
-        String mapping = requestURI.replaceAll(basePath, "");
-
         for (ServiceInstance serviceInstance : instances) {
             Map<String, String> metadata = serviceInstance.getMetadata();
-            try {
-                log.info(" === metaData === " + objectMapper.writeValueAsString(metadata));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-            port = serviceInstance.getPort();
             contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
-            log.info(" ==== contextPath  ==== " + contextPath);
-            log.info(" ==== mapping ==== " + mapping);
+            log.info(" === context path === " + contextPath);
+            log.info(" === contextPath === " + metadata.get("context-path"));
+            log.info(" === contextPath === " + metadata.get("contextPath"));
+            port = serviceInstance.getPort();
         }
-        if(isDynamic){
-            return "http://" + serviceName.toLowerCase() +":"+ port  + mapping;
-        }
-        return  "http://" + serviceName.toLowerCase() +":"+ port + contextPath + mapping;
 
+        String mapping = requestURI.replaceAll(basePath, "");
+
+        String serviceUrl = "http://" + serviceName + ":"+ port+  (contextPath == null ? "" : contextPath) + mapping;
+
+        return serviceUrl;
     }
 
     public static List<String> getBusinessKey(Object response)
