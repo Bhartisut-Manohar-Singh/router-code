@@ -541,7 +541,6 @@ public class ExecutionServiceImpl implements ExecutionService {
             }
             port = serviceInstance.getPort();
             contextPath = metadata.get("context-path");
-            contextPath = metadata.get("contextPath");
             log.info(" ==== context path ==== " + contextPath);
             log.info(" ==== contextPath ==== " + metadata.get("contextPath"));
         }
