@@ -257,7 +257,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String actualRequest = jsonNode.get("requestData").toString();
 
-
         auditPayload.getRequest().setHeaders(updateHttpHeaders);
         auditPayload.getRequest().setRequestBody(actualRequest);
         auditPayload.getRequest().setMethod("POST");
@@ -267,9 +266,15 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
 
-        log.info("===============================Dyanmic Router URL==========================");
-        log.info(serviceUrl);
-        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
+        log.info(" ==== Dyanmic Router URL ====" + serviceUrl);
+
+        ResponseEntity<Object> exchange = null;
+        try {
+            exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
+            log.info(" ==== response body ==== " + objectMapper.writeValueAsString(exchange.getBody()));
+        }catch (Exception e){
+            log.info(" === exception occured === " + e.getMessage());
+        }
 
         HttpHeaders headers = exchange.getHeaders();
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
@@ -540,15 +545,13 @@ public class ExecutionServiceImpl implements ExecutionService {
                 throw new RuntimeException(e);
             }
             port = serviceInstance.getPort();
-            log.info(" ==== context path ==== " + metadata.get("context-path"));
-            log.info(" ==== contextPath  ==== " + metadata.get("contextPath"));
             contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
+            log.info(" ==== contextPath  ==== " + contextPath);
         }
 
         String mapping = requestURI.replaceAll(basePath, "");
 
         String serviceUrl = "http://" + serviceName +":"+ port + contextPath + mapping;
-        log.info(" === service url === " + serviceUrl);
         return serviceUrl;
     }
 
