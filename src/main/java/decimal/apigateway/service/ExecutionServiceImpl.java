@@ -247,7 +247,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String basePath = path + "/engine/v1/dynamic-router/" + serviceName;
 
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath);
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, true);
 
         HttpHeaders httpHeaders1 = new HttpHeaders();
 
@@ -320,7 +320,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String basePath = path + "/engine/v1/dynamic-router/upload-gateway/" + serviceName;
 
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath);
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, false);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         for (MultipartFile file : files) {
@@ -389,7 +389,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String basePath = path + "/engine/v1/dynamic-router/upload-file/" + serviceName;
 
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath);
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, false);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         for (MultipartFile file : files) {
@@ -474,7 +474,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String basePath = path + "/engine/v1/dynamic-router/plain/" + serviceName;
 
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath);
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, true);
 
         if (serviceUrl.contains("/service-executor/execute-plain"))
         {
@@ -519,7 +519,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
 
-    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath) throws RouterException {
+    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath, Boolean isDynamic) throws RouterException {
 
         String contextPath = "";
         int port = 0;
@@ -552,10 +552,11 @@ public class ExecutionServiceImpl implements ExecutionService {
             log.info(" ==== contextPath  ==== " + contextPath);
             log.info(" ==== mapping ==== " + mapping);
         }
+        if(isDynamic){
+            return "http://" + serviceName +":"+ port  + mapping;
+        }
+        return  "http://" + serviceName +":"+ port + contextPath + mapping;
 
-
-        String serviceUrl = "http://" + serviceName +":"+ port + contextPath + mapping;
-        return serviceUrl;
     }
 
     public static List<String> getBusinessKey(Object response)
