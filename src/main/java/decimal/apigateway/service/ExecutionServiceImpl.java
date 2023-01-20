@@ -537,6 +537,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             throw new RouterException(FAILURE_STATUS, "Service with name: " + serviceName + " is not registered with discovery server", null);
         }
 
+        log.info(" ==== basePath ==== " + basePath);
         String mapping = requestURI.replaceAll(basePath, "");
 
         for (ServiceInstance serviceInstance : instances) {
