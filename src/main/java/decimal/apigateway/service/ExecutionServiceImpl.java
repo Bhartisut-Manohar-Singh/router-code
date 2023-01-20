@@ -537,6 +537,8 @@ public class ExecutionServiceImpl implements ExecutionService {
             throw new RouterException(FAILURE_STATUS, "Service with name: " + serviceName + " is not registered with discovery server", null);
         }
 
+        String mapping = requestURI.replaceAll(basePath, "");
+
         for (ServiceInstance serviceInstance : instances) {
             Map<String, String> metadata = serviceInstance.getMetadata();
             try {
@@ -547,9 +549,9 @@ public class ExecutionServiceImpl implements ExecutionService {
             port = serviceInstance.getPort();
             contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
             log.info(" ==== contextPath  ==== " + contextPath);
+            log.info(" ==== mapping ==== " + mapping);
         }
 
-        String mapping = requestURI.replaceAll(basePath, "");
 
         String serviceUrl = "http://" + serviceName +":"+ port + contextPath + mapping;
         return serviceUrl;
