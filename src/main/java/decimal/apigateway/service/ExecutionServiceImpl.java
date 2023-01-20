@@ -77,6 +77,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Value("${server.servlet.context-path}")
     String path;
 
+
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
@@ -246,7 +247,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String basePath = path + "/engine/v1/dynamic-router/" + serviceName;
 
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath);
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, true);
 
         HttpHeaders httpHeaders1 = new HttpHeaders();
 
@@ -255,7 +256,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         JsonNode jsonNode = objectMapper.readValue(decryptedResponse.getResponse().toString(), JsonNode.class);
 
         String actualRequest = jsonNode.get("requestData").toString();
-
 
         auditPayload.getRequest().setHeaders(updateHttpHeaders);
         auditPayload.getRequest().setRequestBody(actualRequest);
@@ -266,9 +266,15 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
 
-        log.info("===============================Dyanmic Router URL==========================");
-        log.info(serviceUrl);
-        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
+        log.info(" ==== Dyanmic Router URL ====" + serviceUrl);
+
+        ResponseEntity<Object> exchange = null;
+        try {
+            exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
+            log.info(" ==== response body ==== " + objectMapper.writeValueAsString(exchange.getBody()));
+        }catch (Exception e){
+            log.info(" === exception occured === " + e.getMessage());
+        }
 
         HttpHeaders headers = exchange.getHeaders();
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
@@ -314,7 +320,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String basePath = path + "/engine/v1/dynamic-router/upload-gateway/" + serviceName;
 
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath);
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, false);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         for (MultipartFile file : files) {
@@ -383,7 +389,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String basePath = path + "/engine/v1/dynamic-router/upload-file/" + serviceName;
 
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath);
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, false);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         for (MultipartFile file : files) {
@@ -468,7 +474,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String basePath = path + "/engine/v1/dynamic-router/plain/" + serviceName;
 
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath);
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, true);
 
         if (serviceUrl.contains("/service-executor/execute-plain"))
         {
@@ -513,9 +519,10 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
 
-    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath) throws RouterException {
+    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath, Boolean isDynamic) throws RouterException {
 
         String contextPath = "";
+        int port = 0;
 
         List<String> services = discoveryClient.getServices();
 
@@ -530,16 +537,26 @@ public class ExecutionServiceImpl implements ExecutionService {
             throw new RouterException(FAILURE_STATUS, "Service with name: " + serviceName + " is not registered with discovery server", null);
         }
 
-        for (ServiceInstance serviceInstance : instances) {
-            Map<String, String> metadata = serviceInstance.getMetadata();
-            contextPath = metadata.get("context-path");
-        }
-
+        log.info(" ==== basePath ==== " + basePath);
         String mapping = requestURI.replaceAll(basePath, "");
 
-        String serviceUrl = "http://" + serviceName + (contextPath == null ? "" : contextPath) + mapping;
+        for (ServiceInstance serviceInstance : instances) {
+            Map<String, String> metadata = serviceInstance.getMetadata();
+            try {
+                log.info(" === metaData === " + objectMapper.writeValueAsString(metadata));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            port = serviceInstance.getPort();
+            contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
+            log.info(" ==== contextPath  ==== " + contextPath);
+            log.info(" ==== mapping ==== " + mapping);
+        }
+        if(isDynamic){
+            return "http://" + serviceName.toLowerCase() +":"+ port  + mapping;
+        }
+        return  "http://" + serviceName.toLowerCase() +":"+ port + contextPath + mapping;
 
-        return serviceUrl;
     }
 
     public static List<String> getBusinessKey(Object response)
