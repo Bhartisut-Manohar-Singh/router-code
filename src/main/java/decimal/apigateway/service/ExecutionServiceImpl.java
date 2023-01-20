@@ -540,9 +540,9 @@ public class ExecutionServiceImpl implements ExecutionService {
                 throw new RuntimeException(e);
             }
             port = serviceInstance.getPort();
-            contextPath = metadata.get("context-path");
-            log.info(" ==== context path ==== " + contextPath);
-            log.info(" ==== contextPath ==== " + metadata.get("contextPath"));
+            log.info(" ==== context path ==== " + metadata.get("context-path"));
+            log.info(" ==== contextPath  ==== " + metadata.get("contextPath"));
+            contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
         }
 
         String mapping = requestURI.replaceAll(basePath, "");
