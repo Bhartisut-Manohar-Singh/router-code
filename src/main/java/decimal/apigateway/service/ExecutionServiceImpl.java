@@ -539,7 +539,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         String mapping = requestURI.replaceAll(basePath, "");
 
-        String serviceUrl = "http://" + serviceName.toLowerCase() +":"+ port + (contextPath == null ? "" : contextPath) + mapping;
+        String serviceUrl = "http://" + serviceName +":"+ port + (contextPath == null ? "" : contextPath) + mapping;
         log.info(" === service url === " + serviceUrl);
         return serviceUrl;
     }
