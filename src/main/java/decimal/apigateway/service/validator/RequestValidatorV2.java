@@ -5,6 +5,7 @@ import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.logs.model.AuditPayload;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -14,6 +15,7 @@ public class RequestValidatorV2 {
 
     private final SecurityClient securityClient;
 
+    @Autowired
     public RequestValidatorV2(SecurityClient securityClient) {
         this.securityClient = securityClient;
     }
