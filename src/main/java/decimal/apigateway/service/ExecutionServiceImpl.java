@@ -541,16 +541,15 @@ public class ExecutionServiceImpl implements ExecutionService {
             Map<String, String> metadata = serviceInstance.getMetadata();
             contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
             log.info(" === context path === " + contextPath);
-            log.info(" === contextPath === " + metadata.get("context-path"));
-            log.info(" === contextPath === " + metadata.get("contextPath"));
             port = serviceInstance.getPort();
         }
 
         String mapping = requestURI.replaceAll(basePath, "");
-
-        String serviceUrl = "http://" + serviceName + ":"+ port+  (contextPath == null ? "" : contextPath) + mapping;
-
-        return serviceUrl;
+        log.info(" === mapping === " + mapping);
+        if (mapping.contains(contextPath)){
+            return "http://" + serviceName.toLowerCase() +":"+ port  + mapping;
+        }
+        return "http://" + serviceName + ":"+ port+  (contextPath == null ? "" : contextPath) + mapping;
     }
 
     public static List<String> getBusinessKey(Object response)
