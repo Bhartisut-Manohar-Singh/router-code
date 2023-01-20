@@ -553,9 +553,9 @@ public class ExecutionServiceImpl implements ExecutionService {
             log.info(" ==== mapping ==== " + mapping);
         }
         if(isDynamic){
-            return "http://" + serviceName +":"+ port  + mapping;
+            return "http://" + serviceName.toLowerCase() +":"+ port  + mapping;
         }
-        return  "http://" + serviceName +":"+ port + contextPath + mapping;
+        return  "http://" + serviceName.toLowerCase() +":"+ port + contextPath + mapping;
 
     }
 
