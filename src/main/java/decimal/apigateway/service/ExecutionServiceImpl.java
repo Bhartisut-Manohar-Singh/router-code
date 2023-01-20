@@ -77,6 +77,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Value("${server.servlet.context-path}")
     String path;
 
+
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
@@ -533,8 +534,16 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         for (ServiceInstance serviceInstance : instances) {
             Map<String, String> metadata = serviceInstance.getMetadata();
+            try {
+                log.info(" === metaData === " + objectMapper.writeValueAsString(metadata));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
             port = serviceInstance.getPort();
             contextPath = metadata.get("context-path");
+            contextPath = metadata.get("contextPath");
+            log.info(" ==== context path ==== " + contextPath);
+            log.info(" ==== contextPath ==== " + metadata.get("contextPath"));
         }
 
         String mapping = requestURI.replaceAll(basePath, "");
