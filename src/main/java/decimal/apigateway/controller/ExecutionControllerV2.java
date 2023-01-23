@@ -18,7 +18,8 @@ public class ExecutionControllerV2 {
     ExecutionServiceV2 executionServiceV2;
 
     @PostMapping("gateway/{destinationAppId}/{serviceName}")
-    public Object executeRequest(@PathVariable String destinationAppId,@PathVariable String serviceName,
+    public Object executeRequest(@PathVariable(name = "destinationAppId") String destinationAppId,
+                                 @PathVariable(name = "serviceName") String serviceName,
                                  @RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         System.out.println("======================Gateway=============================");
         /*httpHeaders.put("sourceAppId", sourceAppId);

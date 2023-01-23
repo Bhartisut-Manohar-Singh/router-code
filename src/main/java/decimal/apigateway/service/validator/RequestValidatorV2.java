@@ -2,6 +2,7 @@ package decimal.apigateway.service.validator;
 
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
+import decimal.apigateway.enums.RequestValidationTypes;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.logs.model.AuditPayload;
@@ -25,9 +26,8 @@ public class RequestValidatorV2 {
         httpHeaders.put("sourceOrgId", clientId.split(Constant.TILD_SPLITTER)[0]);
         httpHeaders.put("sourceAppId", clientId.split(Constant.TILD_SPLITTER)[1]);
 
+        MicroserviceResponse response = securityClient.validate(request, httpHeaders, RequestValidationTypes.REQUEST.name());
 
-
-        MicroserviceResponse response =securityClient.validateExecutionRequestV2(request, httpHeaders);
         String userName = response.getResponse().toString();
 
         int size = RouterOperations.getStringArray(userName, Constant.TILD_SPLITTER).size();
@@ -40,7 +40,7 @@ public class RequestValidatorV2 {
 
         auditPayload.getRequestIdentifier().setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
 
-        response = securityClient.validateExecutionRequest(request, httpHeaders);
+        response = securityClient.validateExecutionRequestV2(request, httpHeaders);
 
         Map<String, String> customData = response.getCustomData();
 
