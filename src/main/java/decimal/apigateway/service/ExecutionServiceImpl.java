@@ -176,7 +176,10 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
+        log.info(" ==== inside execute request ==== ");
+        log.info(" ============= request body ============== " + request);
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
+
 
         Map<String, String> updatedHttpHeaders = requestValidator.validateRequest(request, httpHeaders,auditPayload);
 
@@ -200,6 +203,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
         MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
+
 
         String maskRequestBody=JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
         auditPayload.getRequest().setRequestBody(maskRequestBody);
