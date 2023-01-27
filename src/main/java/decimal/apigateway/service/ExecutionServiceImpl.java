@@ -533,7 +533,11 @@ public class ExecutionServiceImpl implements ExecutionService {
         List<String> services = discoveryClient.getServices();
 
         List<ServiceInstance> instances = discoveryClient.getInstances(serviceName.toLowerCase());
-
+        try {
+            log.info(" ======= services ======= " + objectMapper.writeValueAsString(instances));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         if(StringUtils.isEmpty(requestURI))
         {
             throw new RouterException(FAILURE_STATUS,Constant.INVALID_URI,null);
