@@ -133,7 +133,9 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setRequestBody(JsonMasker.maskMessage(request, maskKeys));
         auditPayload.getRequest().setHeaders(httpHeaders);
 
-
+        log.info(" ======= calling esb ======= ");
+        log.info(" ======= request ======= " + request);
+        log.info(" ======= headers ======= " + objectMapper.writeValueAsString(httpHeaders));
         ResponseEntity<Object> responseEntity= esbClient.executePlainRequest(request,httpHeaders);
 
          Object responseBody = responseEntity.getBody();

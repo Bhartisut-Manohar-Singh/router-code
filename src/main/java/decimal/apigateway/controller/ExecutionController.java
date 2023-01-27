@@ -47,7 +47,7 @@ public class ExecutionController
     @PostMapping(value = "dynamic-router/{serviceName}/**")
     public Object executeService(@RequestBody String request, HttpServletRequest httpServletRequest, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName) throws IOException, RouterException {
 
-        System.out.println("=============================Dynamic-router=============================");
+        System.out.println(" ========== Dynamic-router for service name ========== " + serviceName);
         return executionService.executeDynamicRequest(httpServletRequest, request, httpHeaders, serviceName);
     }
 
