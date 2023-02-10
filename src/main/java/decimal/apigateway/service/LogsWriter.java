@@ -2,12 +2,14 @@ package decimal.apigateway.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.constant.LogsIdentifier;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.Request;
 import decimal.logs.model.RequestIdentifier;
 import decimal.logs.model.Response;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import java.util.function.Predicate;
 
 import static decimal.apigateway.commons.Constant.MULTIPART;
 
+@Log
 @Service
 @RequestScope
 public class LogsWriter {
@@ -35,6 +38,9 @@ public class LogsWriter {
 
     @Value("${dynamic.router.default.servicename}")
     private String dynamicDefaultServiceName;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
 
     public AuditPayload initializeLog(String request,String requestType, Map<String, String> httpHeaders)
@@ -55,6 +61,7 @@ public class LogsWriter {
         auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().toEpochMilli() - auditPayload.getRequestTimestamp().toEpochMilli());
 
         AuditPayload auditPayloadFinal =new AuditPayload(auditPayload.getRequestTimestamp(),auditPayload.getResponseTimestamp(),auditPayload.getTimeTaken(),auditPayload.getRequest(),auditPayload.getResponse(),auditPayload.getStatus(),auditPayload.getRequestIdentifier(),auditPayload.isLogRequestAndResponse());
+        log.info(" ==== auditPayloadFinal ==== " + new Gson().toJson(auditPayloadFinal));
         logsConnector.audit(auditPayloadFinal);
     }
 
