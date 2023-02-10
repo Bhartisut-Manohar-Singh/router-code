@@ -3,6 +3,7 @@ package decimal.apigateway.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
@@ -146,7 +147,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         List<String> businessKeySet = getBusinessKey(responseBody);
         //auditPayload.getResponse().setResponse(JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys));
-        auditPayload.getResponse().setResponse(responseEntity.getBody());
+        auditPayload.getResponse().setResponse(new Gson().toJson(responseEntity.getBody()));
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
         auditPayload.getResponse().setTimestamp(Instant.now());
