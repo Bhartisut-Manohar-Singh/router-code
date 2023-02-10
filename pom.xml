@@ -86,9 +86,9 @@
         </dependency>
 
         <dependency>
-            <groupId>decimal</groupId>
-            <artifactId>logs-management</artifactId>
-            <version>3.5</version>
+          <groupId>decimal</groupId>
+          <artifactId>logs-management</artifactId>
+          <version>3.5</version>
         </dependency>
         <!--Log4j2 v2.17.0  -->
         <dependency>
