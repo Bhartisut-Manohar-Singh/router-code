@@ -146,7 +146,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             auditPayload.setStatus(responseHeaders.get("status").get(0));
 
         List<String> businessKeySet = getBusinessKey(responseBody);
-        log.info(" ===== response entity body ===== " + responseEntity.getBody());
+        log.info(" ===== response Body from esb ===== " + new Gson().toJson(responseBody));
         //auditPayload.getResponse().setResponse(JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys));
         auditPayload.getResponse().setResponse(new Gson().toJson(responseEntity.getBody()));
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
