@@ -145,7 +145,8 @@ public class ExecutionServiceImpl implements ExecutionService {
             auditPayload.setStatus(responseHeaders.get("status").get(0));
 
         List<String> businessKeySet = getBusinessKey(responseBody);
-        auditPayload.getResponse().setResponse(JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys));
+        //auditPayload.getResponse().setResponse(JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys));
+        auditPayload.getResponse().setResponse(responseEntity.getBody());
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
         auditPayload.getResponse().setTimestamp(Instant.now());
