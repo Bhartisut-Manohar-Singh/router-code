@@ -8,6 +8,7 @@ import decimal.logs.model.AuditPayload;
 import decimal.logs.model.Request;
 import decimal.logs.model.RequestIdentifier;
 import decimal.logs.model.Response;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import static decimal.apigateway.commons.Constant.MULTIPART;
 
 @Service
 @RequestScope
+@Log
 public class LogsWriter {
 
     @Autowired
@@ -99,7 +101,7 @@ public class LogsWriter {
                 String[] split = username.split("~");
                 requestIdentifier.setLoginId(split[2]);
             } catch (Exception ex) {
-                System.out.println("Unable to get login Id");
+                log.info("Unable to get login Id");
             }
         }
 

@@ -13,6 +13,7 @@ import decimal.apigateway.service.validator.RequestValidator;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +30,7 @@ import static decimal.apigateway.commons.Constant.JSON;
 
 @Service
 @CrossOrigin
+@Log
 public class RegistrationServiceImpl implements RegistrationService {
 
     private SecurityClient securityClient;
@@ -223,7 +225,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
         catch (Exception ex)
         {
-            System.out.println("Security Failure!!!!!");
+            log.info("Security Failure!!!!!");
         }
 
         httpHeaders.put("executionsource","API-GATEWAY");

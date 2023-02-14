@@ -471,7 +471,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     @Override
     public Object executeFileRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String mediaDataObjects, MultipartFile[] files) throws RouterException, IOException {
 
-        System.out.println("==========================================Inside DMS Service Layer=========================================" );
+        log.info("==========================================Inside DMS Service Layer=========================================" );
 
         auditPayload = logsWriter.initializeLog(mediaDataObjects,MULTIPART, httpHeaders);
 
@@ -506,12 +506,12 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
 
-        System.out.println("==========================================Calling DMS Upload Api=========================================" );
+        log.info("==========================================Calling DMS Upload Api=========================================" );
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         HttpHeaders responseHeaders= exchange.getHeaders();
-        System.out.println("==========================================Returned From DMS Upload Api=========================================" );
+        log.info("==========================================Returned From DMS Upload Api=========================================" );
 
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
         auditPayload.getResponse().setTimestamp(Instant.now());
