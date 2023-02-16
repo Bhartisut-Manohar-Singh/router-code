@@ -11,7 +11,6 @@ import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.RegistrationServiceV2;
 import decimal.apigateway.service.clients.AuthenticationClient;
 import decimal.apigateway.service.clients.SecurityClient;
-import decimal.apigateway.service.validator.RequestValidator;
 import decimal.apigateway.service.validator.RequestValidatorV2;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.masking.JsonMasker;
