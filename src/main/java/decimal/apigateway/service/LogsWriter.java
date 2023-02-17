@@ -2,12 +2,14 @@ package decimal.apigateway.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.constant.LogsIdentifier;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.Request;
 import decimal.logs.model.RequestIdentifier;
 import decimal.logs.model.Response;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

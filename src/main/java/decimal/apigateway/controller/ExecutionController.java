@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionService;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
 
+@Log
 @RestController
 @RequestMapping("engine/v1/")
 @CrossOrigin(exposedHeaders = { "custom_headers", "security-version", "hash", "authorization", "deviceid", "appid", "clientid", "loginid","deviceid", "nounce", "platform", "requestid", "requesttype", "apiname","orgid","servicename", "txnkey", "username", "content-type", "isforcelogin" , "auth_scheme","storageid"})
