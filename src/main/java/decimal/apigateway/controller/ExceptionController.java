@@ -15,6 +15,7 @@ import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.ErrorPayload;
 import decimal.logs.model.SystemError;
+import lombok.extern.java.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import static decimal.apigateway.commons.Constant.SUCCESS_STATUS;
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
 
 @RestControllerAdvice
+@Log
 public class ExceptionController {
 
     @Autowired
@@ -57,7 +59,7 @@ public class ExceptionController {
     @ExceptionHandler(value = RouterException.class)
     public ResponseEntity<Object> handleRouterException(RouterException ex) throws JsonProcessingException {
 
-        System.out.println("================================In Router Exception==============================");
+        log.info("================================In Router Exception==============================");
 
         boolean isLogoutSuccess = false;
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
@@ -100,7 +102,7 @@ public class ExceptionController {
 
     @ExceptionHandler(value =  HttpServerErrorException.class)
     public ResponseEntity<Object> handleHttpServerErrorException(HttpServerErrorException exception) throws JsonProcessingException {
-        System.out.println("================================In Exception Controller==============================");
+        log.info("================================In Exception Controller==============================");
         exception.printStackTrace();
 
         String errorResponse = exception.getResponseBodyAsString();
@@ -179,7 +181,7 @@ public class ExceptionController {
     public ResponseEntity<Object> handleException(Exception ex, HttpServletRequest req) throws JsonProcessingException {
         ERROR_LOGGER.error("Some error occurred in api-gateway", ex);
 
-        System.out.println("Is instance of RouterException " + (ex instanceof RouterException));
+        log.info("Is instance of RouterException " + (ex instanceof RouterException));
 
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("status", Constant.FAILURE_STATUS);

@@ -1,4 +1,4 @@
-package decimal.apigateway.service;
+package decimal.apigateway.service.executionImplV2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,10 +7,12 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
+import decimal.apigateway.service.ExecutionServiceV2;
+import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.clients.EsbClient;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
-import decimal.apigateway.service.validator.RequestValidator;
+import decimal.apigateway.service.validator.RequestValidatorV2;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.masking.JsonMasker;
@@ -32,20 +34,28 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static decimal.apigateway.commons.Constant.*;
-import static decimal.apigateway.enums.RequestValidationTypes.CLIENT_SECRET;
+import static decimal.apigateway.service.ExecutionServiceImpl.getBusinessKey;
 
 @Service
 @Log
-public class ExecutionServiceImpl implements ExecutionService {
+public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
     @Autowired
-    RequestValidator requestValidator;
+    RequestValidatorV2 requestValidatorV2;
+
+    @Autowired
+    AuditTraceFilter auditTraceFilter;
+
+    @Autowired
+    RestTemplate restTemplate;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Autowired
     EsbClient esbClient;
@@ -54,36 +64,83 @@ public class ExecutionServiceImpl implements ExecutionService {
     SecurityClient securityClient;
 
     @Autowired
-    ObjectMapper objectMapper;
+    AuditPayload auditPayload;
 
     @Autowired
     DiscoveryClient discoveryClient;
 
     @Autowired
-    AuditTraceFilter auditTraceFilter;
-
-    @Autowired
-    AuditPayload auditPayload;
-
-    @Autowired
     LogsWriter logsWriter;
-
-    @Autowired
-    RestTemplate restTemplate;
 
     @Value("${isHttpTracingEnabled}")
     boolean isHttpTracingEnabled;
 
     @Value("${server.servlet.context-path}")
     String path;
+    @Override
+    public Object executeRequest(String destinationAppId,String serviceNmae, String request, Map<String, String> httpHeaders) throws IOException, RouterException {
+        auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
+        Map<String, String> updatedHttpHeaders =requestValidatorV2.validateRequest(request, httpHeaders,auditPayload);
 
+        String logsRequired = updatedHttpHeaders.get("logsrequired");
+        String serviceLog = updatedHttpHeaders.get("serviceLogs");
+
+        String keysToMask = updatedHttpHeaders.get(Constant.KEYS_TO_MASK);
+        String logPurgeDays =  updatedHttpHeaders.get("logpurgedays");
+
+        auditTraceFilter.setPurgeDays(logPurgeDays);
+
+        List<String> maskKeys = new ArrayList<>();
+
+        if (keysToMask != null && !keysToMask.isEmpty()) {
+            String[] keysToMaskArr = keysToMask.split(",");
+            maskKeys = Arrays.asList(keysToMaskArr);
+        }
+
+        auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
+
+        JsonNode node = objectMapper.readValue(request, JsonNode.class);
+
+        MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
+
+        String maskRequestBody= JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
+        auditPayload.getRequest().setRequestBody(maskRequestBody);
+        updatedHttpHeaders.put("executionsource","API-GATEWAY");
+
+        ResponseEntity<Object> responseEntity = esbClient.executeRequestV2(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
+        HttpHeaders responseHeaders = responseEntity.getHeaders();
+
+        if(responseHeaders!=null && responseHeaders.containsKey("status"))
+            auditPayload.setStatus(responseHeaders.get("status").get(0));
+
+        List<String> businessKeySet = getBusinessKey(responseEntity.getBody());
+        String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys);
+        auditPayload.getResponse().setResponse(responseBody);
+        auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
+        httpHeaders.put("executionsource","API-GATEWAY");
+
+        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(responseEntity.getBody(), httpHeaders);
+
+        if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
+            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+
+            throw new RouterException(decryptedResponse.getResponse());
+        }
+        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
+        logsWriter.updateLog(auditPayload);
+
+        Map<String, String> finalResponseMap = new HashMap<>();
+        finalResponseMap.put("response", encryptedResponse.getMessage());
+
+        return finalResponseMap;
+
+    }
 
     @Override
-    public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
-
+    public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException{
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
-        MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
+        MicroserviceResponse microserviceResponse = requestValidatorV2.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
         JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
         Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"),HashMap.class);
         String isDigitallySigned = headers.get(IS_DIGITALLY_SIGNED);
@@ -112,7 +169,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             MicroserviceResponse decryptedResponse = securityClient.decryptRequestWithoutSession(("Y").equalsIgnoreCase(isPayloadEncrypted) ? node.get("request").asText() : request, httpHeaders);
 
             if(("Y").equalsIgnoreCase(isPayloadEncrypted))
-            request = decryptedResponse.getResponse().toString();
+                request = decryptedResponse.getResponse().toString();
         }
 
         String logsRequired = headers.get("logsrequired");
@@ -133,21 +190,17 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setRequestBody(JsonMasker.maskMessage(request, maskKeys));
         auditPayload.getRequest().setHeaders(httpHeaders);
 
-        log.info(" ======= calling esb ======= ");
-        log.info(" ======= request ======= " + request);
-        log.info(" ======= headers ======= " + objectMapper.writeValueAsString(httpHeaders));
+
         ResponseEntity<Object> responseEntity= esbClient.executePlainRequest(request,httpHeaders);
 
-         Object responseBody = responseEntity.getBody();
+        Object responseBody = responseEntity.getBody();
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
 
         List<String> businessKeySet = getBusinessKey(responseBody);
-        log.info(" ===== response Body from esb ===== " + new Gson().toJson(responseBody));
-        //auditPayload.getResponse().setResponse(JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys));
-        auditPayload.getResponse().setResponse(new Gson().toJson(responseEntity.getBody()));
+        auditPayload.getResponse().setResponse(JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys));
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
         auditPayload.getResponse().setTimestamp(Instant.now());
@@ -166,84 +219,13 @@ public class ExecutionServiceImpl implements ExecutionService {
         return responseBody;
     }
 
-    private static Map<String, String> setHeaders(Map<String, String> httpHeaders, Map<String, String> headers, String logsRequired, String serviceLog, String logPurgeDays) {
-        httpHeaders.put("logsrequired", logsRequired);
-        httpHeaders.put("serviceLogs", serviceLog);
-        httpHeaders.put("loginid", headers.getOrDefault("loginid",String.valueOf(LocalDateTime.now())));
-        httpHeaders.put("logpurgedays", logPurgeDays);
-        httpHeaders.put("keys_to_mask", headers.get("keys_to_mask"));
-        httpHeaders.put("executionsource","API-GATEWAY");
-
-        return httpHeaders;
-    }
-
-    @Override
-    public Object executeRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
-
-        auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
-
-        Map<String, String> updatedHttpHeaders = requestValidator.validateRequest(request, httpHeaders,auditPayload);
-
-        String logsRequired = updatedHttpHeaders.get("logsrequired");
-        String serviceLog = updatedHttpHeaders.get("serviceLogs");
-
-        String keysToMask = updatedHttpHeaders.get(Constant.KEYS_TO_MASK);
-        String logPurgeDays =  updatedHttpHeaders.get("logpurgedays");
-
-        auditTraceFilter.setPurgeDays(logPurgeDays);
-
-        List<String> maskKeys = new ArrayList<>();
-
-        if (keysToMask != null && !keysToMask.isEmpty()) {
-            String[] keysToMaskArr = keysToMask.split(",");
-            maskKeys = Arrays.asList(keysToMaskArr);
-        }
-
-        auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
-
-        JsonNode node = objectMapper.readValue(request, JsonNode.class);
-
-        MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
-
-        String maskRequestBody=JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
-        auditPayload.getRequest().setRequestBody(maskRequestBody);
-        updatedHttpHeaders.put("executionsource","API-GATEWAY");
-
-        ResponseEntity<Object> responseEntity = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
-        HttpHeaders responseHeaders = responseEntity.getHeaders();
-
-        if(responseHeaders!=null && responseHeaders.containsKey("status"))
-            auditPayload.setStatus(responseHeaders.get("status").get(0));
-
-        List<String> businessKeySet = getBusinessKey(responseEntity.getBody());
-        String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys);
-        auditPayload.getResponse().setResponse(responseBody);
-        auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
-        httpHeaders.put("executionsource","API-GATEWAY");
-
-        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(responseEntity.getBody(), httpHeaders);
-
-        if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
-            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
-
-            throw new RouterException(decryptedResponse.getResponse());
-        }
-        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
-        logsWriter.updateLog(auditPayload);
-
-        Map<String, String> finalResponseMap = new HashMap<>();
-        finalResponseMap.put("response", encryptedResponse.getMessage());
-
-        return finalResponseMap;
-    }
-
     @Override
     public Object executeDynamicRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
 
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
-        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders, auditPayload);
+        Map<String, String> updateHttpHeaders = requestValidatorV2.validateDynamicRequest(request, httpHeaders, auditPayload);
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
@@ -313,6 +295,112 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     }
 
+    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath, Boolean isDynamic) throws RouterException {
+
+        String contextPath = "";
+        int port = 0;
+
+        List<String> services = discoveryClient.getServices();
+
+        List<ServiceInstance> instances = discoveryClient.getInstances(serviceName.toLowerCase());
+
+        if(StringUtils.isEmpty(requestURI))
+        {
+            throw new RouterException(FAILURE_STATUS,Constant.INVALID_URI,null);
+        }
+
+        if (instances.isEmpty()) {
+            throw new RouterException(FAILURE_STATUS, "Service with name: " + serviceName + " is not registered with discovery server", null);
+        }
+
+        log.info(" ==== basePath ==== " + basePath);
+        String mapping = requestURI.replaceAll(basePath, "");
+
+        for (ServiceInstance serviceInstance : instances) {
+            Map<String, String> metadata = serviceInstance.getMetadata();
+            try {
+                log.info(" === metaData === " + objectMapper.writeValueAsString(metadata));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            port = serviceInstance.getPort();
+            contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
+            log.info(" ==== contextPath  ==== " + contextPath);
+            log.info(" ==== mapping ==== " + mapping);
+        }
+        if(isDynamic){
+            return "http://" + serviceName.toLowerCase() +":"+ port  + mapping;
+        }
+        return  "http://" + serviceName.toLowerCase() +":"+ port + contextPath + mapping;
+
+    }
+
+
+    @Override
+    public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, JsonProcessingException {
+
+        auditPayload=logsWriter.initializeLog(request,JSON,httpHeaders);
+        auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
+
+        requestValidatorV2.validatePlainDynamicRequest(request, httpHeaders);
+
+        HttpHeaders updateHttpHeaders = new HttpHeaders();
+        httpHeaders.forEach(updateHttpHeaders::set);
+
+
+        Request requestData=new Request();
+        Response responseData=new Response();
+        requestData.setTimestamp(Instant.now());
+        requestData.setRequestBody(objectMapper.writeValueAsString(request));
+        requestData.setHeaders(updateHttpHeaders.toSingleValueMap());
+        auditPayload.setRequest(requestData);
+
+        String basePath = path + "/engine/v2/dynamic-router/plain/" + serviceName;
+
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, true);
+
+        if (serviceUrl.contains("/service-executor/execute-plain"))
+        {
+            updateHttpHeaders.put("executionsource", Collections.singletonList("API-GATEWAY"));
+
+        }
+
+        log.info("===============================Dyanmic Router Plain URL==========================");
+        log.info(serviceUrl);
+
+        updateHttpHeaders.put("executionsource", Collections.singletonList("API-GATEWAY"));
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(request, updateHttpHeaders);
+
+        auditPayload.getRequestIdentifier().setArn(serviceUrl);
+
+        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
+
+        HttpHeaders responseHeaders = exchange.getHeaders();
+        MicroserviceResponse dynamicResponse = new MicroserviceResponse();
+
+        auditPayload.getResponse().setTimestamp(Instant.now());
+        if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
+            auditPayload.setStatus(SUCCESS_STATUS);
+            dynamicResponse.setStatus(SUCCESS_STATUS);
+            auditPayload.getResponse().setStatus("200");
+
+        } else {
+            auditPayload.setStatus(FAILURE_STATUS);
+            dynamicResponse.setStatus(FAILURE_STATUS);
+            auditPayload.getResponse().setStatus(String.valueOf(exchange.getStatusCode().value()));
+        }
+
+        dynamicResponse.setResponse(exchange.getBody());
+        responseData.setTimestamp(Instant.now());
+        responseData.setResponse(objectMapper.writeValueAsString(dynamicResponse));
+        auditPayload.setRequest(requestData);
+        auditPayload.setResponse(responseData);
+        LogsConnector.newInstance().audit(auditPayload);
+
+        return dynamicResponse;
+    }
+
     @Override
     public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
 
@@ -320,9 +408,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
 
-        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders,auditPayload);
+        Map<String, String> updateHttpHeaders = requestValidatorV2.validateDynamicRequest(request, httpHeaders,auditPayload);
 
-        String basePath = path + "/engine/v1/dynamic-router/upload-gateway/" + serviceName;
+        String basePath = path + "/engine/v2/dynamic-router/upload-gateway/" + serviceName;
 
         String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, false);
 
@@ -332,8 +420,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
         HttpHeaders headers = new HttpHeaders();
 
-        headers.add("orgId", updateHttpHeaders.get("orgid"));
-        headers.add("appId", updateHttpHeaders.get("appid"));
+        headers.add("sourceOrgId", updateHttpHeaders.get("sourceOrgId"));
+        headers.add("sourceAppId", updateHttpHeaders.get("sourceAppId"));
 
         body.add("uploadRequest", uploadRequest);
 
@@ -389,9 +477,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
 
-        Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders,auditPayload);
+        Map<String, String> updateHttpHeaders = requestValidatorV2.validateDynamicRequest(request, httpHeaders,auditPayload);
 
-        String basePath = path + "/engine/v1/dynamic-router/upload-file/" + serviceName;
+        String basePath = path + "/engine/v2/dynamic-router/upload-file/" + serviceName;
 
         String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, false);
 
@@ -418,12 +506,12 @@ public class ExecutionServiceImpl implements ExecutionService {
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
 
-        System.out.println("==========================================Calling DMS Upload Api=========================================" );
+        log.info("==========================================Calling DMS Upload Api=========================================" );
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         HttpHeaders responseHeaders= exchange.getHeaders();
-        System.out.println("==========================================Returned From DMS Upload Api=========================================" );
+        log.info("==========================================Returned From DMS Upload Api=========================================" );
 
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
         auditPayload.getResponse().setTimestamp(Instant.now());
@@ -457,149 +545,14 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
 
-    @Override
-    public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, JsonProcessingException {
+    private static Map<String, String> setHeaders(Map<String, String> httpHeaders, Map<String, String> headers, String logsRequired, String serviceLog, String logPurgeDays) {
+        httpHeaders.put("logsrequired", logsRequired);
+        httpHeaders.put("serviceLogs", serviceLog);
+        httpHeaders.put("loginid", headers.getOrDefault("loginid",String.valueOf(LocalDateTime.now())));
+        httpHeaders.put("logpurgedays", logPurgeDays);
+        httpHeaders.put("keys_to_mask", headers.get("keys_to_mask"));
+        httpHeaders.put("executionsource","API-GATEWAY");
 
-        auditPayload=logsWriter.initializeLog(request,JSON,httpHeaders);
-        auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
-
-        requestValidator.validatePlainDynamicRequest(request, httpHeaders);
-
-        HttpHeaders updateHttpHeaders = new HttpHeaders();
-        httpHeaders.forEach(updateHttpHeaders::set);
-
-
-        Request requestData=new Request();
-        Response responseData=new Response();
-        requestData.setTimestamp(Instant.now());
-        requestData.setRequestBody(objectMapper.writeValueAsString(request));
-        requestData.setHeaders(updateHttpHeaders.toSingleValueMap());
-        auditPayload.setRequest(requestData);
-
-        String basePath = path + "/engine/v1/dynamic-router/plain/" + serviceName;
-
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, true);
-
-        if (serviceUrl.contains("/service-executor/execute-plain"))
-        {
-            updateHttpHeaders.put("executionsource", Collections.singletonList("API-GATEWAY"));
-
-        }
-
-        log.info("===============================Dyanmic Router Plain URL==========================");
-        log.info(serviceUrl);
-
-        updateHttpHeaders.put("executionsource", Collections.singletonList("API-GATEWAY"));
-
-        HttpEntity<String> requestEntity = new HttpEntity<>(request, updateHttpHeaders);
-
-        auditPayload.getRequestIdentifier().setArn(serviceUrl);
-
-        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
-
-        HttpHeaders responseHeaders = exchange.getHeaders();
-         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
-
-        auditPayload.getResponse().setTimestamp(Instant.now());
-        if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
-            auditPayload.setStatus(SUCCESS_STATUS);
-            dynamicResponse.setStatus(SUCCESS_STATUS);
-            auditPayload.getResponse().setStatus("200");
-
-        } else {
-            auditPayload.setStatus(FAILURE_STATUS);
-            dynamicResponse.setStatus(FAILURE_STATUS);
-            auditPayload.getResponse().setStatus(String.valueOf(exchange.getStatusCode().value()));
-        }
-
-        dynamicResponse.setResponse(exchange.getBody());
-        responseData.setTimestamp(Instant.now());
-        responseData.setResponse(objectMapper.writeValueAsString(dynamicResponse));
-        auditPayload.setRequest(requestData);
-        auditPayload.setResponse(responseData);
-        LogsConnector.newInstance().audit(auditPayload);
-
-        return dynamicResponse;
+        return httpHeaders;
     }
-
-
-    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath, Boolean isDynamic) throws RouterException {
-
-        String contextPath = "";
-        int port = 0;
-
-        List<String> services = discoveryClient.getServices();
-
-        List<ServiceInstance> instances = discoveryClient.getInstances(serviceName.toLowerCase());
-        try {
-            log.info(" ======= services ======= " + objectMapper.writeValueAsString(instances));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        if(StringUtils.isEmpty(requestURI))
-        {
-            throw new RouterException(FAILURE_STATUS,Constant.INVALID_URI,null);
-        }
-
-        if (instances.isEmpty()) {
-            throw new RouterException(FAILURE_STATUS, "Service with name: " + serviceName + " is not registered with discovery server", null);
-        }
-
-        for (ServiceInstance serviceInstance : instances) {
-            Map<String, String> metadata = serviceInstance.getMetadata();
-            contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
-            log.info(" === context path === " + contextPath);
-            port = serviceInstance.getPort();
-        }
-
-        String mapping = requestURI.replaceAll(basePath, "");
-        log.info(" === mapping === " + mapping);
-        if (mapping.contains(contextPath)){
-            return "http://" + serviceName.toLowerCase() +":"+ port  + mapping;
-        }
-        return "http://" + serviceName + ":"+ port+  (contextPath == null ? "" : contextPath) + mapping;
-    }
-
-    public static List<String> getBusinessKey(Object response)
-    {
-        ObjectMapper objectMapper=new ObjectMapper();
-        Set<String> businessKeySet = new LinkedHashSet<>();
-        Map<String, Object> servicesMap=new LinkedHashMap<>();
-
-        try {
-            Map<String,Object> map = objectMapper.readValue(objectMapper.writeValueAsString(response), Map.class);
-
-
-            if(map.containsKey("services")) {
-                servicesMap = (Map<String, Object>) map.get("services");
-            }
-            else{
-                servicesMap = map;
-            }
-
-
-            servicesMap.forEach((key, value) ->
-            {
-                Map<String,Object> valueMap = (Map<String, Object>) value;
-                List<Map<String, Object>> recordsList = (List<Map<String, Object>>) valueMap.get("records");
-                recordsList.forEach(records -> {
-
-                            if (!StringUtils.isEmpty(records.get("primary_key")))
-                                Collections.addAll(businessKeySet, records.get("primary_key").toString().split("~"));
-
-                        }
-                );
-            });
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return new ArrayList<>(businessKeySet) ;
-
-    }
-
-
-
-
 }
