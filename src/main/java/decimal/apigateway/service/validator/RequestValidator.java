@@ -35,7 +35,7 @@ public class RequestValidator {
     }
 
     public Object validateRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterException {
-
+        log.info("=== calling validateRegistrationRequest to security client === " + new Gson().toJson(httpHeaders));
         return securityClient.validateRegistration(request, httpHeaders).getResponse();
     }
 
