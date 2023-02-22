@@ -82,6 +82,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
+        log.info("==== inside executePlainRequest ==== ");
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
@@ -145,8 +146,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
 
-        List<String> businessKeySet = getBusinessKey(responseBody);
         log.info(" ===== response Body from esb ===== " + new Gson().toJson(responseBody));
+        List<String> businessKeySet = getBusinessKey(responseBody);
         //auditPayload.getResponse().setResponse(JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys));
         auditPayload.getResponse().setResponse(new Gson().toJson(responseEntity.getBody()));
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
@@ -181,6 +182,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
+        log.info("==== inside execute request === ");
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         Map<String, String> updatedHttpHeaders = requestValidator.validateRequest(request, httpHeaders,auditPayload);
@@ -216,6 +218,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
 
+        log.info(" ===== response Body from esb ===== " + objectMapper.writeValueAsString(responseEntity.getBody()));
         List<String> businessKeySet = getBusinessKey(responseEntity.getBody());
         String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys);
         auditPayload.getResponse().setResponse(responseBody);
@@ -578,7 +581,7 @@ public class ExecutionServiceImpl implements ExecutionService {
                 servicesMap = map;
             }
 
-
+            log.info(" ==== serviceMap ====" + objectMapper.writeValueAsString(servicesMap));
             servicesMap.forEach((key, value) ->
             {
                 Map<String,Object> valueMap = (Map<String, Object>) value;
