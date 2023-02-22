@@ -67,6 +67,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
+        log.info(" ==== entering register with request === " + request);
         auditPayload = logsWriter.initializeLog(request,JSON, httpHeaders);
 
         auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
@@ -81,6 +82,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         httpHeaders.put("executionsource","API-GATEWAY");
 
+        log.info(" === calling authenticationClient === ");
         ResponseEntity<Object> responseEntity = authenticationClient.register(request, httpHeaders);
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
@@ -108,6 +110,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 httpHeaders.get("servicename"),
                 objectMapper.writeValueAsString(responseMap)).toString();
 
+        log.info(" === calling securityClient === ");
         MicroserviceResponse responseHash = securityClient.generateResponseHash(finalResponse, httpHeaders);
 
         response.addHeader("hash", responseHash.getMessage());
@@ -116,6 +119,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
 
         logsWriter.updateLog(auditPayload);
+        log.info(" ==== exiting register with response === " + finalResponse);
         return finalResponse;
     }
 
