@@ -2,6 +2,7 @@ package decimal.apigateway.service.validator;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.enums.RequestValidationTypes;
@@ -43,6 +44,7 @@ public class RequestValidator {
         httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
         httpHeaders.put("username", httpHeaders.get("clientid"));
 
+        log.info("=== calling validatePlainRequest to security client === " + new Gson().toJson(httpHeaders));
         return securityClient.validatePlainRequest(request, httpHeaders,serviceName);
 
     }
