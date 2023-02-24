@@ -80,7 +80,12 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     @Override
     public Object executeRequest(String destinationAppId,String serviceNmae, String request, Map<String, String> httpHeaders) throws IOException, RouterException {
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
+
+        log.info("V2: Calling security client to validate the request");
+
         Map<String, String> updatedHttpHeaders =requestValidatorV2.validateRequest(request, httpHeaders,auditPayload);
+
+        log.info("V2: security client validated the request");
 
         String logsRequired = updatedHttpHeaders.get("logsrequired");
         String serviceLog = updatedHttpHeaders.get("serviceLogs");
