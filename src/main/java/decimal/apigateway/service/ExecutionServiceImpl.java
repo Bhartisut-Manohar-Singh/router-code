@@ -82,6 +82,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
+        log.info("==== inside executePlainRequest ==== ");
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
@@ -134,7 +135,9 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setRequestBody(JsonMasker.maskMessage(request, maskKeys));
         auditPayload.getRequest().setHeaders(httpHeaders);
 
-
+        log.info(" ======= calling esb ======= ");
+        log.info(" ======= request ======= " + request);
+        log.info(" ======= headers ======= " + objectMapper.writeValueAsString(httpHeaders));
         ResponseEntity<Object> responseEntity= esbClient.executePlainRequest(request,httpHeaders);
 
          Object responseBody = responseEntity.getBody();
@@ -143,9 +146,10 @@ public class ExecutionServiceImpl implements ExecutionService {
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
 
+        log.info(" ===== response Body from esb ===== " + new Gson().toJson(responseBody));
         List<String> businessKeySet = getBusinessKey(responseBody);
-        log.info(" ========= response entity body =========== " + responseEntity.getBody());
-        auditPayload.getResponse().setResponse(responseEntity.getBody());
+        //auditPayload.getResponse().setResponse(JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys));
+        auditPayload.getResponse().setResponse(new Gson().toJson(responseEntity.getBody()));
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
         auditPayload.getResponse().setTimestamp(Instant.now());
@@ -178,6 +182,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Object executeRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
+        log.info("==== inside execute request === ");
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         Map<String, String> updatedHttpHeaders = requestValidator.validateRequest(request, httpHeaders,auditPayload);
@@ -213,6 +218,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
 
+        log.info(" ===== response Body from esb ===== " + objectMapper.writeValueAsString(responseEntity.getBody()));
         List<String> businessKeySet = getBusinessKey(responseEntity.getBody());
         String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys);
         auditPayload.getResponse().setResponse(responseBody);
@@ -416,12 +422,12 @@ public class ExecutionServiceImpl implements ExecutionService {
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
 
-        log.info("==========================================Calling DMS Upload Api=========================================" );
+        System.out.println("==========================================Calling DMS Upload Api=========================================" );
 
         ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         HttpHeaders responseHeaders= exchange.getHeaders();
-        log.info("==========================================Returned From DMS Upload Api=========================================" );
+        System.out.println("==========================================Returned From DMS Upload Api=========================================" );
 
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
         auditPayload.getResponse().setTimestamp(Instant.now());
@@ -529,7 +535,11 @@ public class ExecutionServiceImpl implements ExecutionService {
         List<String> services = discoveryClient.getServices();
 
         List<ServiceInstance> instances = discoveryClient.getInstances(serviceName.toLowerCase());
-
+        try {
+            log.info(" ======= services ======= " + objectMapper.writeValueAsString(instances));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         if(StringUtils.isEmpty(requestURI))
         {
             throw new RouterException(FAILURE_STATUS,Constant.INVALID_URI,null);
@@ -539,26 +549,19 @@ public class ExecutionServiceImpl implements ExecutionService {
             throw new RouterException(FAILURE_STATUS, "Service with name: " + serviceName + " is not registered with discovery server", null);
         }
 
-        log.info(" ==== basePath ==== " + basePath);
-        String mapping = requestURI.replaceAll(basePath, "");
-
         for (ServiceInstance serviceInstance : instances) {
             Map<String, String> metadata = serviceInstance.getMetadata();
-            try {
-                log.info(" === metaData === " + objectMapper.writeValueAsString(metadata));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-            port = serviceInstance.getPort();
             contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
-            log.info(" ==== contextPath  ==== " + contextPath);
-            log.info(" ==== mapping ==== " + mapping);
+            log.info(" === context path === " + contextPath);
+            port = serviceInstance.getPort();
         }
-        if(isDynamic){
+
+        String mapping = requestURI.replaceAll(basePath, "");
+        log.info(" === mapping === " + mapping);
+        if (mapping.contains(contextPath)){
             return "http://" + serviceName.toLowerCase() +":"+ port  + mapping;
         }
-        return  "http://" + serviceName.toLowerCase() +":"+ port + contextPath + mapping;
-
+        return "http://" + serviceName + ":"+ port+  (contextPath == null ? "" : contextPath) + mapping;
     }
 
     public static List<String> getBusinessKey(Object response)
@@ -578,7 +581,7 @@ public class ExecutionServiceImpl implements ExecutionService {
                 servicesMap = map;
             }
 
-
+            log.info(" ==== serviceMap ====" + objectMapper.writeValueAsString(servicesMap));
             servicesMap.forEach((key, value) ->
             {
                 Map<String,Object> valueMap = (Map<String, Object>) value;

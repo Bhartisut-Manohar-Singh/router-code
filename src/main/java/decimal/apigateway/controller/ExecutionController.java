@@ -13,10 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
 
+@Log
 @RestController
 @RequestMapping("engine/v1/")
 @CrossOrigin(exposedHeaders = { "custom_headers", "security-version", "hash", "authorization", "deviceid", "appid", "clientid", "loginid","deviceid", "nounce", "platform", "requestid", "requesttype", "apiname","orgid","servicename", "txnkey", "username", "content-type", "isforcelogin" , "auth_scheme","storageid"})
-@Log
 public class ExecutionController
 {
     @Autowired
@@ -24,7 +24,7 @@ public class ExecutionController
 
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
-        log.info("==============================Gateway Processor=============================");
+        System.out.println("==============================Gateway Processor=============================");
         return executionService.executePlainRequest(request, httpHeaders);
     }
 

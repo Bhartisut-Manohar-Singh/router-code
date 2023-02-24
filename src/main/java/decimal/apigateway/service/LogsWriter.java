@@ -22,9 +22,9 @@ import java.util.function.Predicate;
 
 import static decimal.apigateway.commons.Constant.MULTIPART;
 
+@Log
 @Service
 @RequestScope
-@Log
 public class LogsWriter {
 
     @Autowired
@@ -38,6 +38,9 @@ public class LogsWriter {
 
     @Value("${dynamic.router.default.servicename}")
     private String dynamicDefaultServiceName;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
 
     public AuditPayload initializeLog(String request,String requestType, Map<String, String> httpHeaders)
@@ -58,7 +61,7 @@ public class LogsWriter {
         auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().toEpochMilli() - auditPayload.getRequestTimestamp().toEpochMilli());
 
         AuditPayload auditPayloadFinal =new AuditPayload(auditPayload.getRequestTimestamp(),auditPayload.getResponseTimestamp(),auditPayload.getTimeTaken(),auditPayload.getRequest(),auditPayload.getResponse(),auditPayload.getStatus(),auditPayload.getRequestIdentifier(),auditPayload.isLogRequestAndResponse());
-        log.info(" ==== auditPayloadFinal ===== " + new Gson().toJson(auditPayloadFinal));
+        log.info(" ==== auditPayloadFinal ==== " + new Gson().toJson(auditPayloadFinal));
         logsConnector.audit(auditPayloadFinal);
     }
 
