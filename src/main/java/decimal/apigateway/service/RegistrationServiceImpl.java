@@ -191,6 +191,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(finalResponse, httpHeaders);
 
         if (!encryptedResponse.getStatus().equalsIgnoreCase(Constant.SUCCESS_STATUS)) {
+            auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            logsWriter.updateLog(auditPayload);
             return new ResponseEntity<>(authenticateResponse.getResponse(), HttpStatus.BAD_REQUEST);
         }
 
@@ -205,7 +207,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         finalResponseMap.put("response", encryptedResponse.getMessage());
 
         MicroserviceResponse authResponseHash = securityClient.generateAuthResponseHash(finalResponse.toString(), httpHeaders);
-
         response.addHeader("hash", authResponseHash.getMessage());
 
         node.put("hash", authResponseHash.getMessage());
