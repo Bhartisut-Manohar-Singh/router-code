@@ -64,7 +64,7 @@ public class RequestValidatorV2 {
         response = securityClient.validateExecutionRequestV2(request, httpHeaders);
 
         Map<String, String> customData = response.getCustomData();
-        httpHeaders.put("destinationOrgId",customData.get("destinationOrgId"));
+        httpHeaders.put("destinationorgid",customData.get("destinationOrgId"));
         httpHeaders.put("logsrequired", customData.get("appLogs"));
         httpHeaders.put("serviceLogs", customData.get("serviceLog"));
         httpHeaders.put(Constant.KEYS_TO_MASK, customData.get(Constant.KEYS_TO_MASK));

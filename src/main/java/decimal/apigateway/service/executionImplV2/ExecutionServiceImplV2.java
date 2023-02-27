@@ -122,6 +122,8 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys);
         auditPayload.getResponse().setResponse(responseBody);
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
+        auditPayload.getRequestIdentifier().setLogOrgId(updatedHttpHeaders.get("destinationorgid"));
+        auditPayload.getRequestIdentifier().setLogAppId(destinationAppId);
         httpHeaders.put("executionsource","API-GATEWAY");
 
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(responseEntity.getBody(), httpHeaders);
