@@ -557,10 +557,15 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         String mapping = requestURI.replaceAll(basePath, "");
-        log.info(" === mapping === " + mapping);
-        if (mapping.contains(contextPath)){
-            return "http://" + serviceName.toLowerCase() +":"+ port  + mapping;
+        if(contextPath!=null){
+            if (mapping.contains(contextPath)){
+                return "http://" + serviceName.toLowerCase() +":"+ port  + mapping;
+            }
         }
+        log.info(" === mapping === " + mapping);
+        /*if (mapping.contains(contextPath)){
+            return "http://" + serviceName.toLowerCase() +":"+ port  + mapping;
+        }*/
         return "http://" + serviceName + ":"+ port+  (contextPath == null ? "" : contextPath) + mapping;
     }
 

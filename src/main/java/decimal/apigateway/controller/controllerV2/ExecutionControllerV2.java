@@ -45,11 +45,16 @@ public class ExecutionControllerV2 {
     public Object executeRequest(@PathVariable(name = "destinationAppId") String destinationAppId,
                                  @PathVariable(name = "serviceName") String serviceName,
                                  @RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
-        log.info("======================Gateway=============================");
+        log.info("======================Gateway Execute V2 Called=============================");
         /*httpHeaders.put("sourceAppId", sourceAppId);
         httpHeaders.put("sourceOrgId", sourceOrgId);*/
         httpHeaders.put("destinationAppId", destinationAppId);
         httpHeaders.put("serviceName",serviceName);
+
+        log.info("Headers for v2 execute-----");
+        httpHeaders.forEach((k,v) -> log.info(k + "->" + v));
+
+
         return executionServiceV2.executeRequest(destinationAppId,serviceName, request, httpHeaders);
 
     }

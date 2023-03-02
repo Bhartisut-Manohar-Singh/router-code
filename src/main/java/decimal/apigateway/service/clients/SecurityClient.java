@@ -42,5 +42,5 @@ public interface SecurityClient
     MicroserviceResponse validatePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName);
 
     @PostMapping(value = Constant.API_SECURITY_MICRO_SERVICE + "/v2/validateExecutionRequest")
-    MicroserviceResponse validateExecutionRequestV2(@RequestBody String request, @RequestParam Map<String, String> httpHeaders);
+    MicroserviceResponse validateExecutionRequestV2(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
 }

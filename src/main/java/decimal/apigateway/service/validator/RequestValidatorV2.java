@@ -7,6 +7,7 @@ import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.logs.model.AuditPayload;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import static decimal.apigateway.enums.RequestValidationTypes.*;
 import static decimal.apigateway.enums.RequestValidationTypes.HASH;
 
 @Service
+@Log
 public class RequestValidatorV2 {
 
     private final SecurityClient securityClient;
@@ -37,9 +39,15 @@ public class RequestValidatorV2 {
         httpHeaders.put("sourceOrgId", clientId.split(Constant.TILD_SPLITTER)[0]);
         httpHeaders.put("sourceAppId", clientId.split(Constant.TILD_SPLITTER)[1]);
 
+        log.info("V2: Finally calling security client");
+
         MicroserviceResponse response = securityClient.validate(request, httpHeaders, RequestValidationTypes.REQUEST.name());
 
+        log.info("V2: Finally response returned by security client");
+
         String userName = response.getResponse().toString();
+
+        log.info("V2: username returned -- " + userName);
 
         int size = RouterOperations.getStringArray(userName, Constant.TILD_SPLITTER).size();
 
@@ -51,10 +59,12 @@ public class RequestValidatorV2 {
 
         auditPayload.getRequestIdentifier().setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
 
+        httpHeaders.forEach((k,v) -> log.info(k + "->" + v));
+
         response = securityClient.validateExecutionRequestV2(request, httpHeaders);
 
         Map<String, String> customData = response.getCustomData();
-        httpHeaders.put("destinationOrgId",customData.get("destinationOrgId"));
+        httpHeaders.put("destinationorgid",customData.get("destinationOrgId"));
         httpHeaders.put("logsrequired", customData.get("appLogs"));
         httpHeaders.put("serviceLogs", customData.get("serviceLog"));
         httpHeaders.put(Constant.KEYS_TO_MASK, customData.get(Constant.KEYS_TO_MASK));
