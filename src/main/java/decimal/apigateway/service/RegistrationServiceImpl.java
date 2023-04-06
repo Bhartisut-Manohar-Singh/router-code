@@ -29,7 +29,6 @@ import java.util.*;
 import static decimal.apigateway.commons.Constant.JSON;
 
 @Service
-@CrossOrigin
 @Log
 public class RegistrationServiceImpl implements RegistrationService {
 

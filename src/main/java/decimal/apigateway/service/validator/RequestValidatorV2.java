@@ -119,11 +119,11 @@ public class RequestValidatorV2 {
         }
     }
 
-    public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterException {
-        return securityClient.validateAuthentication(request, httpHeaders);
-    }
-
     public MicroserviceResponse validateLogout(String request, Map<String, String> httpHeaders) throws RouterException {
         return securityClient.validate(request, httpHeaders, RequestValidationTypes.REQUEST.name());
+    }
+
+    public MicroserviceResponse validateAuthenticationV2(String request, Map<String, String> httpHeaders) {
+        return securityClient.validateAuthenticationV2(request, httpHeaders);
     }
 }

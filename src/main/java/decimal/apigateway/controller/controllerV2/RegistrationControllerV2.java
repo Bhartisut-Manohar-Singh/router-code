@@ -13,10 +13,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("engine/v2/")
-@CrossOrigin(exposedHeaders = {"custom_headers", "security-version", "hash", "authorization", "deviceid", "sourceAppId", "clientid", "deviceid", "nounce", "platform", "requestid", "requesttype", "servicename", "txnkey", "username", "content-type", "isforcelogin", "auth_scheme","storageid"})
+@CrossOrigin(exposedHeaders = {"custom_headers", "security-version", "hash", "authorization", "deviceid", "sourceAppId", "clientid", "deviceid", "nounce", "platform", "requestid", "requesttype", "servicename", "txnkey", "username", "content-type", "isforcelogin", "auth_scheme","storageid", "imeinumber"})
 @Log
 public class RegistrationControllerV2 {
 
@@ -28,14 +29,59 @@ public class RegistrationControllerV2 {
     }
 
     @PostMapping("register")
-    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+    public Object executeService(@RequestBody String request,
+                                 @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+
+
+//        String serviceName = Objects.isNull(svcName) || svcName.isEmpty() ? httpHeaders.get("servicename") : svcName;
+//        log.info("Service Name: " + serviceName);
+//
+//        log.info("====================Call for register=============================");
+//        if (serviceName.contains("AUTH") || serviceName.contains("auth")) {
+//            httpHeaders.put("destinationappid", destinationAppId);
+//            httpHeaders.put("servicename",serviceName);
+//
+//            return registrationServiceV2.authenticate(request, httpHeaders, response, destinationAppId);
+//        }
 
         String serviceName = httpHeaders.get("servicename");
         log.info("Service Name: " + serviceName);
 
+        if(serviceName.equalsIgnoreCase("REGISTERAPP"))
+            return registrationServiceV2.register(request, httpHeaders, response);
+        else
+        {
+            String message = Constant.INVALID_SERVICE_NAME;
+            String status = Constant.FAILURE_STATUS;
+            MicroserviceResponse microserviceResponse = new MicroserviceResponse(status, message, "");
+
+            throw new RouterException(Constant.ROUTER_SERVICE_NOT_FOUND,  Constant.ROUTER_ERROR_TYPE_VALIDATION,microserviceResponse);
+
+        }
+
+        // return new ResponseEntity<>( Constant.ROUTER_SERVICE_NOT_FOUND
+//, HttpStatus.BAD_REQUEST);
+
+    }
+
+    @PostMapping("register/{destinationAppId}/{serviceName}")
+    public Object executeService(@PathVariable(name = "destinationAppId") String destinationAppId,
+                                 @PathVariable(name = "serviceName") String svcName,
+                                 @RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+
+        log.info("(Register) Destination app id : "+ destinationAppId);
+        log.info("(Register) Service name : "+ svcName);
+
+        String serviceName = Objects.isNull(svcName) || svcName.isEmpty() ? httpHeaders.get("servicename") : svcName;
+        log.info("Service Name: " + serviceName);
+
         log.info("====================Call for register=============================");
-        if (serviceName.contains("AUTH") || serviceName.contains("auth"))
-            return registrationServiceV2.authenticate(request, httpHeaders, response);
+        if (serviceName.contains("AUTH") || serviceName.contains("auth")) {
+            httpHeaders.put("destinationappid", destinationAppId);
+            httpHeaders.put("servicename",serviceName);
+
+            return registrationServiceV2.authenticate(request, httpHeaders, response, destinationAppId);
+        }
         else if(serviceName.equalsIgnoreCase("REGISTERAPP"))
             return registrationServiceV2.register(request, httpHeaders, response);
         else
@@ -53,10 +99,16 @@ public class RegistrationControllerV2 {
 
     }
 
-    @PostMapping("authenticate")
-    public Object authenticate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+    @PostMapping("authenticate/{destinationAppId}/{serviceName}")
+    public Object authenticate(@PathVariable(required = false, name = "destinationAppId") String destinationAppId,
+                               @PathVariable(required = false, name = "serviceName") String svcName,
+                               @RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
         log.info("====================Call for authenticate=============================");
-        return registrationServiceV2.authenticate(request, httpHeaders, response);
+        String serviceName = Objects.isNull(svcName) || svcName.isEmpty() ? httpHeaders.get("servicename") : svcName;
+
+        httpHeaders.put("destinationappid", destinationAppId);
+        httpHeaders.put("servicename",serviceName);
+        return registrationServiceV2.authenticate(request, httpHeaders, response, destinationAppId);
     }
 
     @PostMapping("logout")
