@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.ResponseOperations;
+import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.LogsWriter;
@@ -121,16 +122,19 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
     }
 
     @Override
-    public Object  authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
-
+    public Object  authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response, String destinationAppId) throws IOException, RouterException {
+        log.info("Authenticate v2 called for  - " + request + " and dAppId - " + destinationAppId);
         auditPayload = logsWriter.initializeLog(request,JSON, httpHeaders);
 
-        MicroserviceResponse microserviceResponse = requestValidatorV2.validateAuthentication(request, httpHeaders);
+        MicroserviceResponse microserviceResponse = requestValidatorV2.validateAuthenticationV2(request, httpHeaders);
+
+        log.info("Response returned by validate authentication - " + microserviceResponse);
 
         httpHeaders.put("username", microserviceResponse.getMessage());
 
         Map<String, String> customData = microserviceResponse.getCustomData();
 
+        String destinationOrgId = "";
         if(customData != null)
         {
             String logsRequired = customData.get("appLogs");
@@ -142,7 +146,7 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
             httpHeaders.put("servicelogs", serviceLog);
             httpHeaders.put("logpurgedays",logPurgeDays);
             auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
-
+            destinationOrgId = customData.getOrDefault("destinationOrgId", "");
         }
         else
             auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
@@ -167,7 +171,16 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
 
         httpHeaders.put("executionsource","API-GATEWAY");
 
-        ResponseEntity<Object> responseEntity = authenticationClient.authenticate(plainRequest, httpHeaders);
+
+        log.info("Now updating org and app id headers to destination org - " + destinationOrgId + " and dAPP id - " + destinationAppId);
+        httpHeaders.put(Headers.orgid.name(), destinationOrgId);
+        httpHeaders.put(Headers.appid.name(), destinationAppId);
+        httpHeaders.put("destinationorgid", destinationOrgId);
+
+        log.info("Calling authentication service.....");
+        ResponseEntity<Object> responseEntity = authenticationClient.authenticateV2(plainRequest, httpHeaders);
+
+        log.info("Response returned by authentication service -- " + responseEntity);
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
@@ -185,6 +198,8 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
         String maskedResponse = JsonMasker.maskMessage(finalResponse.toString(), maskKeys);
         auditPayload.getResponse().setResponse(maskedResponse);
 
+        log.info("Encrypting response...");
+
         MicroserviceResponse encryptedResponse = securityClient.encryptResponse(finalResponse, httpHeaders);
 
         if (!encryptedResponse.getStatus().equalsIgnoreCase(Constant.SUCCESS_STATUS)) {
@@ -201,6 +216,8 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
 
+        log.info("Encrypting response hash.....");
+
         MicroserviceResponse authResponseHash = securityClient.generateAuthResponseHash(finalResponse.toString(), httpHeaders);
 
         response.addHeader("hash", authResponseHash.getMessage());
@@ -208,8 +225,12 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
         node.put("hash", authResponseHash.getMessage());
 
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
+        auditPayload.getRequestIdentifier().setLogOrgId(destinationOrgId);
+        auditPayload.getRequestIdentifier().setLogAppId(destinationAppId);
 
         logsWriter.updateLog(auditPayload);
+
+        log.info("Returning final response map");
 
         return finalResponseMap;
     }
