@@ -175,6 +175,7 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
         log.info("Now updating org and app id headers to destination org - " + destinationOrgId + " and dAPP id - " + destinationAppId);
         httpHeaders.put(Headers.orgid.name(), destinationOrgId);
         httpHeaders.put(Headers.appid.name(), destinationAppId);
+        httpHeaders.put("destinationorgid", destinationOrgId);
 
         log.info("Calling authentication service.....");
         ResponseEntity<Object> responseEntity = authenticationClient.authenticateV2(plainRequest, httpHeaders);
