@@ -225,6 +225,8 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
         node.put("hash", authResponseHash.getMessage());
 
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
+        auditPayload.getRequestIdentifier().setLogOrgId(destinationOrgId);
+        auditPayload.getRequestIdentifier().setLogAppId(destinationAppId);
 
         logsWriter.updateLog(auditPayload);
 
