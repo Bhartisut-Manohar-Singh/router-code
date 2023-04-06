@@ -65,8 +65,8 @@ public class RegistrationControllerV2 {
     }
 
     @PostMapping("register/{destinationAppId}/{serviceName}")
-    public Object executeService(@PathVariable(required = false, name = "destinationAppId") String destinationAppId,
-                                 @PathVariable(required = false, name = "serviceName") String svcName,
+    public Object executeService(@PathVariable(name = "destinationAppId") String destinationAppId,
+                                 @PathVariable(name = "serviceName") String svcName,
                                  @RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
         log.info("(Register) Destination app id : "+ destinationAppId);
