@@ -28,6 +28,42 @@ public class RegistrationControllerV2 {
         this.registrationServiceV2 = registrationServiceV2;
     }
 
+    @PostMapping("register")
+    public Object executeService(@RequestBody String request,
+                                 @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+
+
+//        String serviceName = Objects.isNull(svcName) || svcName.isEmpty() ? httpHeaders.get("servicename") : svcName;
+//        log.info("Service Name: " + serviceName);
+//
+//        log.info("====================Call for register=============================");
+//        if (serviceName.contains("AUTH") || serviceName.contains("auth")) {
+//            httpHeaders.put("destinationappid", destinationAppId);
+//            httpHeaders.put("servicename",serviceName);
+//
+//            return registrationServiceV2.authenticate(request, httpHeaders, response, destinationAppId);
+//        }
+
+        String serviceName = httpHeaders.get("servicename");
+        log.info("Service Name: " + serviceName);
+
+        if(serviceName.equalsIgnoreCase("REGISTERAPP"))
+            return registrationServiceV2.register(request, httpHeaders, response);
+        else
+        {
+            String message = Constant.INVALID_SERVICE_NAME;
+            String status = Constant.FAILURE_STATUS;
+            MicroserviceResponse microserviceResponse = new MicroserviceResponse(status, message, "");
+
+            throw new RouterException(Constant.ROUTER_SERVICE_NOT_FOUND,  Constant.ROUTER_ERROR_TYPE_VALIDATION,microserviceResponse);
+
+        }
+
+        // return new ResponseEntity<>( Constant.ROUTER_SERVICE_NOT_FOUND
+//, HttpStatus.BAD_REQUEST);
+
+    }
+
     @PostMapping("register/{destinationAppId}/{serviceName}")
     public Object executeService(@PathVariable(required = false, name = "destinationAppId") String destinationAppId,
                                  @PathVariable(required = false, name = "serviceName") String svcName,
