@@ -25,13 +25,13 @@ public class RateLimiterConfigController {
     }
 
     @PatchMapping
-    private RateLimiter updateRateLimiter(@RequestParam String key, @RequestParam int value){
+    public RateLimiter updateRateLimiter(@RequestParam String key, @RequestParam int value){
         log.info("updating rate limit for key - " + key + " with value - " + value);
         return rateLimitManager.updateRateLimit(key, value);
     }
 
     @DeleteMapping
-    private RateLimiter deleteRateLimiter(@RequestParam String key){
+    public RateLimiter deleteRateLimiter(@RequestParam String key){
         log.info("Deleting rate limit for key - " + key);
         return rateLimitManager.deleteRateLimiter(key);
     }
