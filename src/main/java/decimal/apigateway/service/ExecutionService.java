@@ -12,6 +12,8 @@ public interface ExecutionService {
 
     Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException;
 
+    Object executeMultiPart(String request, Map<String, String> httpHeaders) throws RouterException, IOException;
+
     Object executeRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException;
 
     Object executeDynamicRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException;
