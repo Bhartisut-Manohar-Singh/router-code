@@ -32,4 +32,12 @@ public class Constant {
     public static final String ROUTER_HEADER_SECURITY_VERSION = "security-version";
 
     public static final String ROUTER_SERVICE_NOT_FOUND = "Service Name Not Found";
+
+    public static final String ORG_ID = "orgid";
+
+    public static final String APP_ID = "appid";
+
+    public static final String CLIENT_ID = "clientid";
+
+    public static final String ROUTER_HEADER_SOURCE_IP = "X-FORWARDED-FOR";
 }
