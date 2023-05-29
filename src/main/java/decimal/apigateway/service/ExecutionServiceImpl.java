@@ -187,7 +187,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setHeaders(httpHeaders);
 
 
-        ResponseEntity<Object> responseEntity= esbClient.executeMultipart(request,httpHeaders);
+        ResponseEntity<byte[]> responseEntity= esbClient.executeMultipart(request,httpHeaders);
 
         Object responseBody = responseEntity.getBody();
 
