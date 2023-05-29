@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
+import static decimal.apigateway.commons.Constant.INVALID_REQUEST_500;
+
 @RestController
 @RequestMapping("engine/v3/")
 @CrossOrigin(exposedHeaders = {"custom_headers", "security-version", "hash", "authorization", "deviceid", "sourceAppId", "clientid", "deviceid", "nounce", "platform", "requestid", "requesttype", "servicename", "txnkey", "username", "content-type", "isforcelogin", "auth_scheme","storageid", "imeinumber"})
@@ -44,6 +46,12 @@ public class RegistrationControllerV3 {
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws  IOException, RouterException {
         log.info("==============================Public Gateway Processor=============================");
+        String authorizationToken = httpHeaders.get("authorization");
+
+        if (authorizationToken == null || !authorizationToken.startsWith("Bearer")) {
+            throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
+        }
+
         return executionService.executePlainRequest(request, httpHeaders);
     }
 
