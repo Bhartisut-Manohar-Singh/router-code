@@ -29,7 +29,7 @@ public class ExecutionController
     @PostMapping("/execute/multipart")
     public Object executeMultipart(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         System.out.println("==============================Gateway Processor=============================");
-        return executionService.executePlainRequest(request, httpHeaders);
+        return executionService.executeMultiPart(request, httpHeaders);
     }
 
     @PostMapping("execute/{orgId}/{appId}/{serviceName}/{version}")
