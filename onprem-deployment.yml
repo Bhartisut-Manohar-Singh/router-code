@@ -34,16 +34,39 @@ data:
     server.compression.mime-types=application/json,application/xml,text/html,text/xml,text/plain
 
     server.servlet.context-path=/router
-    eureka.client.service-url.defaultZone=http://discovery-server:8761/eureka
-    eureka.instance.prefer-ip-address=true
-    eureka.instance.lease-renewal-interval-in-seconds=2
-    eureka.instance.lease-expiration-duration-in-seconds=5
-    eureka.client.registry-fetch-interval-seconds=5
-    #eureka.client.enabled=false
-
-
+    spring.cloud.consul.discovery.enabled=true
+    spring.cloud.consul.discovery.register=true
+    spring.cloud.consul.discovery.deregister=false
+    spring.cloud.consul.discovery.health-check-path=/router/actuator/health
+    spring.cloud.consul.discovery.health-check-interval=3s
+    spring.cloud.consul.discovery.health-check-timeout=3s
+    spring.cloud.consul.discovery.health-check-critical-timeout=5s
+    spring.cloud.consul.discovery.scheme=http
+    spring.cloud.consul.discovery.health-check-tls-skip-verify=true
+    spring.cloud.consul.discovery.prefer-ip-address=true
+    spring.cloud.consul.discovery.register-health-check=true
+    spring.cloud.consul.port=8500
+    spring.cloud.consul.host=consul-headless
+  
+    spring.kafka.producer.bootstrap-servers = kafka1:9092
+    spring.kafka.producer.key-serializer = org.apache.kafka.common.serialization.StringSerializer
+    spring.kafka.producer.value-serializer = decimal.logs.serializer.CustomSerializer
+    spring.kafka.producer.properties.max.request.size = 10000000
+  
+    #Feign Properties
+    feign.httpclient.maxConnections= 10
+    feign.httpclient.maxConnectionsPerRoute = 5
+    feign.client.config.default.connectTimeout= 30000
+    feign.client.config.default.readTimeout= 30000
+  
     feign.client.config.default.logger-level=FULL
-
+  
+    # Connection Pool Details for HTTP
+    maxConnectionPerRoute=5
+    maxHttpConnections=10
+    connectionTimeout = 30000
+    readTimeout  =  30000
+  
     # MULTIPART (MultipartProperties)
     # Enable multipart uploads
     spring.servlet.multipart.enabled=true
@@ -53,7 +76,7 @@ data:
     spring.servlet.multipart.max-file-size=1000MB
     # Max Request Size
     spring.servlet.multipart.max-request-size=1000MB
-
+  
     # Add Micrometer Config
     management.endpoint.metrics.enabled=true
     management.endpoints.web.exposure.include=*
@@ -70,20 +93,10 @@ data:
 
     dynamic.router.default.servicename = DYNAMIC_SERVICE_REQUEST
     dms.default.servicename = DMS_SERVICE_REQUEST
-
     logging-agent-url=http://logging-agent:9051
-    
-    #Feign Properties
-    feign.httpclient.maxConnections= 50
-    feign.httpclient.maxConnectionsPerRoute = 25
-    feign.client.config.default.connectTimeout= 120000
-    feign.client.config.default.readTimeout= 120000
-
-    # Connection Pool Details for HTTP
-    maxConnectionPerRoute=25
-    maxHttpConnections=50
-    connectionTimeout = 30000
-    readTimeout  =  30000
+  
+  
+    print.logs.on.console = N
 
 
 
