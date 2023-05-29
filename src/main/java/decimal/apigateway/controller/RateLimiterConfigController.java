@@ -24,7 +24,7 @@ public class RateLimiterConfigController {
         rmConfigRepo.save(master);
     }
 
-    @PatchMapping
+    @PutMapping
     public RateLimiter updateRateLimiter(@RequestParam String key, @RequestParam int value){
         log.info("updating rate limit for key - " + key + " with value - " + value);
         return rateLimitManager.updateRateLimit(key, value);
