@@ -48,5 +48,6 @@ public interface SecurityClient
     MicroserviceResponse validateExecutionRequestV2(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
 
     @PostMapping(value =  Constant.API_SECURITY_MICRO_SERVICE + "/validatePublicRegistration")
-    Object validatePublicRegistration(String request, Map<String, String> httpHeaders);
+    MicroserviceResponse validatePublicRegistration(@RequestBody String requestBody, @RequestHeader Map<String, String> httpHeaders);
+
 }
