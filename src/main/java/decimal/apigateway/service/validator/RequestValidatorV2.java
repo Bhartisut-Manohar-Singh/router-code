@@ -126,4 +126,15 @@ public class RequestValidatorV2 {
     public MicroserviceResponse validateAuthenticationV2(String request, Map<String, String> httpHeaders) {
         return securityClient.validateAuthenticationV2(request, httpHeaders);
     }
+
+    public Object validatePublicRegistrationRequest(String request, Map<String, String> httpHeaders) {
+
+        return securityClient.validatePublicRegistration(request, httpHeaders);
+    }
+
+    public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) {
+        return securityClient.validateAuthentication(request, httpHeaders);
+    }
+
+
 }

@@ -29,4 +29,6 @@ public interface AuthenticationClient {
     @GetMapping(value = Constant.AUTHENTICATION_MICRO_SERVICE + "/forceLogout")
     ResponseEntity<Object> forceLogout(Map<String, String> httpHeaders);
 
+    @PostMapping(value = Constant.AUTHENTICATION_MICRO_SERVICE + "/publicRegister")
+    ResponseEntity<Object> publicRegister(String request, Map<String, String> httpHeaders);
 }
