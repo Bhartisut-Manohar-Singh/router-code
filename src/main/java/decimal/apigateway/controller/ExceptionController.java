@@ -15,7 +15,7 @@ import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.ErrorPayload;
 import decimal.logs.model.SystemError;
-import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import decimal.ratelimiter.exception.RequestNotPermitted;
 import lombok.extern.java.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
