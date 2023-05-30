@@ -114,7 +114,6 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
         node.put("Authorization", "Bearer " + jwtToken);
 
-
         return responseOperations.prepareResponseObject(httpHeaders.get("requestid"),
                 httpHeaders.get("servicename"), objectMapper.writeValueAsString(new HashMap<>())).toString();
     }
