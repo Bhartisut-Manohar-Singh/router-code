@@ -15,6 +15,7 @@ import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.ErrorPayload;
 import decimal.logs.model.SystemError;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import lombok.extern.java.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,4 +203,11 @@ public class ExceptionController {
 
         return new ResponseEntity<>(errorResponse, responseHeaders,HttpStatus.BAD_REQUEST);
     }*/
+
+    @ExceptionHandler(value = RequestNotPermitted.class)
+    public ResponseEntity<Object> handleRouterException(RequestNotPermitted ex) throws JsonProcessingException {
+        log.info("Inside request not permission exception handler");
+
+        return new ResponseEntity<>(ex.getMessage(), null, HttpStatus.TOO_MANY_REQUESTS);
+    }
 }
