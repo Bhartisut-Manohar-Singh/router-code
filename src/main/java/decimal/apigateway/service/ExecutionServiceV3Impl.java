@@ -165,6 +165,57 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         return responseBody;
     }
 
+    @Override
+    public Object executeMultiPart(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
+
+        auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
+
+        MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
+        JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
+        Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"),HashMap.class);
+
+        String logsRequired = headers.get("logsrequired");
+        String serviceLog = headers.get("serviceLog");
+        String keysToMask = headers.get("keys_to_mask");
+        String logPurgeDays =  headers.get("logpurgedays");
+
+        auditTraceFilter.setPurgeDays(logPurgeDays);
+        httpHeaders = setHeaders(httpHeaders, headers, logsRequired, serviceLog, logPurgeDays);
+        List<String> maskKeys = new ArrayList<>();
+
+        if (keysToMask != null && !keysToMask.isEmpty()) {
+            String[] keysToMaskArr = keysToMask.split(",");
+            maskKeys = Arrays.asList(keysToMaskArr);
+        }
+
+        auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
+        auditPayload.getRequest().setRequestBody(JsonMasker.maskMessage(request, maskKeys));
+        auditPayload.getRequest().setHeaders(httpHeaders);
+
+
+        ResponseEntity<byte[]> responseEntity= esbClient.executeMultipart(request,httpHeaders);
+
+        Object responseBody = responseEntity.getBody();
+
+        HttpHeaders responseHeaders = responseEntity.getHeaders();
+        if(responseHeaders!=null && responseHeaders.containsKey("status"))
+            auditPayload.setStatus(responseHeaders.get("status").get(0));
+
+        Map<String,String> responseMap = new HashMap<>();
+        responseMap.put("response","Response is Multipart");
+        List<String> businessKeySet = getBusinessKey(responseBody);
+        auditPayload.getResponse().setResponse(responseBody instanceof  byte [] ? objectMapper.writeValueAsString(responseMap) : objectMapper.writeValueAsString(responseBody));
+        auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
+        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
+        auditPayload.getResponse().setTimestamp(Instant.now());
+
+        logsWriter.updateLog(auditPayload);
+
+
+        return responseBody;
+    }
+
+
     private static Map<String, String> setHeaders(Map<String, String> httpHeaders, Map<String, String> headers, String logsRequired, String serviceLog, String logPurgeDays) {
         httpHeaders.put("logsrequired", logsRequired);
         httpHeaders.put("serviceLogs", serviceLog);
