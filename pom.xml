@@ -126,6 +126,12 @@
             <artifactId>json-path</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>decimal</groupId>
+            <artifactId>rate-limiter</artifactId>
+            <version>4.1.4.SNAP</version>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>
