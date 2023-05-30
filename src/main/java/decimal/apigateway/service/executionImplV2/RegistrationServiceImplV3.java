@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.ResponseOperations;
 import decimal.apigateway.commons.RouterOperations;
+import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.LogsWriter;
@@ -81,6 +82,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
         httpHeaders.put(Constant.LOGIN_ID, tokenDetails.get(0));
         httpHeaders.put(Constant.CLIENT_SECRET, tokenDetails.get(1));
+        httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
 
 
         ObjectNode jsonNodes = objectMapper.convertValue(requestValidatorV2.validatePublicRegistrationRequest(request, httpHeaders), ObjectNode.class);

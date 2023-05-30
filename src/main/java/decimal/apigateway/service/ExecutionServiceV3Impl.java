@@ -77,6 +77,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
 
         String clientId = httpHeaders.get(Constant.ORG_ID) + Constant.TILD_SPLITTER + httpHeaders.get(Constant.APP_ID);
         httpHeaders.put(Constant.CLIENT_ID, clientId);
+        httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
 
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
 
