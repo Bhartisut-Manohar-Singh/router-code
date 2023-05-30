@@ -114,9 +114,8 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
         node.put("Authorization", "Bearer " + jwtToken);
 
-
         return responseOperations.prepareResponseObject(httpHeaders.get("requestid"),
-                httpHeaders.get("servicename"), null).toString();
+                httpHeaders.get("servicename"), objectMapper.writeValueAsString(new HashMap<>())).toString();
     }
 
     private List<String> fetchTokenDetails(Map<String, String> httpHeaders) throws RouterException {
