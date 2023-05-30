@@ -3,6 +3,7 @@ package decimal.apigateway.controller.V3;
 
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionService;
+import decimal.apigateway.service.ExecutionServiceV3;
 import decimal.apigateway.service.RegistrationServiceV3;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,10 @@ public class RegistrationControllerV3 {
 
     private final RegistrationServiceV3 registrationServiceV3;
 
-    private final ExecutionService executionService;
+    private final ExecutionServiceV3 executionService;
 
     @Autowired
-    public RegistrationControllerV3(RegistrationServiceV3 registrationServiceV3, ExecutionService executionService) {
+    public RegistrationControllerV3(RegistrationServiceV3 registrationServiceV3, ExecutionServiceV3 executionService) {
         this.registrationServiceV3 = registrationServiceV3;
         this.executionService = executionService;
     }
