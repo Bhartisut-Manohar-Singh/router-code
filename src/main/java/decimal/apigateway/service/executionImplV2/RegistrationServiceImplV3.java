@@ -83,6 +83,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
         httpHeaders.put(Constant.LOGIN_ID, tokenDetails.get(0));
         httpHeaders.put(Constant.CLIENT_SECRET, tokenDetails.get(1));
         httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
+        httpHeaders.put(Headers.servicename.name(), "REGISTERAPP");
 
 
         ObjectNode jsonNodes = objectMapper.convertValue(requestValidatorV2.validatePublicRegistrationRequest(request, httpHeaders), ObjectNode.class);
