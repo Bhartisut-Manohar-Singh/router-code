@@ -129,7 +129,7 @@
         <dependency>
             <groupId>decimal</groupId>
             <artifactId>rate-limiter</artifactId>
-            <version>4.1.5.SNAP</version>
+            <version>4.1.6.SNAP</version>
         </dependency>
 
     </dependencies>
