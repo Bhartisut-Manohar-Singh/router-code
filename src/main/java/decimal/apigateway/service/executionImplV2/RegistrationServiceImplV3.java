@@ -87,8 +87,6 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
         log.info("Response from Step 1 ....." + jsonNodes);
 
-//        auditPayload.getRequest().setRequestBody(request);
-
         httpHeaders.put("executionsource","API-GATEWAY");
 
         log.info("Executing Step 2 to Generate token.....");
@@ -105,8 +103,6 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
         Map<String, Object> rsaKeysMap = objectMapper.convertValue(registerResponse.getResponse(), new TypeReference<Map<String, Object>>() {
         });
 
-//        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(registerResponse.getResponse()));
-
         String jwtToken = String.valueOf(rsaKeysMap.get("jwtToken"));
 
         ObjectNode node = objectMapper.createObjectNode();
@@ -115,22 +111,9 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
         node.put("Authorization", "Bearer " + jwtToken);
 
-        Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("rsa", objectMapper.writeValueAsString(rsaKeysMap));
 
-        String finalResponse = responseOperations.prepareResponseObject(httpHeaders.get("requestid"),
-                httpHeaders.get("servicename"),
-                objectMapper.writeValueAsString(responseMap)).toString();
-
-//        MicroserviceResponse responseHash = securityService.generateResponseHash(finalResponse, httpHeaders);
-//
-//        response.addHeader("hash", responseHash.getMessage());
-//        node.put("hash", responseHash.getMessage());
-
-//        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
-
-//        logsWriter.updateLog(auditPayload);
-        return finalResponse;
+        return responseOperations.prepareResponseObject(httpHeaders.get("requestid"),
+                httpHeaders.get("servicename"), "JWT token created successfully").toString();
     }
 
     private List<String> fetchTokenDetails(Map<String, String> httpHeaders) throws RouterException {
