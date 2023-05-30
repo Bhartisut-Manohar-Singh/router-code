@@ -115,7 +115,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
 
         return responseOperations.prepareResponseObject(httpHeaders.get("requestid"),
-                httpHeaders.get("servicename"), "JWT token created successfully").toString();
+                httpHeaders.get("servicename"), null).toString();
     }
 
     private List<String> fetchTokenDetails(Map<String, String> httpHeaders) throws RouterException {
