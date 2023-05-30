@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import static decimal.apigateway.commons.Constant.INVALID_REQUEST_500;
+import static decimal.apigateway.commons.Constant.MULTIPART;
 
 @RestController
 @RequestMapping("engine/v3/")
@@ -48,10 +49,13 @@ public class RegistrationControllerV3 {
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws  IOException, RouterException {
         log.info("==============================Public Gateway Processor=============================");
         String authorizationToken = httpHeaders.get("authorization");
+        String responseType = httpHeaders.get("response-type");
 
         if (authorizationToken == null || !authorizationToken.startsWith("Bearer")) {
             throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
+        if (responseType !=null && MULTIPART.equalsIgnoreCase(responseType))
+            return executionService.executeMultiPart(request,httpHeaders);
 
         return executionService.executePlainRequest(request, httpHeaders);
     }

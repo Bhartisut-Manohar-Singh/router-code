@@ -9,4 +9,5 @@ public interface ExecutionServiceV3 {
 
     Object executePlainRequest(String request, Map<String, String> httpHeaders)throws RouterException, IOException;
 
+    Object executeMultiPart(String request, Map<String, String> httpHeaders) throws RouterException, IOException;
 }
