@@ -1,6 +1,8 @@
 package decimal.apigateway.service.validator;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.enums.RequestValidationTypes;
@@ -9,6 +11,7 @@ import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.clients.SecurityClient;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,8 @@ import java.util.Map;
 
 import static decimal.apigateway.enums.RequestValidationTypes.*;
 
+
+@Log
 @Service
 public class RequestValidator {
 
@@ -30,7 +35,7 @@ public class RequestValidator {
     }
 
     public Object validateRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterException {
-
+        log.info("=== calling validateRegistrationRequest to security client === " + new Gson().toJson(httpHeaders));
         return securityClient.validateRegistration(request, httpHeaders).getResponse();
     }
 
@@ -39,6 +44,7 @@ public class RequestValidator {
         httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
         httpHeaders.put("username", httpHeaders.get("clientid"));
 
+        log.info("=== calling validatePlainRequest to security client === " + new Gson().toJson(httpHeaders));
         return securityClient.validatePlainRequest(request, httpHeaders,serviceName);
 
     }
@@ -64,7 +70,11 @@ public class RequestValidator {
         httpHeaders.put("appid", clientId.split(Constant.TILD_SPLITTER)[1]);
 
         MicroserviceResponse response = securityClient.validate(request, httpHeaders, RequestValidationTypes.REQUEST.name());
-
+        try {
+            log.info("====== response from security client ======= " + objectMapper.writeValueAsString(response));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         String userName = response.getResponse().toString();
 
         int size = RouterOperations.getStringArray(userName, Constant.TILD_SPLITTER).size();
