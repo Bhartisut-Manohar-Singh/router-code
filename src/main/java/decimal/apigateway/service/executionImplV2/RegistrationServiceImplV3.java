@@ -9,6 +9,7 @@ import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
+import decimal.apigateway.model.ResponseOutput;
 import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.RegistrationServiceV3;
 import decimal.apigateway.service.clients.AuthenticationClient;
@@ -55,6 +56,9 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
     @Autowired
     AuditPayload auditPayload;
 
+    @Autowired
+    ResponseOutput responseOutput;
+
     @Value("${isHttpTracingEnabled}")
     boolean isHttpTracingEnabled;
 
@@ -85,9 +89,14 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
         httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
         httpHeaders.put(Headers.servicename.name(), "REGISTERAPP");
 
+        ObjectNode jsonNodes;
 
-        ObjectNode jsonNodes = objectMapper.convertValue(requestValidatorV2.validatePublicRegistrationRequest(request, httpHeaders), ObjectNode.class);
+        try {
+            jsonNodes = objectMapper.convertValue(requestValidatorV2.validatePublicRegistrationRequest(request, httpHeaders), ObjectNode.class);
 
+        }catch (Exception routerException){
+            return new ResponseOutput("FAILURE","Failed to generate JWT token. Please check your credentials and try again.");
+        }
         log.info("Response from Step 1 ....." + jsonNodes);
 
         httpHeaders.put("executionsource","API-GATEWAY");
@@ -114,8 +123,9 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
         node.put("Authorization", "Bearer " + jwtToken);
 
-        return responseOperations.prepareResponseObject(httpHeaders.get("requestid"),
-                httpHeaders.get("servicename"), objectMapper.writeValueAsString(new HashMap<>())).toString();
+//        return responseOperations.prepareResponseObject(httpHeaders.get("requestid"),
+//                httpHeaders.get("servicename"), objectMapper.writeValueAsString(new HashMap<>())).toString();
+        return new ResponseOutput("SUCCESS", "JWT token generated successfully.");
     }
 
     private List<String> fetchTokenDetails(Map<String, String> httpHeaders) throws RouterException {
