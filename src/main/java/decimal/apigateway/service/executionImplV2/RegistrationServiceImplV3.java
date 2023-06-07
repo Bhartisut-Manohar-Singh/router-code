@@ -56,9 +56,6 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
     @Autowired
     AuditPayload auditPayload;
 
-    @Autowired
-    ResponseOutput responseOutput;
-
     @Value("${isHttpTracingEnabled}")
     boolean isHttpTracingEnabled;
 
