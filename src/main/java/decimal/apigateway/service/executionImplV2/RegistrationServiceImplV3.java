@@ -31,8 +31,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static decimal.apigateway.commons.Constant.INVALID_REQUEST_500;
-import static decimal.apigateway.commons.Constant.JSON;
+import static decimal.apigateway.commons.Constant.*;
 
 
 @Service
@@ -117,9 +116,9 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
             node.put("Authorization", "Bearer " + jwtToken);
 
-            return new ResponseOutput("SUCCESS", "JWT token generated successfully.");
+            return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
         } catch (Exception routerException) {
-            return new ResponseOutput("FAILURE", "Failed to generate JWT token. Please check your credentials and try again.");
+            return new ResponseOutput(FAILURE_STATUS, JWT_TOKEN_FAILURE);
         }
     }
 
