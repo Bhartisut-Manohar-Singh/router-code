@@ -72,7 +72,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
     }
 
     @Override
-    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException, PublicTokenCreationException {
 
         log.info("Executing Step 1 to validate register request.....");
 
@@ -119,7 +119,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
             return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
         } catch (Exception routerException) {
-            return new PublicTokenCreationException(FAILURE_STATUS, JWT_TOKEN_FAILURE);
+            throw  new PublicTokenCreationException(FAILURE_STATUS, JWT_TOKEN_FAILURE);
         }
     }
 
