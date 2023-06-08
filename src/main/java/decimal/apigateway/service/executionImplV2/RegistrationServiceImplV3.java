@@ -9,6 +9,7 @@ import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
+import decimal.apigateway.model.ResponseOutput;
 import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.RegistrationServiceV3;
 import decimal.apigateway.service.clients.AuthenticationClient;
@@ -85,37 +86,41 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
         httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
         httpHeaders.put(Headers.servicename.name(), "REGISTERAPP");
 
+        ObjectNode jsonNodes;
 
-        ObjectNode jsonNodes = objectMapper.convertValue(requestValidatorV2.validatePublicRegistrationRequest(request, httpHeaders), ObjectNode.class);
+        try {
+            jsonNodes = objectMapper.convertValue(requestValidatorV2.validatePublicRegistrationRequest(request, httpHeaders), ObjectNode.class);
 
-        log.info("Response from Step 1 ....." + jsonNodes);
+            log.info("Response from Step 1 ....." + jsonNodes);
 
-        httpHeaders.put("executionsource","API-GATEWAY");
+            httpHeaders.put("executionsource", "API-GATEWAY");
 
-        log.info("Executing Step 2 to Generate token.....");
+            log.info("Executing Step 2 to Generate token.....");
 
-        ResponseEntity<Object> responseEntity = authenticationClient.publicRegister(request, httpHeaders);
+            ResponseEntity<Object> responseEntity = authenticationClient.publicRegister(request, httpHeaders);
 
-        log.info("Response from Step 1....." + responseEntity.getBody());
+            log.info("Response from Step 1....." + responseEntity.getBody());
 
-        HttpHeaders responseHeaders = responseEntity.getHeaders();
-        if(responseHeaders!=null && responseHeaders.containsKey("status"))
-            auditPayload.setStatus(responseHeaders.get("status").get(0));
+            HttpHeaders responseHeaders = responseEntity.getHeaders();
+            if (responseHeaders != null && responseHeaders.containsKey("status"))
+                auditPayload.setStatus(responseHeaders.get("status").get(0));
 
-        MicroserviceResponse registerResponse = objectMapper.convertValue(responseEntity.getBody(),MicroserviceResponse.class);
-        Map<String, Object> rsaKeysMap = objectMapper.convertValue(registerResponse.getResponse(), new TypeReference<Map<String, Object>>() {
-        });
+            MicroserviceResponse registerResponse = objectMapper.convertValue(responseEntity.getBody(), MicroserviceResponse.class);
+            Map<String, Object> rsaKeysMap = objectMapper.convertValue(registerResponse.getResponse(), new TypeReference<Map<String, Object>>() {
+            });
 
-        String jwtToken = String.valueOf(rsaKeysMap.get("jwtToken"));
+            String jwtToken = String.valueOf(rsaKeysMap.get("jwtToken"));
 
-        ObjectNode node = objectMapper.createObjectNode();
+            ObjectNode node = objectMapper.createObjectNode();
 
-        response.addHeader("Authorization", "Bearer " + jwtToken);
+            response.addHeader("Authorization", "Bearer " + jwtToken);
 
-        node.put("Authorization", "Bearer " + jwtToken);
+            node.put("Authorization", "Bearer " + jwtToken);
 
-        return responseOperations.prepareResponseObject(httpHeaders.get("requestid"),
-                httpHeaders.get("servicename"), objectMapper.writeValueAsString(new HashMap<>())).toString();
+            return new ResponseOutput("SUCCESS", "JWT token generated successfully.");
+        } catch (Exception routerException) {
+            return new ResponseOutput("FAILURE", "Failed to generate JWT token. Please check your credentials and try again.");
+        }
     }
 
     private List<String> fetchTokenDetails(Map<String, String> httpHeaders) throws RouterException {
@@ -127,14 +132,14 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
         String decodedToken;
 
-        try{
+        try {
             String token = authorizationToken.replace("Basic", "");
             log.info("Encoded Token received - " + token);
 
             byte[] decoded = Base64.getDecoder().decode(token.split(" ")[1]);
             decodedToken = new String(decoded, StandardCharsets.UTF_8);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
 
@@ -143,8 +148,9 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
         List<String> token = RouterOperations.getStringArray(decodedToken, Constant.COLON);
 
         //token format - loginId:clientsecret
-        if(token.size() != 2){
-            throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);        }
+        if (token.size() != 2) {
+            throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
+        }
 
         return token;
     }
