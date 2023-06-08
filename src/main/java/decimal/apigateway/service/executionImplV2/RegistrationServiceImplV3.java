@@ -73,6 +73,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
     @Override
     public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException, PublicTokenCreationException {
+        try {
 
         log.info("Executing Step 1 to validate register request.....");
 
@@ -88,7 +89,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
         ObjectNode jsonNodes;
 
-        try {
+
             jsonNodes = objectMapper.convertValue(requestValidatorV2.validatePublicRegistrationRequest(request, httpHeaders), ObjectNode.class);
 
             log.info("Response from Step 1 ....." + jsonNodes);
