@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
+import decimal.apigateway.exception.PublicTokenCreationException;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
+import decimal.apigateway.model.ResponseOutput;
 import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.ServiceMonitoringAudit;
 import decimal.logs.connector.LogsConnector;
@@ -32,8 +34,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import static decimal.apigateway.commons.Constant.FAILURE_STATUS;
-import static decimal.apigateway.commons.Constant.SUCCESS_STATUS;
+import static decimal.apigateway.commons.Constant.*;
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
 
 @RestControllerAdvice
@@ -209,5 +210,11 @@ public class ExceptionController {
         log.info("Inside request not permission exception handler - " + ex.getMessage());
 
         return new ResponseEntity<>(ex.getMessage(), null, HttpStatus.TOO_MANY_REQUESTS);
+    }
+
+    @ExceptionHandler(value = PublicTokenCreationException.class)
+    public ResponseEntity<Object> handlePublicJwtCreationException(PublicTokenCreationException ex)  {
+
+        return new ResponseEntity<>(new ResponseOutput(ex.getErrorCode(), ex.getErrorMessage()), null, HttpStatus.BAD_REQUEST);
     }
 }

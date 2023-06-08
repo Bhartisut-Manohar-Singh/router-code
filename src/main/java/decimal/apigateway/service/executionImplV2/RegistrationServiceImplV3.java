@@ -7,6 +7,7 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.ResponseOperations;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.enums.Headers;
+import decimal.apigateway.exception.PublicTokenCreationException;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.model.ResponseOutput;
@@ -118,7 +119,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
             return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
         } catch (Exception routerException) {
-            return new ResponseOutput(FAILURE_STATUS, JWT_TOKEN_FAILURE);
+            return new PublicTokenCreationException(FAILURE_STATUS, JWT_TOKEN_FAILURE);
         }
     }
 
