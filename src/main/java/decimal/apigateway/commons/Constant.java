@@ -44,4 +44,7 @@ public class Constant {
 
     public static final String ROUTER_HEADER_SOURCE_IP = "X-FORWARDED-FOR";
     public static final String COLON = ":";
+
+    public static final String JWT_TOKEN_SUCCESS = "JWT token generated successfully.";
+    public static final String JWT_TOKEN_FAILURE = "Failed to generate JWT token. Please check your credentials and try again.";
 }

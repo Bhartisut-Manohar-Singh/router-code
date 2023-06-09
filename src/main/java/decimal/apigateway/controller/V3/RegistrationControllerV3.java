@@ -1,6 +1,7 @@
 package decimal.apigateway.controller.V3;
 
 
+import decimal.apigateway.exception.PublicTokenCreationException;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionService;
 import decimal.apigateway.service.ExecutionServiceV3;
@@ -41,7 +42,7 @@ public class RegistrationControllerV3 {
      * @throws IOException
      */
     @PostMapping("register")
-    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException, PublicTokenCreationException {
         return registrationServiceV3.register(request, httpHeaders, response);
     }
 
