@@ -16,7 +16,7 @@
     <description>Spring boot project which will act as api gateway</description>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>1.8</java.version>
         <spring-cloud.version>Greenwich.SR1</spring-cloud.version>
     </properties>
 
