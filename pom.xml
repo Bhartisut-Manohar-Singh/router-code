@@ -100,7 +100,7 @@
         <dependency>
             <groupId>decimal</groupId>
             <artifactId>logs-management</artifactId>
-            <version>4.2</version>
+            <version>3.2</version>
         </dependency>
 
         <!--Log4j2 v2.17.0  -->
