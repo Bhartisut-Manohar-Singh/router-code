@@ -1,6 +1,5 @@
 package decimal.apigateway.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionService;
@@ -27,7 +26,6 @@ public class ExecutionController
         System.out.println("==============================Gateway Processor=============================");
         return executionService.executePlainRequest(request, httpHeaders);
     }
-
     @PostMapping("execute/{orgId}/{appId}/{serviceName}/{version}")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String orgId,
                                       @PathVariable String appId, @PathVariable String serviceName, @PathVariable String version) throws RouterException, IOException {
