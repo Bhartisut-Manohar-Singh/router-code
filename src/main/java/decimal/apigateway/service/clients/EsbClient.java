@@ -17,4 +17,12 @@ public interface EsbClient {
 
     @PostMapping(value = Constant.ESB + "/service-executor/execute-plain", consumes = "application/json")
     ResponseEntity<Object> executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
+
+
+    @PostMapping(value = Constant.ESB + "/multipart/execute-plain", consumes = "application/json")
+    ResponseEntity<byte[]> executeMultipart(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
+  
+    @PostMapping(value = Constant.ESB + "/service-executor/v2/execute", consumes = "application/json")
+    ResponseEntity<Object> executeRequestV2(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
+
 }
