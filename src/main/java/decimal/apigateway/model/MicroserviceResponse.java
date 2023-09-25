@@ -24,4 +24,14 @@ public class MicroserviceResponse {
         this.message = message;
         this.response = response;
     }
+
+    @Override
+    public String toString() {
+        return "MicroserviceResponse{" +
+                "status='" + status + '\'' +
+                ", message='" + message + '\'' +
+                ", response=" + response +
+                ", customData=" + customData +
+                '}';
+    }
 }
