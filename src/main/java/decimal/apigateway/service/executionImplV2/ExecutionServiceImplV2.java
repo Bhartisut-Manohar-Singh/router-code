@@ -4,15 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
-import decimal.apigateway.enums.Headers;
-import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.enums.HeadersV1;
+import decimal.apigateway.exception.RouterExceptionV1;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.ExecutionServiceV2;
 import decimal.apigateway.service.LogsWriter;
-import decimal.apigateway.service.clients.EsbClient;
-import decimal.apigateway.service.clients.SecurityClient;
+import decimal.apigateway.service.SecurityService;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
 import decimal.apigateway.service.validator.RequestValidatorV2;
+import decimal.authenticationservice.clients.EsbClientAuth;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.masking.JsonMasker;
@@ -58,10 +58,8 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     ObjectMapper objectMapper;
 
     @Autowired
-    EsbClient esbClient;
+    EsbClientAuth esbClient;
 
-    @Autowired
-    SecurityClient securityClient;
 
     @Autowired
     AuditPayload auditPayload;
@@ -77,8 +75,13 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
     @Value("${server.servlet.context-path}")
     String path;
+
+    @Autowired
+    SecurityService securityService;
+
+
     @Override
-    public Object executeRequest(String destinationAppId,String serviceNmae, String request, Map<String, String> httpHeaders) throws IOException, RouterException {
+    public Object executeRequest(String destinationAppId,String serviceNmae, String request, Map<String, String> httpHeaders) throws IOException, RouterExceptionV1 {
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         log.info("V2: Calling security client to validate the request");
@@ -106,7 +109,8 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
-        MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
+        MicroserviceResponse decryptedResponse = securityService.decryptRequest(node.get("request"), httpHeaders);
+        //MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
 
         String maskRequestBody= JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
         auditPayload.getRequest().setRequestBody(maskRequestBody);
@@ -126,12 +130,12 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         auditPayload.getRequestIdentifier().setLogAppId(destinationAppId);
         httpHeaders.put("executionsource","API-GATEWAY");
 
-        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(responseEntity.getBody(), httpHeaders);
+        MicroserviceResponse encryptedResponse = securityService.encryptResponse(objectMapper.writeValueAsString(responseEntity.getBody()), httpHeaders);
 
         if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
 
-            throw new RouterException(decryptedResponse.getResponse());
+            throw new RouterExceptionV1(decryptedResponse.getResponse());
         }
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
         logsWriter.updateLog(auditPayload);
@@ -144,7 +148,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     }
 
     @Override
-    public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException{
+    public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterExceptionV1, IOException{
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         MicroserviceResponse microserviceResponse = requestValidatorV2.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
@@ -161,19 +165,19 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
             JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
             if(("Y").equalsIgnoreCase(isPayloadEncrypted) && (!node.hasNonNull("request")))
-                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send encrypted payload.\"}"));
+                throw new RouterExceptionV1(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send encrypted payload.\"}"));
 
-            if(("Y").equalsIgnoreCase(isPayloadEncrypted) && !httpHeaders.containsKey(Headers.txnkey.name()))
-                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send txnkey in Headers as your request payload is encrypted.\"}"));
+            if(("Y").equalsIgnoreCase(isPayloadEncrypted) && !httpHeaders.containsKey(HeadersV1.txnkey.name()))
+                throw new RouterExceptionV1(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send txnkey in HeadersV1 as your request payload is encrypted.\"}"));
 
-            if(("Y").equalsIgnoreCase(isDigitallySigned) && !httpHeaders.containsKey(Headers.hash.name()))
-                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send hash in Headers as your request is digitally signed.\"}"));
+            if(("Y").equalsIgnoreCase(isDigitallySigned) && !httpHeaders.containsKey(HeadersV1.hash.name()))
+                throw new RouterExceptionV1(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send hash in HeadersV1 as your request is digitally signed.\"}"));
 
             httpHeaders.put(IS_DIGITALLY_SIGNED,isDigitallySigned);
             httpHeaders.put(IS_PAYLOAD_ENCRYPTED,isPayloadEncrypted);
-            httpHeaders.put(Headers.clientsecret.name(), headers.get(Headers.clientsecret.name()));
+            httpHeaders.put(HeadersV1.clientsecret.name(), headers.get(HeadersV1.clientsecret.name()));
 
-            MicroserviceResponse decryptedResponse = securityClient.decryptRequestWithoutSession(("Y").equalsIgnoreCase(isPayloadEncrypted) ? node.get("request").asText() : request, httpHeaders);
+            MicroserviceResponse decryptedResponse = securityService.decryptRequestWithoutSession(("Y").equalsIgnoreCase(isPayloadEncrypted) ? node.get("request").asText() : request, httpHeaders);
 
             if(("Y").equalsIgnoreCase(isPayloadEncrypted))
                 request = decryptedResponse.getResponse().toString();
@@ -216,7 +220,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         if (("Y").equalsIgnoreCase(isPayloadEncrypted))
         {
-            MicroserviceResponse encryptedResponse = securityClient.encryptResponseWithoutSession(responseEntity.getBody(), httpHeaders);
+            MicroserviceResponse encryptedResponse = securityService.encryptResponseWithoutSession(responseEntity, httpHeaders);
             Map<String, String> finalResponseMap = new HashMap<>();
             finalResponseMap.put("response", encryptedResponse.getMessage());
 
@@ -227,7 +231,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     }
 
     @Override
-    public Object executeDynamicRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
+    public Object executeDynamicRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterExceptionV1, IOException {
 
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
@@ -236,7 +240,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
-        MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), updateHttpHeaders);
+        MicroserviceResponse decryptedResponse = securityService.decryptRequest(node, httpHeaders);
 
         String basePath = path + "/engine/v1/dynamic-router/" + serviceName;
 
@@ -286,12 +290,10 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         }
 
         dynamicResponse.setResponse(exchange.getBody());
-
-
-        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
+        MicroserviceResponse encryptedResponse = securityService.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
 
         if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
-            throw new RouterException(decryptedResponse.getResponse());
+            throw new RouterExceptionV1(decryptedResponse.getResponse());
         }
 
         logsWriter.updateLog(auditPayload);
@@ -302,7 +304,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
     }
 
-    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath, Boolean isDynamic) throws RouterException {
+    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath, Boolean isDynamic) throws RouterExceptionV1 {
 
         String contextPath = "";
         int port = 0;
@@ -313,11 +315,11 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         if(StringUtils.isEmpty(requestURI))
         {
-            throw new RouterException(FAILURE_STATUS,Constant.INVALID_URI,null);
+            throw new RouterExceptionV1(FAILURE_STATUS,Constant.INVALID_URI,null);
         }
 
         if (instances.isEmpty()) {
-            throw new RouterException(FAILURE_STATUS, "Service with name: " + serviceName + " is not registered with discovery server", null);
+            throw new RouterExceptionV1(FAILURE_STATUS, "Service with name: " + serviceName + " is not registered with discovery server", null);
         }
 
         log.info(" ==== basePath ==== " + basePath);
@@ -344,7 +346,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
 
     @Override
-    public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, JsonProcessingException {
+    public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterExceptionV1, JsonProcessingException {
 
         auditPayload=logsWriter.initializeLog(request,JSON,httpHeaders);
         auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
@@ -409,7 +411,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     }
 
     @Override
-    public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
+    public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String uploadRequest, MultipartFile[] files) throws RouterExceptionV1, IOException {
 
         auditPayload = logsWriter.initializeLog(uploadRequest,MULTIPART, httpHeaders);
 
@@ -465,7 +467,8 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         logsWriter.updateLog(auditPayload);
 
-        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
+        MicroserviceResponse encryptedResponse = securityService.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
+        //MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
@@ -476,7 +479,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     }
 
     @Override
-    public Object executeFileRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String mediaDataObjects, MultipartFile[] files) throws RouterException, IOException {
+    public Object executeFileRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String mediaDataObjects, MultipartFile[] files) throws RouterExceptionV1, IOException {
 
         log.info("==========================================Inside DMS Service Layer=========================================" );
 
@@ -541,7 +544,8 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         logsWriter.updateLog(auditPayload);
 
-        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
+        MicroserviceResponse encryptedResponse = securityService.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
+        //MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());

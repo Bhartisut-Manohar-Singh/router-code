@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RouterException extends Exception {
+public class RouterExceptionV1 extends Exception {
 
     private static final long serialVersionUID = 1L;
 
@@ -26,18 +26,18 @@ public class RouterException extends Exception {
     private String errorHint;
 
 
-    public RouterException(String errorCode, Exception e) {
+    public RouterExceptionV1(String errorCode, Exception e) {
         this.errorCode = errorCode;
-//        this.errorMessage = RouterOperations.getMessageFromCode(errorCode);
+//        this.errorMessage = RouterOperationsV1.getMessageFromCode(errorCode);
         this.messageTrace = e != null ? e.getMessage() : "";
     }
-    public RouterException(String errorCode, String message, Exception e) {
+    public RouterExceptionV1(String errorCode, String message, Exception e) {
         this.errorCode = errorCode;
         this.errorMessage = message;
         this.messageTrace = e != null ? e.getMessage() : "";
     }
 
-    public RouterException(String errorCode, Exception e, String errorType, String errorHint) {
+    public RouterExceptionV1(String errorCode, Exception e, String errorType, String errorHint) {
         this(errorCode, e);
         this.errorType = errorType;
         this.errorHint = errorHint;
@@ -51,13 +51,13 @@ public class RouterException extends Exception {
 		this.errorHint = errorHint;
 	}*/
 
-    public RouterException(String errorCode, String errorMessage, Object detailedLogs) {
+    public RouterExceptionV1(String errorCode, String errorMessage, Object detailedLogs) {
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
         this.response = detailedLogs;
     }
 
-    public RouterException(Object response)
+    public RouterExceptionV1(Object response)
     {
         this.response = response;
     }

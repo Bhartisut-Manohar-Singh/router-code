@@ -1,7 +1,7 @@
 package decimal.apigateway.controller.controllerV2;
 
 import decimal.apigateway.commons.Constant;
-import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.exception.RouterExceptionV1;
 import decimal.apigateway.service.ExecutionServiceV2;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +24,14 @@ public class ExecutionControllerV2 {
     ExecutionServiceV2 executionServiceV2;
 
     @PostMapping("gatewayProcessor")
-    public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
+    public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterExceptionV1, IOException {
         log.info("==============================Gateway Processor=============================");
         return executionServiceV2.executePlainRequest(request, httpHeaders);
     }
 
     @PostMapping("execute/{sourceOrgId}/{sourceAppId}/{serviceName}/{version}")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String sourceOrgId,
-                                      @PathVariable String sourceAppId, @PathVariable String serviceName, @PathVariable String version) throws RouterException, IOException {
+                                      @PathVariable String sourceAppId, @PathVariable String serviceName, @PathVariable String version) throws RouterExceptionV1, IOException {
         httpHeaders.put("servicename", serviceName);
         httpHeaders.put("orgid", sourceOrgId);
         httpHeaders.put("appid", sourceAppId);
@@ -43,12 +43,15 @@ public class ExecutionControllerV2 {
 
     @PostMapping("gateway/{destinationAppId}/{serviceName}")
     public Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable(name = "destinationAppId") String destinationAppId,
-                                 @PathVariable(name = "serviceName") String serviceName) throws RouterException, IOException {
+                                 @PathVariable(name = "serviceName") String serviceName) throws RouterExceptionV1, IOException {
         log.info("======================Gateway Execute V2 Called=============================");
         /*httpHeaders.put("sourceAppId", sourceAppId);
         httpHeaders.put("sourceOrgId", sourceOrgId);*/
-        httpHeaders.put("destinationAppId", destinationAppId);
-        httpHeaders.put("serviceName",serviceName);
+        /*
+        Because of network call previous header keys were in camel case.
+        */
+         httpHeaders.put("destinationappid", destinationAppId);
+        httpHeaders.put("servicename",serviceName);
 
         log.info("Headers for v2 execute-----");
         httpHeaders.forEach((k,v) -> log.info(k + "->" + v));
@@ -59,14 +62,14 @@ public class ExecutionControllerV2 {
     }
 
     @PostMapping(value = "dynamic-router/{serviceName}/**")
-    public Object executeService(@RequestBody String request, HttpServletRequest httpServletRequest, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName) throws IOException, RouterException {
+    public Object executeService(@RequestBody String request, HttpServletRequest httpServletRequest, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName) throws IOException, RouterExceptionV1 {
 
         log.info("=============================Dynamic-router=============================");
         return executionServiceV2.executeDynamicRequest(httpServletRequest, request, httpHeaders, serviceName);
     }
 
     @PostMapping(value = "dynamic-router/plain/{serviceName}/**")
-    public Object executeServicePlain(@RequestBody String request, HttpServletRequest httpServletRequest, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName) throws IOException, RouterException {
+    public Object executeServicePlain(@RequestBody String request, HttpServletRequest httpServletRequest, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName) throws IOException, RouterExceptionV1 {
 
         log.info("============================Dynamic-router/plain=============================");
         return executionServiceV2.executeDynamicRequestPlain(httpServletRequest, request, httpHeaders, serviceName);

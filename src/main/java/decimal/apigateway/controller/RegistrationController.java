@@ -1,14 +1,11 @@
 package decimal.apigateway.controller;
 
 import decimal.apigateway.commons.Constant;
-import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.exception.RouterExceptionV1;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.RegistrationService;
-import io.micrometer.core.annotation.Timed;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -17,7 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("engine/v1/")
-@CrossOrigin(exposedHeaders = {"custom_headers", "security-version", "hash", "authorization", "deviceid", "appid", "clientid", "deviceid", "nounce", "platform", "requestid", "requesttype", "servicename", "txnkey", "username", "content-type", "isforcelogin", "auth_scheme","storageid", "imeinumber"})
+@CrossOrigin(exposedHeaders = {"custom_headers", "security-version", "hash", "authorization", "deviceid", "appid", "clientid", "deviceid", "nounce", "platform", "requestid", "requesttype", "servicename", "txnkey", "username", "content-type", "isforcelogin", "auth_scheme","storageid"})
 @Log
 public class RegistrationController {
     private RegistrationService registrationService;
@@ -27,8 +24,9 @@ public class RegistrationController {
         this.registrationService = registrationService;
     }
 
+
     @PostMapping("register")
-    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterExceptionV1 {
 
         String serviceName = httpHeaders.get("servicename");
         log.info("Service Name: " + serviceName);
@@ -44,7 +42,7 @@ public class RegistrationController {
             String status = Constant.FAILURE_STATUS;
             MicroserviceResponse microserviceResponse = new MicroserviceResponse(status, message, "");
 
-            throw new RouterException(Constant.ROUTER_SERVICE_NOT_FOUND,  Constant.ROUTER_ERROR_TYPE_VALIDATION,microserviceResponse);
+            throw new RouterExceptionV1(Constant.ROUTER_SERVICE_NOT_FOUND,  Constant.ROUTER_ERROR_TYPE_VALIDATION,microserviceResponse);
 
         }
 
@@ -54,13 +52,13 @@ public class RegistrationController {
     }
 
     @PostMapping("authenticate")
-    public Object authenticate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+    public Object authenticate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterExceptionV1 {
         log.info("====================Call for authenticate=============================");
         return registrationService.authenticate(request, httpHeaders, response);
     }
 
     @PostMapping("logout")
-    public Object logout(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+    public Object logout(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterExceptionV1 {
         log.info("====================Call for logout=============================");
         return registrationService.logout(request, httpHeaders, response);
     }

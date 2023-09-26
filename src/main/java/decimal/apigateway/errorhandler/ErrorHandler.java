@@ -1,6 +1,6 @@
 package decimal.apigateway.errorhandler;
 
-import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.exception.RouterExceptionV1;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import lombok.extern.java.Log;
@@ -25,7 +25,7 @@ public class ErrorHandler implements ErrorDecoder {
 
             log.info("Error received from target server with body: " + responseBody);
 
-            return new RouterException(responseBody);
+            return new RouterExceptionV1(responseBody);
         }
 
         catch (IOException e)

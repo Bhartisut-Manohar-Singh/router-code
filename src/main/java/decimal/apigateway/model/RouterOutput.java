@@ -1,7 +1,7 @@
 package decimal.apigateway.model;
 
 import decimal.apigateway.exception.RouterError;
-import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.exception.RouterExceptionV1;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,9 +21,9 @@ public class RouterOutput {
 
 	public RouterOutput(Exception e)
 	{
-		if(e instanceof RouterException)
+		if(e instanceof RouterExceptionV1)
 		{        		
-    	this.setRouterError(new RouterError(((RouterException) e).getErrorCode(), e));
+    	this.setRouterError(new RouterError(((RouterExceptionV1) e).getErrorCode(), e));
 		}
 		else
 		{

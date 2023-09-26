@@ -1,9 +1,6 @@
 package decimal.apigateway.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Map;
 
@@ -18,6 +15,13 @@ public class MicroserviceResponse {
     Object response;
 
     Map<String, String> customData;
+
+    public MicroserviceResponse(decimal.sessionmanagement.model.MicroserviceResponse microserviceResponse) {
+        this.status = microserviceResponse.getStatus();
+        this.message = microserviceResponse.getMessage();
+        this.response = microserviceResponse.getResponse();
+        this.customData = microserviceResponse.getCustomData();
+    }
 
     public MicroserviceResponse(String status, String message, Object response) {
         this.status = status;

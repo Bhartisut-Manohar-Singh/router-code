@@ -2,8 +2,7 @@ package decimal.apigateway.controller.V3;
 
 
 import decimal.apigateway.exception.PublicTokenCreationException;
-import decimal.apigateway.exception.RouterException;
-import decimal.apigateway.service.ExecutionService;
+import decimal.apigateway.exception.RouterExceptionV1;
 import decimal.apigateway.service.ExecutionServiceV3;
 import decimal.apigateway.service.RegistrationServiceV3;
 import lombok.extern.java.Log;
@@ -42,22 +41,21 @@ public class RegistrationControllerV3 {
      * @throws IOException
      */
     @PostMapping("register")
-    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException, PublicTokenCreationException {
+    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterExceptionV1, PublicTokenCreationException {
         return registrationServiceV3.register(request, httpHeaders, response);
     }
 
     @PostMapping("gatewayProcessor")
-    public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws  IOException, RouterException {
+    public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws  IOException, RouterExceptionV1 {
         log.info("==============================Public Gateway Processor=============================");
         String authorizationToken = httpHeaders.get("authorization");
         String responseType = httpHeaders.get("response-type");
 
         if (authorizationToken == null || !authorizationToken.startsWith("Bearer")) {
-            throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
+            throw new RouterExceptionV1(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
         if (responseType !=null && MULTIPART.equalsIgnoreCase(responseType))
             return executionService.executeMultiPart(request,httpHeaders);
-
         return executionService.executePlainRequest(request, httpHeaders);
     }
 

@@ -3,7 +3,7 @@ package decimal.apigateway.controller;
 import decimal.ratelimiter.config.RateLimitManager;
 import decimal.ratelimiter.domain.RateLimiterConfigMaster;
 import decimal.ratelimiter.repo.RateLimiterConfigRepo;
-import io.github.resilience4j.ratelimiter.RateLimiter;
+
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

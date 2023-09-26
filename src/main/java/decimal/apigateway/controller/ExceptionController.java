@@ -4,16 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.PublicTokenCreationException;
-import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.exception.RouterExceptionV1;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.model.ResponseOutput;
 import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.ServiceMonitoringAudit;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.filters.AuditTraceFilter;
-import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.ErrorPayload;
 import decimal.logs.model.SystemError;
@@ -29,10 +27,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpServerErrorException;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 
 import static decimal.apigateway.commons.Constant.*;
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
@@ -58,8 +53,8 @@ public class ExceptionController {
     @Autowired
     LogsWriter logsWriter;
 
-    @ExceptionHandler(value = RouterException.class)
-    public ResponseEntity<Object> handleRouterException(RouterException ex) throws JsonProcessingException {
+    @ExceptionHandler(value = RouterExceptionV1.class)
+    public ResponseEntity<Object> handleRouterException(RouterExceptionV1 ex) throws JsonProcessingException {
 
         log.info("================================In Router Exception==============================");
 
@@ -139,9 +134,9 @@ public class ExceptionController {
         ex.printStackTrace();
         SystemError systemError = new SystemError();
 
-        if(ex instanceof RouterException)
+        if(ex instanceof RouterExceptionV1)
         {
-            RouterException exception = (RouterException) ex;
+            RouterExceptionV1 exception = (RouterExceptionV1) ex;
 
             Object response = exception.getResponse();
 

@@ -1,7 +1,7 @@
 package decimal.apigateway.model;
 
 import decimal.apigateway.exception.RouterError;
-import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.exception.RouterExceptionV1;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,8 +20,8 @@ public class ServiceOutput {
     }
 
     public ServiceOutput(Exception e, String serviceName) {
-        if (e instanceof RouterException) {
-            RouterException routerException = (RouterException) e;
+        if (e instanceof RouterExceptionV1) {
+            RouterExceptionV1 routerException = (RouterExceptionV1) e;
             this.setServiceError(new RouterError(routerException.getErrorCode(), routerException, routerException.getErrorType(), routerException.getErrorHint()));
         } else {
             this.setServiceError(new RouterError("ROUTER_API_EXECUTION", e));

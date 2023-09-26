@@ -4,11 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import decimal.apigateway.commons.Constant;
-import decimal.apigateway.commons.RouterOperations;
-import decimal.apigateway.enums.RequestValidationTypes;
+import decimal.apigateway.enums.RequestValidationTypesV1;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
-import decimal.apigateway.service.clients.SecurityClient;
+import decimal.apigateway.service.SecurityService;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
 import lombok.extern.java.Log;
@@ -17,59 +16,58 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-import static decimal.apigateway.enums.RequestValidationTypes.*;
+import static decimal.apigateway.enums.RequestValidationTypesV1.*;
 
 
 @Log
 @Service
-public class RequestValidator {
+public class RequestValidatorV1 {
 
-    private final
-    SecurityClient securityClient;
+    @Autowired
+    SecurityService securityService;
 
     @Autowired
     ObjectMapper objectMapper;
 
-    public RequestValidator(SecurityClient securityClient) {
-        this.securityClient = securityClient;
+    public RequestValidatorV1(SecurityService securityService) {
+        this.securityService = securityService;
     }
 
-    public Object validateRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterException {
+    public Object validateRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterExceptionV1 {
         log.info("=== calling validateRegistrationRequest to security client === " + new Gson().toJson(httpHeaders));
-        return securityClient.validateRegistration(request, httpHeaders).getResponse();
+        return securityService.validateRegistration(request, httpHeaders);
     }
 
-    public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders,String serviceName) throws RouterException {
+    public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders,String serviceName) throws RouterExceptionV1 {
         httpHeaders.put("scopeToCheck", "PUBLIC");
         httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
         httpHeaders.put("username", httpHeaders.get("clientid"));
 
         log.info("=== calling validatePlainRequest to security client === " + new Gson().toJson(httpHeaders));
-        return securityClient.validatePlainRequest(request, httpHeaders,serviceName);
-
+        return securityService.validatePlainRequest(request, httpHeaders, serviceName);
     }
 
-    public void validatePlainDynamicRequest(String request, Map<String, String> httpHeaders) throws RouterException {
+    public void validatePlainDynamicRequest(String request, Map<String, String> httpHeaders) throws RouterExceptionV1 {
 
         httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
 
-        RequestValidationTypes[] requestValidationTypes = { CLIENT_SECRET,IP};
+        RequestValidationTypesV1[] requestValidationTypes = { CLIENT_SECRET,IP};
 
-        for (RequestValidationTypes plainRequestValidation : requestValidationTypes) {
-            securityClient.validate(request, httpHeaders, plainRequestValidation.name());
+        for (RequestValidationTypesV1 plainRequestValidation : requestValidationTypes) {
+            securityService.validate(request, httpHeaders, plainRequestValidation.name());
         }
     }
 
     @Autowired
     AuditTraceFilter auditTraceFilter;
 
-    public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) throws RouterException {
+    public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) throws RouterExceptionV1 {
         String clientId = httpHeaders.get("clientid");
 
         httpHeaders.put("orgid", clientId.split(Constant.TILD_SPLITTER)[0]);
         httpHeaders.put("appid", clientId.split(Constant.TILD_SPLITTER)[1]);
 
-        MicroserviceResponse response = securityClient.validate(request, httpHeaders, RequestValidationTypes.REQUEST.name());
+        MicroserviceResponse response = securityService.validate(request, httpHeaders, REQUEST.name());
         try {
             log.info("====== response from security client ======= " + objectMapper.writeValueAsString(response));
         } catch (JsonProcessingException e) {
@@ -77,7 +75,7 @@ public class RequestValidator {
         }
         String userName = response.getResponse().toString();
 
-        int size = RouterOperations.getStringArray(userName, Constant.TILD_SPLITTER).size();
+        int size = RouterOperationsV1.getStringArray(userName, Constant.TILD_SPLITTER).size();
 
         httpHeaders.put("username", userName);
 
@@ -87,7 +85,12 @@ public class RequestValidator {
 
         auditPayload.getRequestIdentifier().setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
 
-        response = securityClient.validateExecutionRequest(request, httpHeaders);
+        response = securityService.validateExecutionRequest(request, httpHeaders);
+        try {
+            log.info(" ==== response from validateExecutionRequest ==== " + objectMapper.writeValueAsString(response));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         Map<String, String> customData = response.getCustomData();
 
@@ -106,8 +109,7 @@ public class RequestValidator {
         httpHeaders.put("orgid", clientId.split(Constant.TILD_SPLITTER)[0]);
         httpHeaders.put("appid", clientId.split(Constant.TILD_SPLITTER)[1]);
 
-        MicroserviceResponse response = securityClient.validate(request, httpHeaders, RequestValidationTypes.REQUEST.name());
-
+        MicroserviceResponse response = securityService.validate(request, httpHeaders, REQUEST.name());
         String userName = response.getResponse().toString();
 
         httpHeaders.put("username", userName);
@@ -116,20 +118,21 @@ public class RequestValidator {
             auditPayload.getRequestIdentifier().setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
         }
 
-        RequestValidationTypes[] requestValidationTypesArr = {APPLICATION, INACTIVE_SESSION, SESSION, IP, TXN_KEY, HASH};
+        RequestValidationTypesV1[] requestValidationTypesArr = {APPLICATION, INACTIVE_SESSION, SESSION, IP, TXN_KEY, HASH};
 
-        for (RequestValidationTypes requestValidationTypes : requestValidationTypesArr) {
-            securityClient.validate(request, httpHeaders, requestValidationTypes.name());
+        for (RequestValidationTypesV1 requestValidationTypes : requestValidationTypesArr) {
+            securityService.validate(request, httpHeaders, requestValidationTypes.name());
         }
 
         return httpHeaders;
     }
 
-    public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterException {
-        return securityClient.validateAuthentication(request, httpHeaders);
+    public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterExceptionV1 {
+        return securityService.validateAuthentication(request, httpHeaders);
     }
 
-    public MicroserviceResponse validateLogout(String request, Map<String, String> httpHeaders) throws RouterException {
-        return securityClient.validate(request, httpHeaders, RequestValidationTypes.REQUEST.name());
+    public MicroserviceResponse validateLogout(String request, Map<String, String> httpHeaders) throws RouterExceptionV1 {
+
+        return securityService.validate(request, httpHeaders, REQUEST.name());
     }
 }
