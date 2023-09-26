@@ -118,4 +118,76 @@ public class LogsWriter {
 
         return requestIdentifier;
     }
+
+
+
+    public AuditPayload initializeLog(String request, String requestType, Map<String, String> httpHeaders, String servicaName, AuditPayload auditPayload)
+    {
+
+        auditPayload.setRequestTimestamp(Instant.now());
+
+        RequestIdentifier requestIdentifier = getRequestIdentifier(httpHeaders,requestType, servicaName);
+        auditPayload.setRequestIdentifier(requestIdentifier);
+
+        auditPayload.getRequest().setHeaders(httpHeaders);
+
+        return auditPayload;
+    }
+
+
+    private RequestIdentifier getRequestIdentifier(Map<String, String> requestHeaders,String requestType, String service) {
+        RequestIdentifier requestIdentifier = new RequestIdentifier();
+
+
+        String clientId = requestHeaders.get(LogsIdentifier.clientid.name());
+        String orgId = requestHeaders.get(LogsIdentifier.orgid.name());
+        String appId = requestHeaders.get(LogsIdentifier.appid.name());
+        String logOrgId = requestHeaders.get(LogsIdentifier.logorgid.name());
+        String logAppId = requestHeaders.get(LogsIdentifier.logappid.name());
+        String serviceName = requestHeaders.get(LogsIdentifier.servicename.name());
+        String apiName = requestHeaders.get(LogsIdentifier.apiname.name());
+
+        String requestId = requestHeaders.get(LogsIdentifier.requestid.name());
+        String traceId = requestHeaders.get(LogsIdentifier.traceid.name());
+
+        String username = requestHeaders.get(LogsIdentifier.username.name());
+        String loginId = requestHeaders.get(LogsIdentifier.loginid.name());
+
+        if (isNotNullAndNotEmpty.test(clientId)) {
+            String[] split = clientId.split("~");
+            orgId = split[0];
+            appId = split[1];
+        }
+
+        String arn = isNotNullAndNotEmpty.test(serviceName) ? serviceName : apiName;
+
+
+        if(arn.equalsIgnoreCase("undefined"))
+            arn = requestType.equals(MULTIPART)?dmsDefaultServiceName:dynamicDefaultServiceName;
+
+        String finalTraceId = isNotNullAndNotEmpty.test(traceId) ? traceId : (isNotNullAndNotEmpty.test(requestId) ? requestId : UUID.randomUUID().toString());
+
+        if (loginId != null && !loginId.isEmpty())
+            requestIdentifier.setLoginId(loginId);
+        else if (username != null && !username.isEmpty()) {
+            try {
+                String[] split = username.split("~");
+                requestIdentifier.setLoginId(split[2]);
+            } catch (Exception ex) {
+                log.info("Unable to get login Id");
+            }
+        }
+
+        requestIdentifier.setOrgId(orgId);
+        requestIdentifier.setAppId(appId);
+        requestIdentifier.setLogOrgId(logOrgId);
+        requestIdentifier.setLogAppId(logAppId);
+        requestIdentifier.setSystemName(service);
+        requestIdentifier.setArn(arn);
+        requestIdentifier.setTraceId(finalTraceId);
+        requestIdentifier.setSpanId(UUID.randomUUID().toString());
+
+        return requestIdentifier;
+    }
+
 }
