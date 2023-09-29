@@ -10,6 +10,7 @@ import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.model.ResponseOutput;
 import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.ServiceMonitoringAudit;
+import decimal.authenticationservice.exception.RouterExceptionAuth;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
@@ -31,6 +32,8 @@ import java.time.Instant;
 
 import static decimal.apigateway.commons.Constant.*;
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
+import static decimal.authenticationservice.common.ConstantsAuth.STATUS;
+import static decimal.sessionmanagement.common.RouterResponseCode.ROUTER_MULTIPLE_SESSION;
 
 @RestControllerAdvice
 @Log
@@ -212,4 +215,27 @@ public class ExceptionController {
         log.info("Inside handlePublicJwtCreationException - " + ex.getMessage());
         return new ResponseEntity<>(new ResponseOutput(ex.getErrorCode(), ex.getErrorMessage()), null, HttpStatus.BAD_REQUEST);
     }
+
+
+
+    @ExceptionHandler(value = RouterExceptionAuth.class)
+    public ResponseEntity<Object> handleRouterExceptionAUTH(RouterExceptionAuth ex) throws JsonProcessingException {
+
+        log.info("Inside handleRouterExceptionAUTH exception handler - " + ex.getMessage());
+
+        RouterExceptionAuth  exception = new RouterExceptionAuth();
+        exception.setErrorCode(ex.getErrorCode());
+        exception.setErrorHint(ex.getErrorHint());
+        exception.setErrorMessage(exception.getErrorMessage());
+
+        MicroserviceResponse response = new MicroserviceResponse();
+        response.setStatus(ex.getErrorCode());
+        response.setMessage(ex.getErrorMessage());
+        response.setResponse(String.valueOf(ex.getErrorHint()));
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set(STATUS,ROUTER_MULTIPLE_SESSION);
+        return new ResponseEntity<>(response,responseHeaders, HttpStatus.BAD_REQUEST);
+    }
+
+
 }
