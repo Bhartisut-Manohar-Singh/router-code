@@ -109,9 +109,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             if (errorCode.equals(e.getErrorCode())) {
                 response.setStatus("SUCCESS");
                 response.setMessage("User has been logout successfully");
+                response.setResponse(errorCode);
             } else {
                 response.setStatus("FAILURE");
                 response.setMessage("User has not been logout successfully");
+                response.setResponse(errorCode);
             }
         } catch (JsonProcessingException je) {
             throw new RuntimeException("Something went wrong");
