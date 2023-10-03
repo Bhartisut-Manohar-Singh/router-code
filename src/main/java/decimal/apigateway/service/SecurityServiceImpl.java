@@ -1,3 +1,4 @@
+
 package decimal.apigateway.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -44,6 +45,7 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public Object validateRegistration(String request, Map<String, String> httpHeaders) {
         try {
+
             return securityValidator.validateRegistration(request, httpHeaders).getResponse();
         } catch (RouterException | IOException e) {
             throw new RuntimeException(e);
@@ -188,7 +190,7 @@ public class SecurityServiceImpl implements SecurityService {
     public Object validatePublicRegistration(String request, Map<String, String> httpHeaders) {
 
         try {
-         return securityValidator.validatePublicRegistration(request, httpHeaders);
+            return securityValidator.validatePublicRegistration(request, httpHeaders);
         } catch (RouterException | IOException e) {
             throw new RuntimeException(e);
         }
