@@ -153,7 +153,8 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         logsWriter.updateLog(auditPayload);
 
         if (("Y").equalsIgnoreCase(isPayloadEncrypted)) {
-            MicroserviceResponse encryptedResponse = securityService.encryptResponseWithoutSession(responseEntity, headers);
+            MicroserviceResponse encryptedResponse = securityService.encryptResponseWithoutSession(responseEntity,
+                    httpHeaders);
             Map<String, String> finalResponseMap = new HashMap<>();
             finalResponseMap.put("response", encryptedResponse.getMessage());
 
