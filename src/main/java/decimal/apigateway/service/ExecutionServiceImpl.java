@@ -85,7 +85,13 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders, httpHeaders.get("servicename"));
         JsonNode responseNode = objectMapper.convertValue(microserviceResponse.getResponse(), JsonNode.class);
-        Map<String, String> headers = objectMapper.convertValue(responseNode.get("headers"), HashMap.class);
+        //Map<String, String> headers = objectMapper.convertValue(responseNode.get("headers"), HashMap.class);
+        Map<String,Object> response = objectMapper.convertValue(responseNode.get("response"),HashMap.class);
+        log.info("==== inside executePlainRequest ====  response "+response);
+
+        log.info("==== inside executePlainRequest ====  headers "+response.get("headers"));
+        Map<String,String> headers = (Map<String, String>) response.get("headers");
+
         log.info("=== calling execute plain request -------=== " + new Gson().toJson(headers));
         String isDigitallySigned = headers.get(IS_DIGITALLY_SIGNED);
         String isPayloadEncrypted = headers.get(IS_PAYLOAD_ENCRYPTED);
