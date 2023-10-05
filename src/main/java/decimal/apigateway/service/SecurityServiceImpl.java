@@ -2,6 +2,7 @@
 package decimal.apigateway.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.gson.Gson;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.Request;
@@ -272,6 +273,7 @@ public class SecurityServiceImpl implements SecurityService {
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
             logsWriter.updateLog(auditPayload);
             ResponseEntity response = securityValidator.validatePlainRequest(request, httpHeaders, serviceName);
+            log.info("====== inside validatePlainRequest =======" + new Gson().toJson(response.getBody()));
             return new MicroserviceResponse(response.getStatusCode().toString(), "", response.getBody());
         } catch (RouterException | IOException e) {
             throw new RuntimeException(e);
