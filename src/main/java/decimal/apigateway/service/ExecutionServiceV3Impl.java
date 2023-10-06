@@ -85,7 +85,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
 
         JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
         log.info("----- Response Node: " + objectMapper.writeValueAsString(responseNode));
-        Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"), new TypeReference<>(){});
+        Map<String,String> headers = objectMapper.convertValue(responseNode.get("response").get("headers"), new TypeReference<>(){});
         String isDigitallySigned = headers.get(IS_DIGITALLY_SIGNED);
         String isPayloadEncrypted = headers.get(IS_PAYLOAD_ENCRYPTED);
 
