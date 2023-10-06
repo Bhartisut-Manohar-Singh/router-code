@@ -1,5 +1,6 @@
 package decimal.apigateway.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -83,7 +84,8 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         log.info("Public request validated successfully.... ");
 
         JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
-        Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"),HashMap.class);
+        log.info("----- Response Node: " + objectMapper.writeValueAsString(responseNode));
+        Map<String,String> headers = objectMapper.convertValue(responseNode.get("response").get("headers"), new TypeReference<>(){});
         String isDigitallySigned = headers.get(IS_DIGITALLY_SIGNED);
         String isPayloadEncrypted = headers.get(IS_PAYLOAD_ENCRYPTED);
 
