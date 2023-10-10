@@ -20,10 +20,15 @@ public interface AuthenticationClient {
     @PostMapping(value = Constant.AUTHENTICATION_MICRO_SERVICE + "/authenticate")
     ResponseEntity<Object> authenticate(@RequestBody Object plainRequest, @RequestHeader  Map<String, String> httpHeaders);
 
+    @PostMapping(value = Constant.AUTHENTICATION_MICRO_SERVICE + "/v2/authenticate")
+    ResponseEntity<Object> authenticateV2(@RequestBody Object plainRequest, @RequestHeader  Map<String, String> httpHeaders);
+
     @GetMapping(value = Constant.AUTHENTICATION_MICRO_SERVICE + "/logout")
     ResponseEntity<Object> logout(@RequestHeader  Map<String, String> httpHeaders);
 
     @GetMapping(value = Constant.AUTHENTICATION_MICRO_SERVICE + "/forceLogout")
     ResponseEntity<Object> forceLogout(Map<String, String> httpHeaders);
 
+    @PostMapping(value = Constant.AUTHENTICATION_MICRO_SERVICE + "/publicRegister")
+    ResponseEntity<Object> publicRegister(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders);
 }
