@@ -238,4 +238,17 @@ public class ExceptionController {
     }
 
 
+    @ExceptionHandler(value = RuntimeException.class)
+    public ResponseEntity<Object> handleRouterExceptionAUTH(RuntimeException ex) throws JsonProcessingException {
+
+        log.info(" Inside handleRuntimeException - " + ex.getMessage());
+
+        MicroserviceResponse response = new MicroserviceResponse();
+        response.setMessage(ex.getMessage());
+        response.setResponse("RunTimeException");
+        HttpHeaders responseHeaders = new HttpHeaders();
+        return new ResponseEntity<>(response,responseHeaders, HttpStatus.BAD_REQUEST);
+    }
+
+
 }
