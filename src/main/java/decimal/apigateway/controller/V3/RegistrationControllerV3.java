@@ -42,6 +42,7 @@ public class RegistrationControllerV3 {
      */
     @PostMapping("register")
     public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterExceptionV1, PublicTokenCreationException {
+        log.info("----------");
         return registrationServiceV3.register(request, httpHeaders, response);
     }
 
