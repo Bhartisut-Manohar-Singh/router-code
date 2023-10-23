@@ -252,6 +252,6 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
         httpHeaders.put("executionsource", "API-GATEWAY");
         ResponseEntity<Object> responseEntity = authenticationService.logout(httpHeaders);
         MicroserviceResponse microserviceResponse = objectMapper.convertValue(responseEntity.getBody(), MicroserviceResponse.class);
-        return new ResponseEntity(microserviceResponse, responseEntity.getHeaders(), HttpStatus.OK);
+        return new ResponseEntity(microserviceResponse, responseEntity.getHeaders(), HttpStatus.BAD_REQUEST);
     }
 }

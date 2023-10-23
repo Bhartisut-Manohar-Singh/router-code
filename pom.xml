@@ -138,7 +138,7 @@
         <dependency>
             <groupId>decimal</groupId>
             <artifactId>rate-limiter</artifactId>
-            <version>4.1.6.SNAP</version>
+            <version>4.1.6.SNAPSHOOT</version>
         </dependency>
 
         <dependency>
@@ -156,7 +156,7 @@
         <dependency>
             <groupId>decimal</groupId>
             <artifactId>authentication-service</artifactId>
-            <version>1.4.9.BETA</version>
+            <version>1.5.0.BETA</version>
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>
