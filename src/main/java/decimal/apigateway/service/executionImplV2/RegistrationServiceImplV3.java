@@ -76,7 +76,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
             String clientId = httpHeaders.get(Constant.ORG_ID) + Constant.TILD_SPLITTER + httpHeaders.get(Constant.APP_ID);
             httpHeaders.put(Constant.CLIENT_ID, clientId);
-
+            log.info("------------client id------------" + clientId);
             List<String> tokenDetails = fetchTokenDetails(httpHeaders);
 
             httpHeaders.put(Constant.LOGIN_ID, tokenDetails.get(0));
@@ -145,7 +145,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
         log.info("decoded token = " + decodedToken);
 
         List<String> token = RouterOperations.getStringArray(decodedToken, Constant.COLON);
-
+        log.info("---------------token -----------" + token+ "-token size-" + token.size());
         //token format - loginId:clientsecret
         if (token.size() != 2) {
             throw new RouterExceptionV1(INVALID_REQUEST_500, "Invalid JWT token", null);
