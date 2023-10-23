@@ -213,6 +213,7 @@ public class ExceptionController {
     @ExceptionHandler(value = PublicTokenCreationException.class)
     public ResponseEntity<Object> handlePublicJwtCreationException(PublicTokenCreationException ex)  {
         log.info("Inside handlePublicJwtCreationException - " + ex.getMessage());
+        ex.printStackTrace();
         return new ResponseEntity<>(new ResponseOutput(ex.getErrorCode(), ex.getErrorMessage()), null, HttpStatus.BAD_REQUEST);
     }
 
