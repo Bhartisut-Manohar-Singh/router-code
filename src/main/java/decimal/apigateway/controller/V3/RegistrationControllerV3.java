@@ -50,7 +50,7 @@ public class RegistrationControllerV3 {
         log.info("==============================Public Gateway Processor=============================");
         String authorizationToken = httpHeaders.get("authorization");
         String responseType = httpHeaders.get("response-type");
-
+        log.info("--------authorization token----------" + authorizationToken);
         if (authorizationToken == null || !authorizationToken.startsWith("Bearer")) {
             throw new RouterExceptionV1(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
