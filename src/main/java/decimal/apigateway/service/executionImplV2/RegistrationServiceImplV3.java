@@ -69,7 +69,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
     }
 
     @Override
-    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterExceptionV1, PublicTokenCreationException {
+    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
         try {
 
             log.info("Executing Step 1 to validate register request.....");
@@ -115,10 +115,10 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             response.addHeader("Authorization", "Bearer " + jwtToken);
 
             node.put("Authorization", "Bearer " + jwtToken);
-
-            return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
+            throw new IOException("failed message");
+           // return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
         } catch (Exception routerException) {
-            throw new PublicTokenCreationException(FAILURE_STATUS, JWT_TOKEN_FAILURE);
+            throw new IOException(FAILURE_STATUS,routerException);
         }
     }
 

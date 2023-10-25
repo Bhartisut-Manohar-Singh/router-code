@@ -17,6 +17,7 @@ import decimal.logs.model.AuditPayload;
 import decimal.logs.model.ErrorPayload;
 import decimal.logs.model.SystemError;
 import decimal.ratelimiter.exception.RequestNotPermitted;
+import decimal.sessionmanagement.exception.RouterException;
 import lombok.extern.java.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class ExceptionController {
     @Autowired
     LogsWriter logsWriter;
 
-    @ExceptionHandler(value = RouterExceptionV1.class)
+    @ExceptionHandler({RouterExceptionV1.class, RouterException.class})
     public ResponseEntity<Object> handleRouterException(RouterExceptionV1 ex) throws JsonProcessingException {
 
         log.info("================================In Router Exception==============================");
