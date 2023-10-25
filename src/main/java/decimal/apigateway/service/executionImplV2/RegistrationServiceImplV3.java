@@ -9,6 +9,7 @@ import decimal.apigateway.commons.ResponseOperations;
 import decimal.apigateway.enums.HeadersV1;
 import decimal.apigateway.exception.RouterExceptionV1;
 import decimal.apigateway.model.MicroserviceResponse;
+import decimal.apigateway.model.ResponseOutput;
 import decimal.apigateway.service.AuthenticationService;
 import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.RegistrationServiceV3;
@@ -113,8 +114,8 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             response.addHeader("Authorization", "Bearer " + jwtToken);
 
             node.put("Authorization", "Bearer " + jwtToken);
-            throw new IOException("failed message");
-           // return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
+            //throw new IOException("failed message");
+            return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
         } catch (Exception routerException) {
             throw new IOException(FAILURE_STATUS,routerException);
         }
