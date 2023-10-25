@@ -114,8 +114,8 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             response.addHeader("Authorization", "Bearer " + jwtToken);
 
             node.put("Authorization", "Bearer " + jwtToken);
-            //throw new IOException("failed message");
-            return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
+            throw new IOException("failed message");
+            //return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
         } catch (Exception routerException) {
             throw new IOException(FAILURE_STATUS,routerException);
         }
