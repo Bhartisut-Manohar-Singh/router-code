@@ -71,18 +71,17 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
     public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
         try {
 
-            log.info("Executing Step 1 to validate register request.....");
+            log.info("Executing Step 1 to validate register request....."+httpHeaders.toString());
 
             String clientId = httpHeaders.get(Constant.ORG_ID) + Constant.TILD_SPLITTER + httpHeaders.get(Constant.APP_ID);
             httpHeaders.put(Constant.CLIENT_ID, clientId);
             log.info("------------client id------------" + clientId);
             List<String> tokenDetails = fetchTokenDetails(httpHeaders);
-            String username= httpHeaders.get("username");
             httpHeaders.put(Constant.LOGIN_ID, tokenDetails.get(0));
             httpHeaders.put(Constant.CLIENT_SECRET, tokenDetails.get(1));
             httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
             httpHeaders.put(HeadersV1.servicename.name(), "REGISTERAPP");
-            httpHeaders.put(Constant.USERNAME,username);
+
 
             ObjectNode jsonNodes;
 
