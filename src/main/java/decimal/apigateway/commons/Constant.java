@@ -47,4 +47,5 @@ public class Constant {
 
     public static final String JWT_TOKEN_SUCCESS = "JWT token generated successfully.";
     public static final String JWT_TOKEN_FAILURE = "Failed to generate JWT token. Please check your credentials and try again.";
+    public static final String USERNAME = "username";
 }

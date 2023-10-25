@@ -77,11 +77,12 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             httpHeaders.put(Constant.CLIENT_ID, clientId);
             log.info("------------client id------------" + clientId);
             List<String> tokenDetails = fetchTokenDetails(httpHeaders);
-
+            String username= httpHeaders.get("username");
             httpHeaders.put(Constant.LOGIN_ID, tokenDetails.get(0));
             httpHeaders.put(Constant.CLIENT_SECRET, tokenDetails.get(1));
             httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
             httpHeaders.put(HeadersV1.servicename.name(), "REGISTERAPP");
+            httpHeaders.put(Constant.USERNAME,username);
 
             ObjectNode jsonNodes;
 
