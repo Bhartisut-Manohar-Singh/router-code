@@ -100,6 +100,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             log.info("Response from Step 1....." + objectMapper.writeValueAsString(responseEntity));
 
             HttpHeaders responseHeaders = responseEntity.getHeaders();
+//            ..{"headers":{"status":["SUCCESS"]},
             if (responseHeaders != null && responseHeaders.containsKey("status"))
                 auditPayload.setStatus(responseHeaders.get("status").get(0));
 
@@ -114,10 +115,12 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             response.addHeader("Authorization", "Bearer " + jwtToken);
 
             node.put("Authorization", "Bearer " + jwtToken);
+
             throw new IOException("failed message");
-            //return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
+//            return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
         } catch (Exception routerException) {
             routerException.printStackTrace();
+
             throw new IOException(FAILURE_STATUS,routerException);
         }
     }

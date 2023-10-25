@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpServerErrorException;
 
+import java.io.IOException;
 import java.time.Instant;
 
 import static decimal.apigateway.commons.Constant.*;
@@ -218,6 +219,18 @@ public class ExceptionController {
         return new ResponseEntity<>(new ResponseOutput(ex.getErrorCode(), ex.getErrorMessage()), null, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(value = IOException.class)
+    public ResponseEntity<Object> handleIOException(IOException ex)  {
+        log.info("Inside IOException - " + ex.getMessage());
+        ex.printStackTrace();
+
+        MicroserviceResponse response = new MicroserviceResponse();
+        response.setMessage(ex.getMessage());
+        response.setResponse("");
+        HttpHeaders responseHeaders = new HttpHeaders();
+        ex.printStackTrace();
+        return new ResponseEntity<>(response,responseHeaders, HttpStatus.BAD_REQUEST);
+    }
 
 
     @ExceptionHandler(value = RouterExceptionAuth.class)
