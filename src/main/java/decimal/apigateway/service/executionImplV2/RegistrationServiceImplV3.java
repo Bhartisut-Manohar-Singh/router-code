@@ -97,7 +97,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             //ResponseEntity<Object> responseEntity = authenticationClient.publicRegister(request, httpHeaders);
             ResponseEntity<Object> responseEntity = authenticationService.publicRegister(request, httpHeaders);
 
-            log.info("Response from Step 1....." + responseEntity.toString());
+            log.info("Response from Step 1....." + objectMapper.writeValueAsString(responseEntity));
 
             HttpHeaders responseHeaders = responseEntity.getHeaders();
             if (responseHeaders != null && responseHeaders.containsKey("status"))
