@@ -97,7 +97,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             //ResponseEntity<Object> responseEntity = authenticationClient.publicRegister(request, httpHeaders);
             ResponseEntity<Object> responseEntity = authenticationService.publicRegister(request, httpHeaders);
 
-            log.info("Response from Step 1....." + responseEntity.getBody());
+            log.info("Response from Step 1....." + responseEntity.toString());
 
             HttpHeaders responseHeaders = responseEntity.getHeaders();
             if (responseHeaders != null && responseHeaders.containsKey("status"))
@@ -117,6 +117,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             throw new IOException("failed message");
             //return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
         } catch (Exception routerException) {
+            routerException.printStackTrace();
             throw new IOException(FAILURE_STATUS,routerException);
         }
     }
