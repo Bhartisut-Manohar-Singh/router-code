@@ -221,12 +221,11 @@ public class ExceptionController {
 
     @ExceptionHandler(value = IOException.class)
     public ResponseEntity<Object> handleIOException(IOException ex)  {
-        log.info("Inside IOException - " + ex.getLocalizedMessage());
+        log.info("Inside IOException - " + ex.getCause().getMessage());
         ex.printStackTrace();
 
         MicroserviceResponse response = new MicroserviceResponse();
-        response.setMessage(ex.getMessage());
-        response.setResponse(ex.getMessage());
+        response.setResponse(ex.getCause().getMessage());
         HttpHeaders responseHeaders = new HttpHeaders();
         return new ResponseEntity<>(response,responseHeaders, HttpStatus.BAD_REQUEST);
     }
