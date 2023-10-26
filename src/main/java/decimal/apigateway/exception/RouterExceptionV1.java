@@ -43,13 +43,13 @@ public class RouterExceptionV1 extends Exception {
         this.errorHint = errorHint;
     }
 
-	/*public RouterException(String errorCode, String msg, String errorType, String errorHint)
+	public RouterExceptionV1(String errorCode, String msg, String errorType, String errorHint)
 	{
 		this.errorCode = errorCode;
 		this.errorMessage = msg;
 		this.errorType = errorType;
 		this.errorHint = errorHint;
-	}*/
+	}
 
     public RouterExceptionV1(String errorCode, String errorMessage, Object detailedLogs) {
         this.errorCode = errorCode;
