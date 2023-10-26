@@ -121,7 +121,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
         } catch (Exception routerException) {
            // routerException.printStackTrace();
-            log.info("routerException "+objectMapper.writeValueAsString(routerException));
+            log.info("routerException ---------"+objectMapper.writeValueAsString(routerException));
 
            // throw new RouterExceptionV1(routerException.getErrorCode(), (Exception) null,routerException.getErrorHint(),routerException.getErrorType());
         }
