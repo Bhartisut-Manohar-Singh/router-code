@@ -303,13 +303,9 @@ public class SecurityServiceImpl implements SecurityService {
     }
 
     @Override
-    public Object validatePublicRegistration(String request, Map<String, String> httpHeaders) {
+    public Object validatePublicRegistration(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        try {
-            return securityValidator.validatePublicRegistration(request, httpHeaders);
-        } catch (RouterException | IOException e) {
-            throw new RuntimeException(e);
-        }
+        return securityValidator.validatePublicRegistration(request, httpHeaders);
     }
 
 

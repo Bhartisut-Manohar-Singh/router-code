@@ -7,10 +7,12 @@ import decimal.apigateway.service.SecurityService;
 import decimal.logs.model.AuditPayload;
 import decimal.sessionmanagement.common.RouterOperations;
 import decimal.sessionmanagement.enums.RequestValidationTypes;
+import decimal.sessionmanagement.exception.RouterException;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Map;
 
 import static decimal.sessionmanagement.enums.RequestValidationTypes.*;
@@ -133,7 +135,7 @@ public class RequestValidatorV2 {
         //return securityClient.validate(request, httpHeaders, RequestValidationTypesV1.REQUEST.name());
     }
 
-    public Object validatePublicRegistrationRequest(String request, Map<String, String> httpHeaders) {
+    public Object validatePublicRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
         return securityService.validatePublicRegistration(request, httpHeaders);
     }
 

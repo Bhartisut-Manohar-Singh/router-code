@@ -17,6 +17,7 @@ import decimal.apigateway.service.validator.RequestValidatorV2;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
 import decimal.sessionmanagement.common.RouterOperations;
+import decimal.sessionmanagement.exception.RouterException;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,7 +70,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
     }
 
     @Override
-    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterExceptionV1 {
+    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterExceptionV1, RouterException {
         try {
 
             log.info("Executing Step 1 to validate register request....."+httpHeaders.toString());
@@ -118,14 +119,14 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             node.put("Authorization", "Bearer " + jwtToken);
 
             //throw new IOException("failed message");
-
-        } catch (Exception routerException) {
-           // routerException.printStackTrace();
+            return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
+        } catch (RouterException routerException) {
             log.info("routerException ---------"+objectMapper.writeValueAsString(routerException));
-
-           // throw new RouterExceptionV1(routerException.getErrorCode(), (Exception) null,routerException.getErrorHint(),routerException.getErrorType());
+            log.info("error Hint ---------" + routerException.getErrorHint());
+            throw routerException;
+        }catch (IOException exception){
+            throw exception;
         }
-        return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
     }
 
     private List<String> fetchTokenDetails(Map<String, String> httpHeaders) throws RouterExceptionV1 {

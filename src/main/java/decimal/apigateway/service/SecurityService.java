@@ -2,8 +2,10 @@ package decimal.apigateway.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import decimal.apigateway.model.MicroserviceResponse;
+import decimal.sessionmanagement.exception.RouterException;
 import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
 import java.util.Map;
 
 public interface SecurityService {
@@ -32,7 +34,7 @@ public interface SecurityService {
 
     MicroserviceResponse validateExecutionRequest(String request, Map<String, String> httpHeaders);
 
-    Object validatePublicRegistration(String request, Map<String, String> httpHeaders);
+    Object validatePublicRegistration(String request, Map<String, String> httpHeaders) throws RouterException, IOException;
 
     MicroserviceResponse validateAuthenticationV2(String request, Map<String, String> httpHeaders);
 }
