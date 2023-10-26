@@ -58,8 +58,8 @@ public class ExceptionController {
     @Autowired
     LogsWriter logsWriter;
 
-    @ExceptionHandler({RouterExceptionV1.class, RouterException.class})
-    public ResponseEntity<Object> handleRouterException(RouterExceptionV1 ex) throws JsonProcessingException {
+    @ExceptionHandler(value = RouterExceptionV1.class)
+    public ResponseEntity<Object> handleRouterExceptionV1(RouterExceptionV1 ex) throws JsonProcessingException {
 
         log.info("================================In Router Exception==============================");
 
@@ -79,15 +79,12 @@ public class ExceptionController {
 
         try {
             createErrorPayload(ex);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
         }
 
-        if(ex.getResponse() != null)
-        {
-            JsonNode jsonNode = mapper.convertValue(ex.getResponse(),JsonNode.class);
-            isLogoutSuccess =  jsonNode.hasNonNull("status") ? jsonNode.get("status").asText().equalsIgnoreCase("625") : false;
+        if (ex.getResponse() != null) {
+            JsonNode jsonNode = mapper.convertValue(ex.getResponse(), JsonNode.class);
+            isLogoutSuccess = jsonNode.hasNonNull("status") ? jsonNode.get("status").asText().equalsIgnoreCase("625") : false;
         }
 
       /* if(auditPayload != null && auditPayload.getResponse()!=null) {
@@ -98,11 +95,11 @@ public class ExceptionController {
             logsWriter.updateLog(auditPayload);
         }*/
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("status",isLogoutSuccess ? SUCCESS_STATUS : FAILURE_STATUS);
-       return new ResponseEntity<>(ex.getResponse(), responseHeaders,HttpStatus.BAD_REQUEST);
+        responseHeaders.set("status", isLogoutSuccess ? SUCCESS_STATUS : FAILURE_STATUS);
+        return new ResponseEntity<>(ex.getResponse(), responseHeaders, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value =  HttpServerErrorException.class)
+    @ExceptionHandler(value = HttpServerErrorException.class)
     public ResponseEntity<Object> handleHttpServerErrorException(HttpServerErrorException exception) throws JsonProcessingException {
         log.info("================================In Exception Controller==============================");
         exception.printStackTrace();
@@ -113,15 +110,13 @@ public class ExceptionController {
         String status = FAILURE_STATUS;
 
         MicroserviceResponse microserviceResponse = new MicroserviceResponse(status, message, errorResponse);
-          try {
-              createErrorPayload(exception);
-          }
-          catch (Exception e)
-          {
-              e.printStackTrace();
-          }
+        try {
+            createErrorPayload(exception);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        if(auditPayload != null && auditPayload.getResponse()!=null) {
+        if (auditPayload != null && auditPayload.getResponse() != null) {
             auditPayload.getResponse().setResponse(microserviceResponse.getResponse() != null ? mapper.writeValueAsString(microserviceResponse) : "");
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
             auditPayload.getResponse().setTimestamp(Instant.now());
@@ -129,40 +124,39 @@ public class ExceptionController {
             logsWriter.updateLog(auditPayload);
         }
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("status",FAILURE_STATUS);
-        return new ResponseEntity<>(microserviceResponse, responseHeaders,HttpStatus.INTERNAL_SERVER_ERROR);
+        responseHeaders.set("status", FAILURE_STATUS);
+        return new ResponseEntity<>(microserviceResponse, responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Autowired
     AuditTraceFilter auditTraceFilter;
+
     private void createErrorPayload(Exception ex) {
         ex.printStackTrace();
         SystemError systemError = new SystemError();
 
-        if(ex instanceof RouterExceptionV1)
-        {
+        if (ex instanceof RouterExceptionV1) {
             RouterExceptionV1 exception = (RouterExceptionV1) ex;
 
             Object response = exception.getResponse();
 
-            if(response != null){
+            if (response != null) {
                 ObjectNode jsonNodes = mapper.convertValue(response, ObjectNode.class);
 
                 String statusCode = jsonNodes.get("status") != null ? jsonNodes.get("status").asText() : HttpStatus.BAD_REQUEST.toString();
 
-                String message = jsonNodes.get("message") !=null ? jsonNodes.get("message").toString() : "Some error occurred when executing request";
+                String message = jsonNodes.get("message") != null ? jsonNodes.get("message").toString() : "Some error occurred when executing request";
                 systemError.setErrorCode(statusCode);
                 systemError.setMessage(message);
                 systemError.setDetailedError(jsonNodes.toString());
 
-            }else {
+            } else {
 
                 systemError.setErrorCode(exception.getErrorCode() == null || exception.getErrorCode().isEmpty() ? HttpStatus.BAD_REQUEST.toString() : exception.getErrorCode());
                 systemError.setMessage(exception.getMessage());
                 systemError.setDetailedError(exception.getErrorHint());
             }
-        }
-        else {
+        } else {
             systemError.setErrorCode(HttpStatus.BAD_REQUEST.toString());
             systemError.setMessage("Some error occurred when executing request " + ex.getMessage());
         }
@@ -213,21 +207,21 @@ public class ExceptionController {
     }
 
     @ExceptionHandler(value = PublicTokenCreationException.class)
-    public ResponseEntity<Object> handlePublicJwtCreationException(PublicTokenCreationException ex)  {
+    public ResponseEntity<Object> handlePublicJwtCreationException(PublicTokenCreationException ex) {
         log.info("Inside handlePublicJwtCreationException - " + ex.getMessage());
         ex.printStackTrace();
         return new ResponseEntity<>(new ResponseOutput(ex.getErrorCode(), ex.getErrorMessage()), null, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = IOException.class)
-    public ResponseEntity<Object> handleIOException(IOException ex)  {
+    public ResponseEntity<Object> handleIOException(IOException ex) {
         log.info("Inside IOException - " + ex.getCause().getMessage());
         ex.printStackTrace();
 
         MicroserviceResponse response = new MicroserviceResponse();
         response.setResponse(ex.getCause().getMessage());
         HttpHeaders responseHeaders = new HttpHeaders();
-        return new ResponseEntity<>(response,responseHeaders, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, responseHeaders, HttpStatus.BAD_REQUEST);
     }
 
 
@@ -236,7 +230,7 @@ public class ExceptionController {
 
         log.info("Inside handleRouterExceptionAUTH exception handler - " + ex.getMessage());
 
-        RouterExceptionAuth  exception = new RouterExceptionAuth();
+        RouterExceptionAuth exception = new RouterExceptionAuth();
         exception.setErrorCode(ex.getErrorCode());
         exception.setErrorHint(ex.getErrorHint());
         exception.setErrorMessage(exception.getErrorMessage());
@@ -246,8 +240,8 @@ public class ExceptionController {
         response.setMessage(ex.getErrorMessage());
         response.setResponse(String.valueOf(ex.getErrorHint()));
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set(STATUS,ROUTER_MULTIPLE_SESSION);
-        return new ResponseEntity<>(response,responseHeaders, HttpStatus.BAD_REQUEST);
+        responseHeaders.set(STATUS, ROUTER_MULTIPLE_SESSION);
+        return new ResponseEntity<>(response, responseHeaders, HttpStatus.BAD_REQUEST);
     }
 
 
@@ -255,14 +249,25 @@ public class ExceptionController {
     public ResponseEntity<Object> handleRouterExceptionAUTH(RuntimeException ex) throws JsonProcessingException {
 
         log.info(" Inside handleRuntimeException - " + ex.getMessage());
-        ex.printStackTrace();
 
         MicroserviceResponse response = new MicroserviceResponse();
         response.setMessage(ex.getMessage());
         response.setResponse("RunTimeException");
         HttpHeaders responseHeaders = new HttpHeaders();
-        return new ResponseEntity<>(response,responseHeaders, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, responseHeaders, HttpStatus.BAD_REQUEST);
     }
 
 
+    @ExceptionHandler(RouterException.class)
+    public ResponseEntity<Object> handleRouterException(RouterException ex) {
+
+        log.info("================================In Router Exception==============================");
+
+        MicroserviceResponse response = new MicroserviceResponse();
+        response.setMessage(ex.getErrorHint());
+        response.setStatus(ex.getErrorCode());
+        response.setResponse(ex.getErrorType());
+        HttpHeaders responseHeaders = new HttpHeaders();
+        return new ResponseEntity<>(response, responseHeaders, HttpStatus.BAD_REQUEST);
+    }
 }
