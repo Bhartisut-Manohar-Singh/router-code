@@ -17,6 +17,7 @@ import decimal.apigateway.service.validator.RequestValidatorV2;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
 import decimal.sessionmanagement.common.RouterOperations;
+import decimal.sessionmanagement.exception.RouterException;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,7 +69,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
     }
 
     @Override
-    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
+    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
         try {
 
             log.info("Executing Step 1 to validate register request....."+httpHeaders.toString());
@@ -121,7 +122,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
         } catch (Exception routerException) {
             routerException.printStackTrace();
 
-            throw new IOException(FAILURE_STATUS,routerException);
+            throw new RouterException(FAILURE_STATUS,routerException);
         }
     }
 

@@ -4,6 +4,7 @@ package decimal.apigateway.controller.V3;
 import decimal.apigateway.exception.RouterExceptionV1;
 import decimal.apigateway.service.ExecutionServiceV3;
 import decimal.apigateway.service.RegistrationServiceV3;
+import decimal.sessionmanagement.exception.RouterException;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +41,7 @@ public class RegistrationControllerV3 {
      * @throws IOException
      */
     @PostMapping("register")
-    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
+    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
         log.info("-------register call v3-------------");
         return registrationServiceV3.register(request, httpHeaders, response);
     }
