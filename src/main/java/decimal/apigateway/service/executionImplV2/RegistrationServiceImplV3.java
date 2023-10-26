@@ -119,18 +119,18 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
             //throw new IOException("failed message");
             return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
-        } catch (Exception routerException) {
+        } catch (RouterException routerException) {
             routerException.printStackTrace();
 
-            throw new RouterException(FAILURE_STATUS,routerException);
+            throw new RouterException(routerException.getErrorCode(),null,routerException.getMessage(),routerException.getErrorHint());
         }
     }
 
-    private List<String> fetchTokenDetails(Map<String, String> httpHeaders) throws RouterExceptionV1 {
+    private List<String> fetchTokenDetails(Map<String, String> httpHeaders) throws RouterException {
         String authorizationToken = httpHeaders.get("authorization");
 
         if (authorizationToken == null || !authorizationToken.startsWith("Basic")) {
-            throw new RouterExceptionV1(INVALID_REQUEST_500, "Invalid JWT token", null);
+            throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
 
         String decodedToken;
@@ -143,7 +143,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             decodedToken = new String(decoded, StandardCharsets.UTF_8);
 
         } catch (Exception e) {
-            throw new RouterExceptionV1(INVALID_REQUEST_500, "Invalid JWT token", null);
+            throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
 
         log.info("decoded token = " + decodedToken);
@@ -152,7 +152,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
         log.info("---------------token -----------" + token+ "-token size-" + token.size());
         //token format - loginId:clientsecret
         if (token.size() != 2) {
-            throw new RouterExceptionV1(INVALID_REQUEST_500, "Invalid JWT token", null);
+            throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
 
         return token;
