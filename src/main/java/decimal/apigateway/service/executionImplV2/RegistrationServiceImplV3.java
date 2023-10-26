@@ -120,7 +120,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             //throw new IOException("failed message");
 
         } catch (Exception routerException) {
-            routerException.printStackTrace();
+           // routerException.printStackTrace();
             log.info("routerException "+objectMapper.writeValueAsString(routerException));
 
            // throw new RouterExceptionV1(routerException.getErrorCode(), (Exception) null,routerException.getErrorHint(),routerException.getErrorType());
