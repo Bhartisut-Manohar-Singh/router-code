@@ -118,13 +118,14 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             node.put("Authorization", "Bearer " + jwtToken);
 
             //throw new IOException("failed message");
-        return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
-        } catch (RouterExceptionV1 routerException) {
+
+        } catch (Exception routerException) {
             routerException.printStackTrace();
             log.info("routerException "+objectMapper.writeValueAsString(routerException));
 
-            throw new RouterExceptionV1(routerException.getErrorCode(), (Exception) null,routerException.getErrorHint(),routerException.getErrorType());
+           // throw new RouterExceptionV1(routerException.getErrorCode(), (Exception) null,routerException.getErrorHint(),routerException.getErrorType());
         }
+        return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
     }
 
     private List<String> fetchTokenDetails(Map<String, String> httpHeaders) throws RouterExceptionV1 {
