@@ -219,13 +219,16 @@ public class ExceptionController {
         return new ResponseEntity<>(new ResponseOutput(ex.getErrorCode(), ex.getErrorMessage()), null, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = IOException.class)
-    public ResponseEntity<Object> handleIOException(IOException ex)  {
+    @ExceptionHandler(value = RouterException.class)
+    public ResponseEntity<Object> handleIOException(RouterException ex)  {
         log.info("Inside IOException - " + ex.getCause().getMessage());
         ex.printStackTrace();
-
-        MicroserviceResponse response = new MicroserviceResponse();
-        response.setResponse(ex.getCause().getLocalizedMessage());
+        RouterException response=new RouterException();
+        //MicroserviceResponse response = new MicroserviceResponse();
+        response.setErrorCode(ex.getErrorCode());
+        response.setErrorMessage(ex.getErrorMessage());
+        response.setErrorHint(ex.getErrorHint());
+        response.setErrorType(ex.getErrorType());
         HttpHeaders responseHeaders = new HttpHeaders();
         return new ResponseEntity<>(response,responseHeaders, HttpStatus.BAD_REQUEST);
     }
