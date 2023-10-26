@@ -121,6 +121,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
         return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
         } catch (RouterExceptionV1 routerException) {
             routerException.printStackTrace();
+            log.info("routerException "+objectMapper.writeValueAsString(routerException));
 
             throw new RouterExceptionV1(routerException.getErrorCode(), (Exception) null,routerException.getErrorHint(),routerException.getErrorType());
         }

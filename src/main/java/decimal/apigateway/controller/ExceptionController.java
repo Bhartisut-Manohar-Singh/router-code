@@ -219,19 +219,18 @@ public class ExceptionController {
         return new ResponseEntity<>(new ResponseOutput(ex.getErrorCode(), ex.getErrorMessage()), null, HttpStatus.BAD_REQUEST);
     }
 
-    /*@ExceptionHandler(value = RouterException.class)
-    public ResponseEntity<Object> handleRouterException(RouterException ex)  {
+    @ExceptionHandler(value = IOException.class)
+    public ResponseEntity<Object> handleIOException(IOException ex)  {
         log.info("Inside IOException - " + ex.getCause().getMessage());
         ex.printStackTrace();
 
         MicroserviceResponse response = new MicroserviceResponse();
-        response.setMessage(ex.getErrorType());
-        response.setResponse(ex.getErrorHint());
-        //response.setResponse(ex.getCause().getMessage());
+        response.setResponse(ex.getCause().getMessage());
         HttpHeaders responseHeaders = new HttpHeaders();
         return new ResponseEntity<>(response,responseHeaders, HttpStatus.BAD_REQUEST);
     }
-*/
+
+
     @ExceptionHandler(value = RouterExceptionAuth.class)
     public ResponseEntity<Object> handleRouterExceptionAUTH(RouterExceptionAuth ex) throws JsonProcessingException {
 
