@@ -23,11 +23,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.integration.annotation.Router;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.rmi.RemoteException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -118,7 +120,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             node.put("Authorization", "Bearer " + jwtToken);
 
             //throw new IOException("failed message");
-            return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
+        return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
         } catch (RouterException routerException) {
             routerException.printStackTrace();
 
