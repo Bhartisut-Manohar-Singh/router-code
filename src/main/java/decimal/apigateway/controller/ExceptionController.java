@@ -219,7 +219,7 @@ public class ExceptionController {
         return new ResponseEntity<>(new ResponseOutput(ex.getErrorCode(), ex.getErrorMessage()), null, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = RouterException.class)
+    /*@ExceptionHandler(value = RouterException.class)
     public ResponseEntity<Object> handleRouterException(RouterException ex)  {
         log.info("Inside IOException - " + ex.getCause().getMessage());
         ex.printStackTrace();
@@ -231,7 +231,7 @@ public class ExceptionController {
         HttpHeaders responseHeaders = new HttpHeaders();
         return new ResponseEntity<>(response,responseHeaders, HttpStatus.BAD_REQUEST);
     }
-
+*/
     @ExceptionHandler(value = RouterExceptionAuth.class)
     public ResponseEntity<Object> handleRouterExceptionAUTH(RouterExceptionAuth ex) throws JsonProcessingException {
 

@@ -122,7 +122,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
         } catch (RouterExceptionV1 routerException) {
             routerException.printStackTrace();
 
-            throw new RouterExceptionV1(routerException.getErrorCode(),routerException.getErrorType(),routerException.getErrorHint());
+            throw new RouterExceptionV1(routerException.getErrorCode(),routerException.getErrorHint(),routerException.getCause().getMessage());
         }
     }
 
