@@ -17,7 +17,6 @@ import decimal.apigateway.service.validator.RequestValidatorV2;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
 import decimal.sessionmanagement.common.RouterOperations;
-import decimal.sessionmanagement.exception.RouterException;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,7 +68,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
     }
 
     @Override
-    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
+    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException {
         try {
 
             log.info("Executing Step 1 to validate register request....."+httpHeaders.toString());
@@ -119,18 +118,18 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
             //throw new IOException("failed message");
             return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
-        } catch (RouterException routerException) {
+        } catch (Exception routerException) {
             routerException.printStackTrace();
 
-            throw new RouterException(routerException.getErrorCode(),null,routerException.getMessage(),routerException.getErrorHint());
+            throw new IOException(FAILURE_STATUS,routerException);
         }
     }
 
-    private List<String> fetchTokenDetails(Map<String, String> httpHeaders) throws RouterException {
+    private List<String> fetchTokenDetails(Map<String, String> httpHeaders) throws RouterExceptionV1 {
         String authorizationToken = httpHeaders.get("authorization");
 
         if (authorizationToken == null || !authorizationToken.startsWith("Basic")) {
-            throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
+            throw new RouterExceptionV1(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
 
         String decodedToken;
@@ -143,7 +142,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             decodedToken = new String(decoded, StandardCharsets.UTF_8);
 
         } catch (Exception e) {
-            throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
+            throw new RouterExceptionV1(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
 
         log.info("decoded token = " + decodedToken);
@@ -152,7 +151,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
         log.info("---------------token -----------" + token+ "-token size-" + token.size());
         //token format - loginId:clientsecret
         if (token.size() != 2) {
-            throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
+            throw new RouterExceptionV1(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
 
         return token;
