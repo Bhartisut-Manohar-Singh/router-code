@@ -226,7 +226,8 @@ public class ExceptionController {
 
         MicroserviceResponse response = new MicroserviceResponse();
         response.setMessage(ex.getErrorType());
-        response.setResponse(ex.getCause().getMessage());
+        response.setResponse(ex.getErrorHint());
+        //response.setResponse(ex.getCause().getMessage());
         HttpHeaders responseHeaders = new HttpHeaders();
         return new ResponseEntity<>(response,responseHeaders, HttpStatus.BAD_REQUEST);
     }
