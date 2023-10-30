@@ -144,7 +144,7 @@
         <dependency>
             <groupId>decimal</groupId>
             <artifactId>security-manager</artifactId>
-            <version>1.5.2.SNAPSHOOT</version>
+            <version>1.5.3.SNAPSHOOT</version>
         </dependency>
 
         <dependency>
@@ -156,7 +156,7 @@
         <dependency>
             <groupId>decimal</groupId>
             <artifactId>authentication-service</artifactId>
-            <version>1.5.0.BETA</version>
+            <version>1.5.1.BETA</version>
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>
