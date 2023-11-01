@@ -63,7 +63,7 @@ public class SecurityServiceImpl implements SecurityService {
             log.info(httpHeaders.get("sourceorgid"));
             log.info(httpHeaders.get("sourceorgid"));
             auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service123", auditPayload);
+            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(request);
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
@@ -86,7 +86,7 @@ public class SecurityServiceImpl implements SecurityService {
     public MicroserviceResponse decryptRequest(JsonNode node, Map<String, String> httpHeaders) {
         try {
             auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(node.toString(), JSON,httpHeaders, "security-service123", auditPayload);
+            auditPayload = logsWriter.initializeLog(node.toString(), JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(node.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
@@ -109,7 +109,7 @@ public class SecurityServiceImpl implements SecurityService {
 
         try {
             auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(body, JSON,httpHeaders, "security-service123", auditPayload);
+            auditPayload = logsWriter.initializeLog(body, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(body);
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
@@ -132,7 +132,7 @@ public class SecurityServiceImpl implements SecurityService {
 
         try {
             auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service123", auditPayload);
+            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(request.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
@@ -154,7 +154,7 @@ public class SecurityServiceImpl implements SecurityService {
 
         try {
             auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(responseEntity.toString(), JSON,httpHeaders, "security-service123", auditPayload);
+            auditPayload = logsWriter.initializeLog(responseEntity.toString(), JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(responseEntity.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
@@ -176,7 +176,7 @@ public class SecurityServiceImpl implements SecurityService {
 
         try {
             auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(finalResponse, JSON,httpHeaders, "security-service123", auditPayload);
+            auditPayload = logsWriter.initializeLog(finalResponse, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(finalResponse.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
@@ -200,7 +200,7 @@ public class SecurityServiceImpl implements SecurityService {
             log.info("request----" + request);
             log.info("httpHeaders------" + httpHeaders + "    name-----------" + name);
             auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service123", auditPayload);
+            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(request.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
@@ -224,7 +224,7 @@ public class SecurityServiceImpl implements SecurityService {
 
         try {
             auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service123", auditPayload);
+            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(request.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
@@ -246,7 +246,7 @@ public class SecurityServiceImpl implements SecurityService {
 
         try {
             auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(finalResponse, JSON,httpHeaders, "security-service123", auditPayload);
+            auditPayload = logsWriter.initializeLog(finalResponse, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(finalResponse.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
@@ -266,7 +266,7 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders, String serviceName) {
         try {
-            auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders, "api-security", auditPayload);
+            auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(request);
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
@@ -285,7 +285,7 @@ public class SecurityServiceImpl implements SecurityService {
 
         try {
             auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service123", auditPayload);
+            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(request.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
@@ -314,7 +314,7 @@ public class SecurityServiceImpl implements SecurityService {
 
         try {
             auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service123", auditPayload);
+            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(request.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));

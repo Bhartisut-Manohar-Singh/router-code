@@ -41,7 +41,7 @@ public class RequestValidatorV2 {
         httpHeaders.put("sourceOrgId", clientId.split(Constant.TILD_SPLITTER)[0]);
         httpHeaders.put("sourceAppId", clientId.split(Constant.TILD_SPLITTER)[1]);
 
-        log.info("V2: Finally calling security client");
+        log.info("V2: Finally calling security client"+httpHeaders);
 
         MicroserviceResponse response = securityService.validate(request, httpHeaders, REQUEST.name());
         //MicroserviceResponse response = securityClient.validate(request, httpHeaders, RequestValidationTypesV1.REQUEST.name());
