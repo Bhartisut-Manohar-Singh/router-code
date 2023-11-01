@@ -60,8 +60,8 @@ public class SecurityServiceImpl implements SecurityService {
     public MicroserviceResponse validateExecutionRequestV2(String request, Map<String, String> httpHeaders) {
             log.info("validateExecutionRequestV2 httpheaders------------ "+httpHeaders);
         try {
-            log.info(httpHeaders.get("sourceorgid"));
-            log.info(httpHeaders.get("sourceappid"));
+            log.info(httpHeaders.get("sourceAppId"));
+            log.info(httpHeaders.get("sourceOrgId"));
             auditPayload=auditPayload();
             auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
