@@ -144,7 +144,7 @@
         <dependency>
             <groupId>decimal</groupId>
             <artifactId>security-manager</artifactId>
-            <version>1.5.5.SNAPSHOOT</version>
+            <version>1.5.6.SNAPSHOOT</version>
         </dependency>
 
         <dependency>
