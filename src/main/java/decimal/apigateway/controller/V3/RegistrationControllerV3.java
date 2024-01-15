@@ -1,10 +1,9 @@
 package decimal.apigateway.controller.V3;
 
 
-import decimal.apigateway.exception.RouterExceptionV1;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionServiceV3;
 import decimal.apigateway.service.RegistrationServiceV3;
-import decimal.sessionmanagement.exception.RouterException;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -41,19 +40,19 @@ public class RegistrationControllerV3 {
      * @throws IOException
      */
     @PostMapping("register")
-    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException, RouterExceptionV1 {
+    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException, RouterException {
         log.info("-------register call v3-------------");
         return registrationServiceV3.register(request, httpHeaders, response);
     }
 
     @PostMapping("gatewayProcessor")
-    public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws  IOException, RouterExceptionV1 {
+    public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws  IOException, RouterException {
         log.info("==============================Public Gateway Processor=============================");
         String authorizationToken = httpHeaders.get("authorization");
         String responseType = httpHeaders.get("response-type");
         log.info("--------authorization token----------" + authorizationToken);
         if (authorizationToken == null || !authorizationToken.startsWith("Bearer")) {
-            throw new RouterExceptionV1(INVALID_REQUEST_500, "Invalid JWT token", null);
+            throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
         if (responseType !=null && MULTIPART.equalsIgnoreCase(responseType))
             return executionService.executeMultiPart(request,httpHeaders);

@@ -1,13 +1,13 @@
 package decimal.apigateway.service.validator;
 
 import decimal.apigateway.commons.Constant;
-import decimal.apigateway.exception.RouterExceptionV1;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.SecurityService;
 import decimal.logs.model.AuditPayload;
-import decimal.sessionmanagement.common.RouterOperations;
-import decimal.sessionmanagement.enums.RequestValidationTypes;
-import decimal.sessionmanagement.exception.RouterException;
+import decimal.apigateway.commons.RouterOperations;
+import decimal.apigateway.enums.RequestValidationTypes;
+import decimal.apigateway.exception.RouterException;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.Map;
 
-import static decimal.sessionmanagement.enums.RequestValidationTypes.*;
+import static decimal.apigateway.enums.RequestValidationTypes.*;
 
 @Service
 @Log
@@ -29,7 +29,7 @@ public class RequestValidatorV2 {
     }
 
 
-    public Object validateRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterExceptionV1 {
+    public Object validateRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterException {
 
         return securityService.validateRegistration(request, httpHeaders);
         //return securityClient.validateRegistration(request, httpHeaders).getResponse();
@@ -118,7 +118,7 @@ public class RequestValidatorV2 {
         return httpHeaders;
     }
 
-    public void validatePlainDynamicRequest(String request, Map<String, String> httpHeaders) throws RouterExceptionV1 {
+    public void validatePlainDynamicRequest(String request, Map<String, String> httpHeaders) throws RouterException {
 
         httpHeaders.put("clientid", httpHeaders.get("sourceOrgId") + "~" + httpHeaders.get("sourceAppId"));
 
@@ -130,7 +130,7 @@ public class RequestValidatorV2 {
         }
     }
 
-    public MicroserviceResponse validateLogout(String request, Map<String, String> httpHeaders) throws RouterExceptionV1 {
+    public MicroserviceResponse validateLogout(String request, Map<String, String> httpHeaders) throws RouterException {
         return securityService.validate(request, httpHeaders, REQUEST.name());
         //return securityClient.validate(request, httpHeaders, RequestValidationTypesV1.REQUEST.name());
     }

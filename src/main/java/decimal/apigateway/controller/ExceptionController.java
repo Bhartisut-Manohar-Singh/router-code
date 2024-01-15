@@ -5,19 +5,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.exception.PublicTokenCreationException;
-import decimal.apigateway.exception.RouterExceptionV1;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.model.ResponseOutput;
 import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.ServiceMonitoringAudit;
-import decimal.authenticationservice.exception.RouterExceptionAuth;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.ErrorPayload;
 import decimal.logs.model.SystemError;
 import decimal.ratelimiter.exception.RequestNotPermitted;
-import decimal.sessionmanagement.exception.RouterException;
 import lombok.extern.java.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +32,8 @@ import java.time.Instant;
 
 import static decimal.apigateway.commons.Constant.*;
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
-import static decimal.authenticationservice.common.ConstantsAuth.STATUS;
-import static decimal.sessionmanagement.common.RouterResponseCode.ROUTER_MULTIPLE_SESSION;
+import static decimal.apigateway.commons.ConstantsAuth.STATUS;
+import static decimal.apigateway.commons.RouterResponseCode.ROUTER_MULTIPLE_SESSION;
 
 @RestControllerAdvice
 @Log
@@ -58,8 +56,8 @@ public class ExceptionController {
     @Autowired
     LogsWriter logsWriter;
 
-    @ExceptionHandler(value = RouterExceptionV1.class)
-    public ResponseEntity<Object> handleRouterExceptionV1(RouterExceptionV1 ex) throws JsonProcessingException {
+    @ExceptionHandler(value = RouterException.class)
+    public ResponseEntity<Object> handleRouterExceptionV1(RouterException ex) throws JsonProcessingException {
 
         log.info("================================In Router Exception==============================");
 
@@ -135,8 +133,8 @@ public class ExceptionController {
         ex.printStackTrace();
         SystemError systemError = new SystemError();
 
-        if (ex instanceof RouterExceptionV1) {
-            RouterExceptionV1 exception = (RouterExceptionV1) ex;
+        if (ex instanceof RouterException) {
+            RouterException exception = (RouterException) ex;
 
             Object response = exception.getResponse();
 
@@ -225,6 +223,7 @@ public class ExceptionController {
     }
 
 
+/*
     @ExceptionHandler(value = RouterExceptionAuth.class)
     public ResponseEntity<Object> handleRouterExceptionAUTH(RouterExceptionAuth ex) throws JsonProcessingException {
 
@@ -243,6 +242,7 @@ public class ExceptionController {
         responseHeaders.set(STATUS, ROUTER_MULTIPLE_SESSION);
         return new ResponseEntity<>(response, responseHeaders, HttpStatus.BAD_REQUEST);
     }
+*/
 
 
     @ExceptionHandler(value = RuntimeException.class)

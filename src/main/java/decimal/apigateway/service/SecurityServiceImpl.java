@@ -3,15 +3,15 @@ package decimal.apigateway.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
+import decimal.apigateway.service.security.EncryptionDecryptionService;
+import decimal.apigateway.service.security.SecurityValidator;
+import decimal.apigateway.service.security.ValidationServiceV2;
+import decimal.apigateway.service.validator.ValidatorFactory;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.Request;
 import decimal.logs.model.Response;
-import decimal.sessionmanagement.exception.RouterException;
-import decimal.sessionmanagement.service.EncryptionDecryptionService;
-import decimal.sessionmanagement.service.SecurityValidator;
-import decimal.sessionmanagement.service.ValidationServiceV2;
-import decimal.sessionmanagement.service.validator.ValidatorFactory;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -68,7 +68,7 @@ public class SecurityServiceImpl implements SecurityService {
             auditPayload.getRequest().setRequestBody(request);
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
-            decimal.sessionmanagement.model.MicroserviceResponse microserviceResponse = (decimal.sessionmanagement.model.MicroserviceResponse) validationServiceV2.validateExecutionRequest(request, httpHeaders).getBody();
+            MicroserviceResponse microserviceResponse = (MicroserviceResponse) validationServiceV2.validateExecutionRequest(request, httpHeaders).getBody();
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
@@ -91,7 +91,7 @@ public class SecurityServiceImpl implements SecurityService {
             auditPayload.getRequest().setRequestBody(node.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
-            decimal.sessionmanagement.model.MicroserviceResponse microserviceResponse = encryptionDecryptionService.decryptRequest(node.asText(), httpHeaders);
+            MicroserviceResponse microserviceResponse = encryptionDecryptionService.decryptRequest(node.asText(), httpHeaders);
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
@@ -99,7 +99,7 @@ public class SecurityServiceImpl implements SecurityService {
             logsWriter.updateLog(auditPayload);
             log.info("MicroserviceResponse  " + microserviceResponse);
             return new MicroserviceResponse(microserviceResponse);
-        } catch (decimal.sessionmanagement.exception.RouterException e) {
+        } catch (RouterException e) {
             throw new RuntimeException(e);
         }
     }
@@ -115,7 +115,7 @@ public class SecurityServiceImpl implements SecurityService {
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
 
-            decimal.sessionmanagement.model.MicroserviceResponse microserviceResponse = encryptionDecryptionService.encryptResponse(body, httpHeaders);
+            MicroserviceResponse microserviceResponse = encryptionDecryptionService.encryptResponse(body, httpHeaders);
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
@@ -137,14 +137,14 @@ public class SecurityServiceImpl implements SecurityService {
             auditPayload.getRequest().setRequestBody(request.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
-            decimal.sessionmanagement.model.MicroserviceResponse microserviceResponse = encryptionDecryptionService.decryptRequestWithoutSession(request, httpHeaders);
+            MicroserviceResponse microserviceResponse = encryptionDecryptionService.decryptRequestWithoutSession(request, httpHeaders);
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
             return new MicroserviceResponse(microserviceResponse);
-        } catch (decimal.sessionmanagement.exception.RouterException e) {
+        } catch (RouterException e) {
             throw new RuntimeException(e);
         }
     }
@@ -159,14 +159,14 @@ public class SecurityServiceImpl implements SecurityService {
             auditPayload.getRequest().setRequestBody(responseEntity.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
-            decimal.sessionmanagement.model.MicroserviceResponse microserviceResponse = encryptionDecryptionService.encryptResponseWithoutSession(responseEntity.getBody().toString(), httpHeaders);
+            MicroserviceResponse microserviceResponse = encryptionDecryptionService.encryptResponseWithoutSession(responseEntity.getBody().toString(), httpHeaders);
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
             return new MicroserviceResponse(microserviceResponse);
-        } catch (decimal.sessionmanagement.exception.RouterException e) {
+        } catch (RouterException e) {
             throw new RuntimeException(e);
         }
     }
@@ -181,7 +181,7 @@ public class SecurityServiceImpl implements SecurityService {
             auditPayload.getRequest().setRequestBody(finalResponse.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
-            decimal.sessionmanagement.model.MicroserviceResponse microserviceResponse = encryptionDecryptionService.generateResponseHash(finalResponse, httpHeaders);
+            MicroserviceResponse microserviceResponse = encryptionDecryptionService.generateResponseHash(finalResponse, httpHeaders);
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
@@ -205,7 +205,7 @@ public class SecurityServiceImpl implements SecurityService {
             auditPayload.getRequest().setRequestBody(request.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
-            decimal.sessionmanagement.model.MicroserviceResponse microserviceResponse = validatorFactory.getValidator(name).validate(request, httpHeaders);
+            MicroserviceResponse microserviceResponse = validatorFactory.getValidator(name).validate(request, httpHeaders);
             log.info("response from session Management " + microserviceResponse);
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
@@ -229,7 +229,7 @@ public class SecurityServiceImpl implements SecurityService {
             auditPayload.getRequest().setRequestBody(request.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
-            decimal.sessionmanagement.model.MicroserviceResponse microserviceResponse = securityValidator.validateAuthenticationRequest(request, httpHeaders);
+            MicroserviceResponse microserviceResponse = securityValidator.validateAuthenticationRequest(request, httpHeaders);
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
@@ -251,14 +251,14 @@ public class SecurityServiceImpl implements SecurityService {
             auditPayload.getRequest().setRequestBody(finalResponse.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
-            decimal.sessionmanagement.model.MicroserviceResponse microserviceResponse = encryptionDecryptionService.generateAuthResponseHash(finalResponse, httpHeaders);
+            MicroserviceResponse microserviceResponse = encryptionDecryptionService.generateAuthResponseHash(finalResponse, httpHeaders);
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
             return new MicroserviceResponse(microserviceResponse);
-        } catch (decimal.sessionmanagement.exception.RouterException e) {
+        } catch (RouterException e) {
             throw new RuntimeException(e);
         }
     }
@@ -290,7 +290,7 @@ public class SecurityServiceImpl implements SecurityService {
             auditPayload.getRequest().setRequestBody(request.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
-            decimal.sessionmanagement.model.MicroserviceResponse response = securityValidator.validateExecutionRequest(request, httpHeaders);
+            MicroserviceResponse response = securityValidator.validateExecutionRequest(request, httpHeaders);
             auditPayload.setStatus(response.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(response.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
@@ -319,7 +319,7 @@ public class SecurityServiceImpl implements SecurityService {
             auditPayload.getRequest().setRequestBody(request.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
-            decimal.sessionmanagement.model.MicroserviceResponse response = securityValidator.validateAuthenticationRequestV2(request, httpHeaders);
+            MicroserviceResponse response = securityValidator.validateAuthenticationRequestV2(request, httpHeaders);
             auditPayload.setStatus(response.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(response.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();

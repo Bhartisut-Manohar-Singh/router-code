@@ -1,7 +1,7 @@
 package decimal.apigateway.controller;
 
 import decimal.apigateway.commons.Constant;
-import decimal.apigateway.exception.RouterExceptionV1;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +22,13 @@ public class ExecutionController
     ExecutionService executionService;
 
     @PostMapping("gatewayProcessor")
-    public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterExceptionV1, IOException {
+    public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         System.out.println("==============================Gateway Processor=============================");
         return executionService.executePlainRequest(request, httpHeaders);
     }
     @PostMapping("execute/{orgId}/{appId}/{serviceName}/{version}")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String orgId,
-                                      @PathVariable String appId, @PathVariable String serviceName, @PathVariable String version) throws RouterExceptionV1, IOException {
+                                      @PathVariable String appId, @PathVariable String serviceName, @PathVariable String version) throws RouterException, IOException {
         httpHeaders.put("servicename", serviceName);
         httpHeaders.put("orgid", orgId);
         httpHeaders.put("appid", appId);
@@ -39,20 +39,20 @@ public class ExecutionController
     }
 
     @PostMapping("gateway")
-    public Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterExceptionV1, IOException {
+    public Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         log.info("======================Gateway=============================");
         return executionService.executeRequest(request, httpHeaders);
     }
 
     @PostMapping(value = "dynamic-router/{serviceName}/**")
-    public Object executeService(@RequestBody String request, HttpServletRequest httpServletRequest, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName) throws IOException, RouterExceptionV1 {
+    public Object executeService(@RequestBody String request, HttpServletRequest httpServletRequest, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName) throws IOException, RouterException {
 
         log.info("=============================Dynamic-router=============================");
         return executionService.executeDynamicRequest(httpServletRequest, request, httpHeaders, serviceName);
     }
 
     @PostMapping(value = "dynamic-router/plain/{serviceName}/**")
-    public Object executeServicePlain(@RequestBody String request, HttpServletRequest httpServletRequest, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName) throws IOException, RouterExceptionV1 {
+    public Object executeServicePlain(@RequestBody String request, HttpServletRequest httpServletRequest, @RequestHeader Map<String, String> httpHeaders, @PathVariable String serviceName) throws IOException, RouterException {
 
         log.info("============================Dynamic-router/plain=============================");
         return executionService.executeDynamicRequestPlain(httpServletRequest, request, httpHeaders, serviceName);

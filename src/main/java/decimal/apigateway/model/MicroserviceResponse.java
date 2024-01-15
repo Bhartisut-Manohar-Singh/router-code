@@ -1,8 +1,12 @@
 package decimal.apigateway.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Map;
+
 
 @Getter
 @Setter
@@ -13,20 +17,15 @@ public class MicroserviceResponse {
     String status;
     String message;
     Object response;
-
     Map<String, String> customData;
 
-    public MicroserviceResponse(decimal.sessionmanagement.model.MicroserviceResponse microserviceResponse) {
-        this.status = microserviceResponse.getStatus();
-        this.message = microserviceResponse.getMessage();
-        this.response = microserviceResponse.getResponse();
-        this.customData = microserviceResponse.getCustomData();
-    }
-
-    public MicroserviceResponse(String status, String message, Object response) {
+    public MicroserviceResponse(String status, String message, Object response){
         this.status = status;
         this.message = message;
         this.response = response;
+    }
+
+    public MicroserviceResponse(MicroserviceResponse microserviceResponse) {
     }
 
     @Override

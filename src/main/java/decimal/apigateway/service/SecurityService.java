@@ -1,8 +1,8 @@
 package decimal.apigateway.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
-import decimal.sessionmanagement.exception.RouterException;
 import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;

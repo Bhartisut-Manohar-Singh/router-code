@@ -5,13 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.ResponseOperations;
-import decimal.apigateway.exception.RouterExceptionV1;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
+import decimal.apigateway.service.security.EncryptionDecryptionServiceImpl;
 import decimal.apigateway.service.validator.RequestValidatorV1;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
-import decimal.sessionmanagement.service.EncryptionDecryptionServiceImpl;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,7 +67,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterExceptionV1 {
+    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
         log.info(" ==== entering register with request === " + request);
         auditPayload = logsWriter.initializeLog(request,JSON, httpHeaders);
@@ -128,15 +128,15 @@ public class RegistrationServiceImpl implements RegistrationService {
     private MicroserviceResponse callSecurityServiceForResponseHash(String request, Map<String, String> httpHeaders) {
 
         try {
-            decimal.sessionmanagement.model.MicroserviceResponse microserviceResponse = encryptionDecryptionService.generateResponseHash(request, httpHeaders);
+            MicroserviceResponse microserviceResponse = encryptionDecryptionService.generateResponseHash(request, httpHeaders);
             return new MicroserviceResponse(microserviceResponse);
-        } catch (decimal.sessionmanagement.exception.RouterException e) {
+        } catch (RouterException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public Object  authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterExceptionV1 {
+    public Object  authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
         auditPayload = logsWriter.initializeLog(request,JSON, httpHeaders);
 
@@ -235,15 +235,15 @@ public class RegistrationServiceImpl implements RegistrationService {
     private MicroserviceResponse callSecurityClientForEncryptResponse(String finalResponse, Map<String, String> httpHeaders) {
 
         try {
-            decimal.sessionmanagement.model.MicroserviceResponse microserviceResponse = encryptionDecryptionService.encryptResponse(finalResponse, httpHeaders);
+            MicroserviceResponse microserviceResponse = encryptionDecryptionService.encryptResponse(finalResponse, httpHeaders);
             return new MicroserviceResponse(microserviceResponse);
-        } catch (decimal.sessionmanagement.exception.RouterException e) {
+        } catch (RouterException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws RouterExceptionV1 {
+    public Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws RouterException {
         try {
             MicroserviceResponse microserviceResponse = requestValidator.validateLogout(request, httpHeaders);
 

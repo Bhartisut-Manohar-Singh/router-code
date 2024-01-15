@@ -1,7 +1,7 @@
 package decimal.apigateway.model;
 
 import decimal.apigateway.exception.RouterError;
-import decimal.apigateway.exception.RouterExceptionV1;
+import decimal.apigateway.exception.RouterException;
 
 import java.io.Serializable;
 import java.util.List;
@@ -16,9 +16,9 @@ public class ApiOutput implements Serializable {
 	public ApiOutput() {}
 	public ApiOutput(Exception e, String apiName)
 	{
-		if(e instanceof RouterExceptionV1)
+		if(e instanceof RouterException)
 		{
-			RouterExceptionV1 routerException = (RouterExceptionV1) e;
+			RouterException routerException = (RouterException) e;
     	this.setApiError(new RouterError(routerException.getErrorCode(), routerException, routerException.getErrorType(), routerException.getErrorHint()));
 		}
 		else

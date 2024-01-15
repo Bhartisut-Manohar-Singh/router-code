@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.ResponseOperations;
-import decimal.apigateway.enums.HeadersV1;
-import decimal.apigateway.exception.RouterExceptionV1;
+import decimal.apigateway.enums.Headers;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.model.ResponseOutput;
 import decimal.apigateway.service.AuthenticationService;
@@ -16,8 +16,8 @@ import decimal.apigateway.service.RegistrationServiceV3;
 import decimal.apigateway.service.validator.RequestValidatorV2;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
-import decimal.sessionmanagement.common.RouterOperations;
-import decimal.sessionmanagement.exception.RouterException;
+import decimal.apigateway.commons.RouterOperations;
+import decimal.apigateway.exception.RouterException;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.rmi.RemoteException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +69,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
     }
 
     @Override
-    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterExceptionV1, RouterException {
+    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException, RouterException {
         try {
 
             log.info("Executing Step 1 to validate register request....."+httpHeaders.toString());
@@ -82,7 +81,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             httpHeaders.put(Constant.LOGIN_ID, tokenDetails.get(0));
             httpHeaders.put(Constant.CLIENT_SECRET, tokenDetails.get(1));
             httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
-            httpHeaders.put(HeadersV1.servicename.name(), "REGISTERAPP");
+            httpHeaders.put(Headers.servicename.name(), "REGISTERAPP");
 
 
             ObjectNode jsonNodes;
@@ -128,11 +127,11 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
         }
     }
 
-    private List<String> fetchTokenDetails(Map<String, String> httpHeaders) throws RouterExceptionV1 {
+    private List<String> fetchTokenDetails(Map<String, String> httpHeaders) throws RouterException {
         String authorizationToken = httpHeaders.get("authorization");
 
         if (authorizationToken == null || !authorizationToken.startsWith("Basic")) {
-            throw new RouterExceptionV1(INVALID_REQUEST_500, "Invalid JWT token", null);
+            throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
 
         String decodedToken;
@@ -145,7 +144,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             decodedToken = new String(decoded, StandardCharsets.UTF_8);
 
         } catch (Exception e) {
-            throw new RouterExceptionV1(INVALID_REQUEST_500, "Invalid JWT token", null);
+            throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
 
         log.info("decoded token = " + decodedToken);
@@ -154,7 +153,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
         log.info("---------------token -----------" + token+ "-token size-" + token.size());
         //token format - loginId:clientsecret
         if (token.size() != 2) {
-            throw new RouterExceptionV1(INVALID_REQUEST_500, "Invalid JWT token", null);
+            throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
 
         return token;

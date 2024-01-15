@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import decimal.apigateway.commons.Constant;
-import decimal.apigateway.enums.HeadersV1;
-import decimal.apigateway.exception.RouterExceptionV1;
+import decimal.apigateway.enums.Headers;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.validator.RequestValidatorV1;
-import decimal.authenticationservice.clients.EsbClientAuth;
+import decimal.apigateway.clients.EsbClientAuth;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
@@ -70,7 +70,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
 
 
     @Override
-    public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterExceptionV1, IOException {
+    public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
         log.info("==== inside executePlainRequest ==== ");
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
@@ -97,17 +97,17 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
             JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
             if(("Y").equalsIgnoreCase(isPayloadEncrypted) && (!node.hasNonNull("request")))
-                throw new RouterExceptionV1(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send encrypted payload.\"}"));
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send encrypted payload.\"}"));
 
-            if(("Y").equalsIgnoreCase(isPayloadEncrypted) && !httpHeaders.containsKey(HeadersV1.txnkey.name()))
-                throw new RouterExceptionV1(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send txnkey in HeadersV1 as your request payload is encrypted.\"}"));
+            if(("Y").equalsIgnoreCase(isPayloadEncrypted) && !httpHeaders.containsKey(Headers.txnkey.name()))
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send txnkey in HeadersV1 as your request payload is encrypted.\"}"));
 
-            if(("Y").equalsIgnoreCase(isDigitallySigned) && !httpHeaders.containsKey(HeadersV1.hash.name()))
-                throw new RouterExceptionV1(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send hash in HeadersV1 as your request is digitally signed.\"}"));
+            if(("Y").equalsIgnoreCase(isDigitallySigned) && !httpHeaders.containsKey(Headers.hash.name()))
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send hash in HeadersV1 as your request is digitally signed.\"}"));
 
             httpHeaders.put(IS_DIGITALLY_SIGNED,isDigitallySigned);
             httpHeaders.put(IS_PAYLOAD_ENCRYPTED,isPayloadEncrypted);
-            httpHeaders.put(HeadersV1.clientsecret.name(), headers.get(HeadersV1.clientsecret.name()));
+            httpHeaders.put(Headers.clientsecret.name(), headers.get(Headers.clientsecret.name()));
 
             MicroserviceResponse decryptedResponse = securityService.decryptRequestWithoutSession(("Y").equalsIgnoreCase(isPayloadEncrypted) ? node.get("request").asText() : request, httpHeaders);
 
@@ -167,7 +167,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
     }
 
     @Override
-    public Object executeMultiPart(String request, Map<String, String> httpHeaders) throws RouterExceptionV1, IOException {
+    public Object executeMultiPart(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 

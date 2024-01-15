@@ -1,6 +1,5 @@
 package decimal.apigateway.service;
 
-import decimal.authenticationservice.model.MicroserviceResponseAuth;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;

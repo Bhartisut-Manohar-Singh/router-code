@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.ResponseOperations;
-import decimal.apigateway.enums.HeadersV1;
-import decimal.apigateway.exception.RouterExceptionV1;
+import decimal.apigateway.enums.Headers;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.AuthenticationService;
 import decimal.apigateway.service.LogsWriter;
@@ -68,7 +68,7 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
     }
 
     @Override
-    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterExceptionV1 {
+    public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
         auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders);
 
@@ -122,7 +122,7 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
     }
 
     @Override
-    public Object authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response, String destinationAppId) throws IOException, RouterExceptionV1 {
+    public Object authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response, String destinationAppId) throws IOException, RouterException {
         log.info("Authenticate v2 called for  - " + request + " and dAppId - " + destinationAppId);
         auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders);
 
@@ -171,8 +171,8 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
 
 
         log.info("Now updating org and app id headers to destination org - " + destinationOrgId + " and dAPP id - " + destinationAppId);
-        httpHeaders.put(HeadersV1.orgid.name(), destinationOrgId);
-        httpHeaders.put(HeadersV1.appid.name(), destinationAppId);
+        httpHeaders.put(Headers.orgid.name(), destinationOrgId);
+        httpHeaders.put(Headers.appid.name(), destinationAppId);
         httpHeaders.put("destinationorgid", destinationOrgId);
 
         log.info("Calling authentication service.....");

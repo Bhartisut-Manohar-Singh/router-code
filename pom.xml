@@ -100,6 +100,12 @@
             <version>3.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>decimal</groupId>
+            <artifactId>logs-management</artifactId>
+            <version>2.8</version>
+        </dependency>
+
         <!--Log4j2 v2.17.0  -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -141,11 +147,11 @@
             <version>4.1.6.SNAPSHOOT</version>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>decimal</groupId>
             <artifactId>security-manager</artifactId>
             <version>1.5.6.SNAPSHOOT</version>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -153,11 +159,11 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>decimal</groupId>
             <artifactId>authentication-service</artifactId>
             <version>1.5.1.BETA</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>io.github.resilience4j</groupId>
             <artifactId>resilience4j-ratelimiter</artifactId>
@@ -171,6 +177,11 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-lexmodelsv2</artifactId>
             <version>1.12.226</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.6.0</version>
         </dependency>
     </dependencies>
 

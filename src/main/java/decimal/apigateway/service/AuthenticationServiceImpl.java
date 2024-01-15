@@ -2,9 +2,9 @@ package decimal.apigateway.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import decimal.authenticationservice.exception.RouterExceptionAuth;
-import decimal.authenticationservice.model.MicroserviceResponseAuth;
-import decimal.authenticationservice.service.AuthenticationProcessor;
+import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.model.MicroserviceResponse;
+import decimal.apigateway.service.authentication.AuthenticationProcessor;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.Request;
 import decimal.logs.model.Response;
@@ -49,14 +49,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
             log.info(" ========== in register auth service =============" + auditPayload.hashCode());
-            MicroserviceResponseAuth microserviceResponse = authenticationProcessor.register(request, httpHeaders);
+            MicroserviceResponse microserviceResponse = authenticationProcessor.register(request, httpHeaders);
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
             return new ResponseEntity<>(microserviceResponse, responseHeaders, HttpStatus.OK);
-        } catch (IOException | RouterExceptionAuth e) {
+        } catch (IOException | RouterException e) {
             throw new RuntimeException(e);
         }
     }
@@ -72,14 +72,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
             log.info(" ============= inside authenticateV2 =================" + auditPayload.hashCode());
-            MicroserviceResponseAuth microserviceResponse = authenticationProcessor.authenticateV2(plainRequest, httpHeaders);
+            MicroserviceResponse microserviceResponse = authenticationProcessor.authenticateV2(plainRequest, httpHeaders);
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
             return new ResponseEntity<>(microserviceResponse, responseHeaders, HttpStatus.OK);
-        } catch (IOException | RouterExceptionAuth e) {
+        } catch (IOException | RouterException e) {
             throw new RuntimeException(e);
         }
     }
@@ -87,7 +87,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public ResponseEntity<Object> forceLogout(Map<String, String> httpHeaders) {
 
-        MicroserviceResponseAuth microserviceResponse = authenticationProcessor.forceLogout(httpHeaders);
+        MicroserviceResponse microserviceResponse = authenticationProcessor.forceLogout(httpHeaders);
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("status", microserviceResponse.getStatus());
         return new ResponseEntity<>(microserviceResponse, responseHeaders, HttpStatus.OK);
@@ -96,14 +96,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public ResponseEntity<Object> logout(Map<String, String> httpHeaders) {
 
-        MicroserviceResponseAuth response = new MicroserviceResponseAuth();
+        MicroserviceResponse response = new MicroserviceResponse();
 
         try {
             log.info("logout------httpHeaders" + httpHeaders);
             authenticationProcessor.logout(httpHeaders);
             log.info("logout microserviceResponse------------------------ ");
 
-        } catch (RouterExceptionAuth e) {
+        } catch (RouterException e) {
             log.info("exception printing--------" + e.getMessage());
             String errorCode = "625";
             if (errorCode.equals(e.getErrorCode())) {
@@ -128,11 +128,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public ResponseEntity<Object> authenticate(Object plainRequest, Map<String, String> httpHeaders) {
 
         try {
-            MicroserviceResponseAuth microserviceResponse = authenticationProcessor.authenticate(String.valueOf(plainRequest), httpHeaders);
+            MicroserviceResponse microserviceResponse = authenticationProcessor.authenticate(String.valueOf(plainRequest), httpHeaders);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             return new ResponseEntity<>(microserviceResponse, responseHeaders, HttpStatus.OK);
-        } catch (IOException | RouterExceptionAuth e) {
+        } catch (IOException | RouterException e) {
             throw new RuntimeException(e);
         }
     }
@@ -141,11 +141,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public ResponseEntity<Object> publicRegister(String request, Map<String, String> httpHeaders) {
 
         try {
-            MicroserviceResponseAuth response = authenticationProcessor.publicRegister(request, httpHeaders);
+            MicroserviceResponse response = authenticationProcessor.publicRegister(request, httpHeaders);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", response.getStatus());
             return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
-        } catch (IOException | RouterExceptionAuth e) {
+        } catch (IOException | RouterException e) {
             throw new RuntimeException(e);
         }
     }

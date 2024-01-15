@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperationsV1;
-import decimal.apigateway.enums.RequestValidationTypesV1;
-import decimal.apigateway.exception.RouterExceptionV1;
+import decimal.apigateway.enums.RequestValidationTypes;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.SecurityService;
 import decimal.logs.filters.AuditTraceFilter;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-import static decimal.apigateway.enums.RequestValidationTypesV1.*;
+import static decimal.apigateway.enums.RequestValidationTypes.*;
 
 
 @Log
@@ -34,12 +34,12 @@ public class RequestValidatorV1 {
         this.securityService = securityService;
     }
 
-    public Object validateRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterExceptionV1 {
+    public Object validateRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterException {
         log.info("=== calling validateRegistrationRequest to security client === " + new Gson().toJson(httpHeaders));
         return securityService.validateRegistration(request, httpHeaders);
     }
 
-    public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders,String serviceName) throws RouterExceptionV1 {
+    public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders,String serviceName) throws RouterException {
         httpHeaders.put("scopeToCheck", "PUBLIC");
         httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
         httpHeaders.put("username", httpHeaders.get("clientid"));
@@ -48,13 +48,13 @@ public class RequestValidatorV1 {
         return securityService.validatePlainRequest(request, httpHeaders, serviceName);
     }
 
-    public void validatePlainDynamicRequest(String request, Map<String, String> httpHeaders) throws RouterExceptionV1 {
+    public void validatePlainDynamicRequest(String request, Map<String, String> httpHeaders) throws RouterException {
 
         httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
 
-        RequestValidationTypesV1[] requestValidationTypes = { CLIENT_SECRET,IP};
+        RequestValidationTypes[] requestValidationTypes = { CLIENT_SECRET,IP};
 
-        for (RequestValidationTypesV1 plainRequestValidation : requestValidationTypes) {
+        for (RequestValidationTypes plainRequestValidation : requestValidationTypes) {
             securityService.validate(request, httpHeaders, plainRequestValidation.name());
         }
     }
@@ -62,7 +62,7 @@ public class RequestValidatorV1 {
     @Autowired
     AuditTraceFilter auditTraceFilter;
 
-    public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) throws RouterExceptionV1 {
+    public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) throws RouterException {
         String clientId = httpHeaders.get("clientid");
 
         httpHeaders.put("orgid", clientId.split(Constant.TILD_SPLITTER)[0]);
@@ -119,20 +119,20 @@ public class RequestValidatorV1 {
             auditPayload.getRequestIdentifier().setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
         }
 
-        RequestValidationTypesV1[] requestValidationTypesArr = {APPLICATION, INACTIVE_SESSION, SESSION, IP, TXN_KEY, HASH};
+        RequestValidationTypes[] requestValidationTypesArr = {APPLICATION, INACTIVE_SESSION, SESSION, IP, TXN_KEY, HASH};
 
-        for (RequestValidationTypesV1 requestValidationTypes : requestValidationTypesArr) {
+        for (RequestValidationTypes requestValidationTypes : requestValidationTypesArr) {
             securityService.validate(request, httpHeaders, requestValidationTypes.name());
         }
 
         return httpHeaders;
     }
 
-    public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterExceptionV1 {
+    public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterException {
         return securityService.validateAuthentication(request, httpHeaders);
     }
 
-    public MicroserviceResponse validateLogout(String request, Map<String, String> httpHeaders) throws RouterExceptionV1 {
+    public MicroserviceResponse validateLogout(String request, Map<String, String> httpHeaders) throws RouterException {
 
         return securityService.validate(request, httpHeaders, REQUEST.name());
     }
