@@ -19,7 +19,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableAsync
 @EnableSwagger2
 @ComponentScan(basePackages = { "decimal.apigateway","decimal.logs.kafka"," decimal.logs.connector", "decimal.ratelimiter"})
-@EnableRedisRepositories(basePackages = {"decimal.ratelimiter.repo"})
+@EnableRedisRepositories(basePackages = {"decimal.ratelimiter.repo", "decimal.apigateway.repository"})
 
 public class ApiGatewayApplication {
 
