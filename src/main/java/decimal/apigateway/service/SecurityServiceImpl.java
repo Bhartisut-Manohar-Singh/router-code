@@ -74,7 +74,7 @@ public class SecurityServiceImpl implements SecurityService {
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
-            return new MicroserviceResponse(microserviceResponse);
+            return microserviceResponse;
 
         } catch (RouterException | IOException e) {
             throw new RuntimeException(e);
@@ -98,7 +98,7 @@ public class SecurityServiceImpl implements SecurityService {
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
             log.info("MicroserviceResponse  " + microserviceResponse);
-            return new MicroserviceResponse(microserviceResponse);
+            return microserviceResponse;
         } catch (RouterException e) {
             throw new RuntimeException(e);
         }
@@ -121,7 +121,7 @@ public class SecurityServiceImpl implements SecurityService {
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
-            return new MicroserviceResponse(microserviceResponse);
+            return microserviceResponse;
         } catch (RouterException e) {
             throw new RuntimeException(e);
         }
@@ -143,7 +143,7 @@ public class SecurityServiceImpl implements SecurityService {
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
-            return new MicroserviceResponse(microserviceResponse);
+            return microserviceResponse;
         } catch (RouterException e) {
             throw new RuntimeException(e);
         }
@@ -165,7 +165,7 @@ public class SecurityServiceImpl implements SecurityService {
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
-            return new MicroserviceResponse(microserviceResponse);
+            return microserviceResponse;
         } catch (RouterException e) {
             throw new RuntimeException(e);
         }
@@ -187,7 +187,7 @@ public class SecurityServiceImpl implements SecurityService {
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
-            return new MicroserviceResponse(microserviceResponse);
+            return microserviceResponse;
         } catch (RouterException e) {
             throw new RuntimeException(e);
         }
@@ -212,7 +212,7 @@ public class SecurityServiceImpl implements SecurityService {
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
-            return new MicroserviceResponse(microserviceResponse);
+            return microserviceResponse;
         } catch (RouterException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -235,7 +235,7 @@ public class SecurityServiceImpl implements SecurityService {
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
-            return new MicroserviceResponse(microserviceResponse);
+            return microserviceResponse;
         } catch (RouterException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -257,7 +257,7 @@ public class SecurityServiceImpl implements SecurityService {
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
-            return new MicroserviceResponse(microserviceResponse);
+            return microserviceResponse;
         } catch (RouterException e) {
             throw new RuntimeException(e);
         }
@@ -296,7 +296,7 @@ public class SecurityServiceImpl implements SecurityService {
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", response.getStatus());
             logsWriter.updateLog(auditPayload);
-            return new MicroserviceResponse(response);
+            return response;
         } catch (RouterException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -325,7 +325,7 @@ public class SecurityServiceImpl implements SecurityService {
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", response.getStatus());
             logsWriter.updateLog(auditPayload);
-            return new MicroserviceResponse(response);
+            return response;
         } catch (RouterException | IOException e) {
             throw new RuntimeException(e);
         }
