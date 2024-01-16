@@ -27,13 +27,12 @@ import java.util.Map;
 
 @Service
 @Log
-public class CryptoUtilV3Auth {
+public class CryptoUtilV3 implements ICryptoUtil{
 
-    private static final Logger logger = LogManager.getLogger(CryptoUtilV3Auth.class);
+    private static final Logger logger = LogManager.getLogger(CryptoUtilV3.class);
     private static final String ENCODING_SCHEME = "UTF-8";
     @Autowired
     LogsConnector logsConnector;
-
     @Autowired
     AuditTraceFilter auditTraceFilter;
 
@@ -134,7 +133,7 @@ public class CryptoUtilV3Auth {
         return new SecretKeySpec(key, "AES");
     }
 
-    public static String encryptTextUsingAES(String plainText, String aesKeyString) throws RouterException {
+    public String encryptTextUsingAES(String plainText, String aesKeyString) throws RouterException {
 
         try {
             //   System.out.println("Encrypting data using V3;plainText="+plainText+";aesKeyString="+aesKeyString);

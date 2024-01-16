@@ -94,7 +94,7 @@ public class AuthSecurityImpl implements AuthSecurity {
 
         log.info("Decoding nounce for getting header data");
         try {
-            return new String(AuthCryptoUtil.hexStringToByteArray(data.trim().toCharArray()));
+            return new String(CryptoUtil.hexStringToByteArray(data.trim().toCharArray()));
         } catch (Exception e) {
             log.info("Exception in decode header data - Authentication" + e.getLocalizedMessage());
             throw new RouterException(RouterResponseCode.DECODE_HEX_STRING, e, Constants.ROUTER_ERROR_TYPE_SECURITY, null);

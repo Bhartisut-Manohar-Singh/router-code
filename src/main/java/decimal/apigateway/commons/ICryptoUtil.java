@@ -1,6 +1,5 @@
 package decimal.apigateway.commons;
 
-
 import decimal.apigateway.exception.RouterException;
 
 import javax.crypto.SecretKey;
@@ -8,7 +7,7 @@ import java.util.Map;
 
 public interface ICryptoUtil {
    // String getSecretAESKeyAsString() throws RouterException;
-    default SecretKey getSecretAESKeyAsString(String salt, String passphrase) throws RouterException {
+    default SecretKey getSecretAESKeyAsString(String salt, String passphrase) throws RouterException{
         return null;
     }
     String encryptTextUsingAES(String plainText, String aesKeyString) throws RouterException;

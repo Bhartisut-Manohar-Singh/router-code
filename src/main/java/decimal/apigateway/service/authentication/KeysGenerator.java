@@ -6,6 +6,7 @@ import decimal.apigateway.commons.*;
 import decimal.apigateway.domain.Session;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.repository.redis.AuthenticationSessionRepoRedis;
+import decimal.apigateway.service.security.CryptoFactory;
 import decimal.logs.filters.AuditTraceFilter;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.*;
 
-import static decimal.apigateway.enums.Headers.requestid;
-import static decimal.apigateway.enums.Headers.username;
+import static decimal.apigateway.enums.Headers.*;
 
 @Service
 @Log
@@ -24,6 +24,9 @@ public class KeysGenerator
 {
     @Value("${systemKey}")
     String systemKey;
+
+    @Autowired
+    CryptoFactory cryptoFactory;
 
     
     
@@ -35,31 +38,31 @@ public class KeysGenerator
 
     Map<String, Object> generateRsaKeys(String securityVesion, String requestId) throws RouterException
     {
-
+        ICryptoUtil iCryptoUtil = cryptoFactory.getSecurityVersion ( securityVesion, requestId );
         log.info("Processing authentication request " + requestId);
 
-        return "2".equalsIgnoreCase(securityVesion) ? AuthCryptoUtilV2.getRSAKeys() : AuthCryptoUtil.getRSAKeys();
+        return "2".equalsIgnoreCase(securityVesion) ? iCryptoUtil.getRSAKeys() : iCryptoUtil.getRSAKeys();
     }
 
 
     String encryptJWTToken(String securityVersion, String systemKey, String username, String requestId) throws RouterException {
         log.info("Encrypting JWT token" + requestId);
-        if (null != securityVersion) {
-            switch (securityVersion) {
+
+            ICryptoUtil iCryptoUtil = cryptoFactory.getSecurityVersion ( securityVersion, requestId );
+
+
+           /* switch (securityVersion) {
                 case "3":
                     System.out.println("=====================securityVersion is 3======================");
-                    return CryptoUtilV3Auth.encryptTextUsingAES(username, systemKey);
+                    return iCryptoUtil.encryptTextUsingAES(username, systemKey);
                 case "2":
                     System.out.println("=====================securityVersion is 2======================");
-                    return AuthCryptoUtilV2.encryptTextUsingAES(username, systemKey);
+                    return CryptoUtilV2.encryptTextUsingAES(username, systemKey);
                 default:
                     System.out.println("=====================securityVersion is "+securityVersion+"======================");
-                    return AuthCryptoUtil.encryptTextUsingAES(username, systemKey);
-            }
-        } else {
-            System.out.println("=====================securityVersion is NULL:"+securityVersion+"======================");
-            return AuthCryptoUtil.encryptTextUsingAES(username, systemKey);
-        }
+                    return CryptoUtil.encryptTextUsingAES(username, systemKey);
+            }*/
+        return iCryptoUtil.encryptTextUsingAES(username,systemKey);
     }
 
     String decryptJWTToken(String securityVersion, String systemKey, String encryptedJWTToken, String requestId) {
