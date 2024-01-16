@@ -1,3 +1,4 @@
+/*
 package decimal.apigateway.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -74,3 +75,4 @@ public class RouterError implements Serializable{
 		this.errorHint = errorHint;
 	}
 }
+*/

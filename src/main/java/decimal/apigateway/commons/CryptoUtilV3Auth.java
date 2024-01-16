@@ -33,6 +33,7 @@ public class CryptoUtilV3Auth {
     private static final String ENCODING_SCHEME = "UTF-8";
     @Autowired
     LogsConnector logsConnector;
+
     @Autowired
     AuditTraceFilter auditTraceFilter;
 

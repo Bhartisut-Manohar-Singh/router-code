@@ -13,6 +13,7 @@ import decimal.apigateway.model.ApplicationDef;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.repository.SSOTokenRepo;
 import decimal.apigateway.service.AuthApplicationDefConfig;
+import decimal.apigateway.service.authentication.sessionmgmt.AuthenticationSessionService;
 import decimal.apigateway.service.authentication.sessionmgmt.LogoutService;
 import decimal.apigateway.service.authentication.sessionmgmt.MultipleSession;
 import decimal.apigateway.service.util.EventRequestUtil;

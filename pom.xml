@@ -67,10 +67,10 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
-        <dependency>
+       <!-- <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-        </dependency>
+        </dependency>-->
 
 
 
@@ -98,12 +98,6 @@
             <groupId>decimal</groupId>
             <artifactId>logs-management</artifactId>
             <version>3.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>decimal</groupId>
-            <artifactId>logs-management</artifactId>
-            <version>2.8</version>
         </dependency>
 
         <!--Log4j2 v2.17.0  -->
@@ -144,19 +138,7 @@
         <dependency>
             <groupId>decimal</groupId>
             <artifactId>rate-limiter</artifactId>
-            <version>4.1.6.SNAPSHOOT</version>
-        </dependency>
-
-        <!--<dependency>
-            <groupId>decimal</groupId>
-            <artifactId>security-manager</artifactId>
-            <version>1.5.6.SNAPSHOOT</version>
-        </dependency>-->
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
+            <version>4.1.6.SNAP</version>
         </dependency>
 
         <!--<dependency>
@@ -200,21 +182,12 @@
 
 
     <build>
-<!--        <plugins>-->
-<!--            <plugin>-->
-<!--                <groupId>org.springframework.boot</groupId>-->
-<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--            </plugin>-->
-<!--        </plugins>-->
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.1.1</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
 
 </project>
