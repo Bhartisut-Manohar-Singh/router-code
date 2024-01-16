@@ -223,13 +223,12 @@ public class ExceptionController {
     }
 
 
-/*
-    @ExceptionHandler(value = RouterExceptionAuth.class)
-    public ResponseEntity<Object> handleRouterExceptionAUTH(RouterExceptionAuth ex) throws JsonProcessingException {
+    @ExceptionHandler(value = RouterException.class)
+    public ResponseEntity<Object> handleRouterException(RouterException ex) throws JsonProcessingException {
 
-        log.info("Inside handleRouterExceptionAUTH exception handler - " + ex.getMessage());
+        log.info("Inside handleRouterException exception handler - " + ex.getMessage());
 
-        RouterExceptionAuth exception = new RouterExceptionAuth();
+        RouterException exception = new RouterException();
         exception.setErrorCode(ex.getErrorCode());
         exception.setErrorHint(ex.getErrorHint());
         exception.setErrorMessage(exception.getErrorMessage());
@@ -242,11 +241,10 @@ public class ExceptionController {
         responseHeaders.set(STATUS, ROUTER_MULTIPLE_SESSION);
         return new ResponseEntity<>(response, responseHeaders, HttpStatus.BAD_REQUEST);
     }
-*/
 
 
     @ExceptionHandler(value = RuntimeException.class)
-    public ResponseEntity<Object> handleRouterExceptionAUTH(RuntimeException ex) throws JsonProcessingException {
+    public ResponseEntity<Object> handleRouterException(RuntimeException ex) throws JsonProcessingException {
 
         log.info(" Inside handleRuntimeException - " + ex.getMessage());
 
@@ -258,7 +256,7 @@ public class ExceptionController {
     }
 
 
-    @ExceptionHandler(RouterException.class)
+  /*  @ExceptionHandler(RouterException.class)
     public ResponseEntity<Object> handleRouterException(RouterException ex) {
 
         log.info("================================In Router Exception==============================");
@@ -269,5 +267,5 @@ public class ExceptionController {
         response.setResponse(ex.getErrorType());
         HttpHeaders responseHeaders = new HttpHeaders();
         return new ResponseEntity<>(response, responseHeaders, HttpStatus.BAD_REQUEST);
-    }
+    }*/
 }
