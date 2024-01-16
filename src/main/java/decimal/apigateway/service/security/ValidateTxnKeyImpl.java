@@ -6,6 +6,7 @@ import decimal.apigateway.domain.TxnKey;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.Request;
 import decimal.apigateway.repository.TxnKeyRepo;
+import decimal.apigateway.repository.redis.RedisKeyValuePairRepository;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

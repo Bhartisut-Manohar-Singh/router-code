@@ -1,4 +1,4 @@
-package decimal.apigateway.service.redis;
+package decimal.apigateway.repository.redis;
 
 import decimal.apigateway.domain.Session;
 import org.springframework.beans.factory.annotation.Autowired;

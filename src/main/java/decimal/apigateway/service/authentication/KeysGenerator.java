@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.*;
 import decimal.apigateway.domain.Session;
 import decimal.apigateway.exception.RouterException;
-import decimal.apigateway.service.redis.AuthenticationSessionRepoRedis;
+import decimal.apigateway.repository.redis.AuthenticationSessionRepoRedis;
 import decimal.logs.filters.AuditTraceFilter;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;

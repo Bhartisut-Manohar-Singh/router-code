@@ -8,7 +8,7 @@ import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.Account;
 import decimal.apigateway.model.Request;
 import decimal.apigateway.service.ApplicationDefConfig;
-import decimal.apigateway.repository.AuthenticationSessionRepo;
+import decimal.apigateway.repository.redis.AuthenticationSessionRepoRedis;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,7 +42,7 @@ public class AuthSecurityImpl implements AuthSecurity {
     ApplicationDefConfig applicationDefConfig;
 
     @Autowired
-    AuthenticationSessionRepo authenticationSessionRepo;
+    AuthenticationSessionRepoRedis authenticationSessionRepo;
 
     @Autowired
     Request requestObj;

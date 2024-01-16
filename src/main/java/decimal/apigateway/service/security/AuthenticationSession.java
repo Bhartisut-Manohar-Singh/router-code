@@ -8,7 +8,7 @@ import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.domain.Session;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.Request;
-import decimal.apigateway.repository.AuthenticationSessionRepo;
+import decimal.apigateway.repository.redis.AuthenticationSessionRepoRedis;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ import java.util.Optional;
 public class AuthenticationSession
 {
     @Autowired
-    AuthenticationSessionRepo authenticationSessionRepo;
+    AuthenticationSessionRepoRedis authenticationSessionRepo;
 
     @Autowired
     Request auditTraceFilter;

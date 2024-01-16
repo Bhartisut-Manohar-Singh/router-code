@@ -56,7 +56,7 @@ public class ExceptionController {
     @Autowired
     LogsWriter logsWriter;
 
-    @ExceptionHandler(value = RouterException.class)
+    /*@ExceptionHandler(value = RouterException.class)
     public ResponseEntity<Object> handleRouterExceptionV1(RouterException ex) throws JsonProcessingException {
 
         log.info("================================In Router Exception==============================");
@@ -85,18 +85,18 @@ public class ExceptionController {
             isLogoutSuccess = jsonNode.hasNonNull("status") ? jsonNode.get("status").asText().equalsIgnoreCase("625") : false;
         }
 
-      /* if(auditPayload != null && auditPayload.getResponse()!=null) {
+      *//* if(auditPayload != null && auditPayload.getResponse()!=null) {
             auditPayload.getResponse().setResponse(ex.getResponse() != null ? mapper.writeValueAsString(ex.getResponse()) : "");
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
             auditPayload.getResponse().setTimestamp(Instant.now());
             auditPayload.setStatus(isLogoutSuccess ? SUCCESS_STATUS : FAILURE_STATUS);
             logsWriter.updateLog(auditPayload);
-        }*/
+        }*//*
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("status", isLogoutSuccess ? SUCCESS_STATUS : FAILURE_STATUS);
         return new ResponseEntity<>(ex.getResponse(), responseHeaders, HttpStatus.BAD_REQUEST);
     }
-
+*/
     @ExceptionHandler(value = HttpServerErrorException.class)
     public ResponseEntity<Object> handleHttpServerErrorException(HttpServerErrorException exception) throws JsonProcessingException {
         log.info("================================In Exception Controller==============================");
