@@ -7,14 +7,18 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@RedisHash("RATE_LIMITER_IP")
-public class RateLimitIpConfig {
+@RedisHash("RATE_LIMITER_APP_AND_SERVICE")
+public class RateLimitAppAndServiceConfig {
     @Id
-    String sourceIp;
-    RateLimitEntity rateLimitEntity;
+    String id;
+    String orgId;
+    String appId;
+    String serviceName;
+    RateLimitEntity rateLimitEntityApp;
+    RateLimitEntity rateLimitEntityService;
+
 }

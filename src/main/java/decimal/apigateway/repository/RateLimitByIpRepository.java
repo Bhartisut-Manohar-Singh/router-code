@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RateLimitByIpRepository extends CrudRepository<RateLimitIpConfig, String> {
-    RateLimitIpConfig findBySourceIp(String sourceIp);
+
 }

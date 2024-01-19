@@ -29,13 +29,14 @@ public class RateLimiterAspect2 {
 
     @Before("rateLimiters(requestBody, httpHeaders)")
     public void rateLimiterAdvice(JoinPoint proceedingJoinPoint, String requestBody, Map<String, String> httpHeaders) throws Throwable {
-        log.info("Executing rate limiter.....");
+        log.info("Executing rate limiter. 2   ....");
 
         String serviceName = httpHeaders.get("servicename");
         String clientId = httpHeaders.get("clientid");
+        String orgid=null;
 
         if(Objects.isNull(clientId)){
-            String orgid = httpHeaders.get("orgid");
+            orgid = httpHeaders.get("orgid");
             String appid = httpHeaders.get("appid");
 
             if (Objects.nonNull(orgid) && Objects.nonNull(appid)){
@@ -51,7 +52,14 @@ public class RateLimiterAspect2 {
         String sourceIp = httpHeaders.get(Constant.ROUTER_HEADER_SOURCE_IP.toLowerCase());
 
         //code for ip
-        rateLimitService.allowRequest(sourceIp);
+        Boolean isRateLimitIpSuccessful = rateLimitService.allowRequestForIp(sourceIp);
+        if(isRateLimitIpSuccessful){
+            Boolean isRateLimitAppSuccessful = rateLimitService.allowRequest(orgid,appId,serviceName);
+
+        }else{
+            // write code that the controller request should not get executed
+            return;
+        }
         //code for application
         //code for service
 
