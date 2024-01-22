@@ -6,13 +6,17 @@ import decimal.apigateway.service.LogsWriter;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.Request;
 import decimal.logs.model.Response;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
 import static decimal.apigateway.commons.Constant.JSON;
 
+@Service
+@Log
 public class SecurityServiceEncImpl implements SecurityServiceEnc {
 
 

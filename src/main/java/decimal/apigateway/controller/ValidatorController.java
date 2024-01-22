@@ -21,7 +21,6 @@ import java.util.Map;
 public class ValidatorController {
 
 
-    private Validator validator;
 
     private final ValidatorFactory validatorFactory;
 
@@ -32,8 +31,7 @@ public class ValidatorController {
     ObjectMapper objectMapper;
 
     @Autowired
-    public ValidatorController(Validator validator, ValidatorFactory validatorFactory){
-        this.validator=validator;
+    public ValidatorController(ValidatorFactory validatorFactory){
         this.validatorFactory=validatorFactory;
     }
 
