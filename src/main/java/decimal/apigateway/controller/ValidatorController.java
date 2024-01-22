@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.Map;
 
 @RestController
-@RequestMapping("engine/v1/")
 public class ValidatorController {
 
 
