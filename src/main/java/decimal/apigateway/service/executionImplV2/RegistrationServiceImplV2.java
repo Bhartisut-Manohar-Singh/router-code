@@ -13,6 +13,7 @@ import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.RegistrationServiceV2;
 import decimal.apigateway.service.SecurityService;
 
+import decimal.apigateway.service.security.SecurityServiceEnc;
 import decimal.apigateway.service.validator.RequestValidatorV2;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.masking.JsonMasker;
@@ -49,6 +50,9 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
 
     @Autowired
     LogsWriter logsWriter;
+
+    @Autowired
+    SecurityServiceEnc securityServiceEnc;
 
     @Autowired
     AuditPayload auditPayload;
@@ -196,7 +200,7 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
         String maskedResponse = JsonMasker.maskMessage(finalResponse.toString(), maskKeys);
         auditPayload.getResponse().setResponse(maskedResponse);
 
-        MicroserviceResponse encryptedResponse = securityService.encryptResponse(objectMapper.writeValueAsString(finalResponse), httpHeaders);
+        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(finalResponse), httpHeaders);
 
         if (!encryptedResponse.getStatus().equalsIgnoreCase(Constant.SUCCESS_STATUS)) {
             return new ResponseEntity<>(authenticateResponse.getResponse(), HttpStatus.BAD_REQUEST);

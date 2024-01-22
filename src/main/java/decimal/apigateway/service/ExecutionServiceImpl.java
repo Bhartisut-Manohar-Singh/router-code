@@ -10,6 +10,7 @@ import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
+import decimal.apigateway.service.security.SecurityServiceEnc;
 import decimal.apigateway.service.validator.RequestValidatorV1;
 import decimal.apigateway.clients.EsbClientAuth;
 import decimal.logs.connector.LogsConnector;
@@ -74,7 +75,12 @@ public class ExecutionServiceImpl implements ExecutionService {
     String path;
 
     @Autowired
-    SecurityServiceImpl securityService;
+    SecurityServiceEnc securityServiceEnc;
+
+    @Autowired
+    SecurityService securityService;
+
+
 
 
     @Override
@@ -230,7 +236,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         httpHeaders.put("executionsource", "API-GATEWAY");
 
         log.info("==== body and headers ====" + objectMapper.writeValueAsString(responseEntity.getBody()) + " " + objectMapper.writeValueAsString(httpHeaders));
-        MicroserviceResponse encryptedResponse = securityService.encryptResponse(objectMapper.writeValueAsString(responseEntity.getBody()), httpHeaders);
+        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(responseEntity.getBody()), httpHeaders);
         log.info("==== encryptedResponse ==== " + objectMapper.writeValueAsString(encryptedResponse));
 
         if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
@@ -308,7 +314,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         dynamicResponse.setResponse(exchange.getBody());
 
-        MicroserviceResponse encryptedResponse = securityService.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
+        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
 
         if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
             throw new RouterException(decryptedResponse.getResponse());
@@ -379,7 +385,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         logsWriter.updateLog(auditPayload);
 
-        MicroserviceResponse encryptedResponse = securityService.encryptResponse(dynamicResponse.getResponse().toString(), updateHttpHeaders);
+        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(dynamicResponse.getResponse().toString(), updateHttpHeaders);
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
@@ -453,7 +459,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         logsWriter.updateLog(auditPayload);
 
-        MicroserviceResponse encryptedResponse = securityService.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
+        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());

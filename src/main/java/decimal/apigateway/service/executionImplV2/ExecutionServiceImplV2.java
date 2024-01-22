@@ -12,6 +12,7 @@ import decimal.apigateway.service.ExecutionServiceV2;
 import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.SecurityService;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
+import decimal.apigateway.service.security.SecurityServiceEnc;
 import decimal.apigateway.service.validator.RequestValidatorV2;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.filters.AuditTraceFilter;
@@ -77,6 +78,9 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     String path;
 
     @Autowired
+    SecurityServiceEnc securityServiceEnc;
+
+    @Autowired
     SecurityService securityService;
 
 
@@ -130,7 +134,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         auditPayload.getRequestIdentifier().setLogAppId(destinationAppId);
         httpHeaders.put("executionsource","API-GATEWAY");
 
-        MicroserviceResponse encryptedResponse = securityService.encryptResponse(objectMapper.writeValueAsString(responseEntity.getBody()), httpHeaders);
+        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(responseEntity.getBody()), httpHeaders);
 
         if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
@@ -290,7 +294,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         }
 
         dynamicResponse.setResponse(exchange.getBody());
-        MicroserviceResponse encryptedResponse = securityService.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
+        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
 
         if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
             throw new RouterException(decryptedResponse.getResponse());
@@ -467,7 +471,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         logsWriter.updateLog(auditPayload);
 
-        MicroserviceResponse encryptedResponse = securityService.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
+        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
         //MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
         Map<String, String> finalResponseMap = new HashMap<>();
@@ -544,7 +548,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         logsWriter.updateLog(auditPayload);
 
-        MicroserviceResponse encryptedResponse = securityService.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
+        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
         //MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
         Map<String, String> finalResponseMap = new HashMap<>();

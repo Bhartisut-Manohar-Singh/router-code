@@ -16,7 +16,7 @@ public interface SecurityService {
 
     MicroserviceResponse decryptRequest(JsonNode node, Map<String, String> httpHeaders);
 
-    MicroserviceResponse encryptResponse(String body, Map<String, String> httpHeaders);
+
 
     MicroserviceResponse decryptRequestWithoutSession(String request, Map<String, String> httpHeaders);
 

@@ -104,28 +104,6 @@ public class SecurityServiceImpl implements SecurityService {
         }
     }
 
-    @Override
-    public MicroserviceResponse encryptResponse(String body, Map<String, String> httpHeaders) {
-
-        try {
-            auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(body, JSON,httpHeaders, "security-service", auditPayload);
-            auditPayload.getRequest().setHeaders(httpHeaders);
-            auditPayload.getRequest().setRequestBody(body);
-            auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
-            auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
-
-            MicroserviceResponse microserviceResponse = encryptionDecryptionService.encryptResponse(body, httpHeaders);
-            auditPayload.setStatus(microserviceResponse.getStatus());
-            auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
-            HttpHeaders responseHeaders = new HttpHeaders();
-            responseHeaders.set("status", microserviceResponse.getStatus());
-            logsWriter.updateLog(auditPayload);
-            return microserviceResponse;
-        } catch (RouterException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Override
     public MicroserviceResponse decryptRequestWithoutSession(String request, Map<String, String> httpHeaders) {
