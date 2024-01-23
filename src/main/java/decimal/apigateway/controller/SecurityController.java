@@ -10,6 +10,8 @@ import decimal.apigateway.service.validator.ValidatorFactory;
 import decimal.logs.filters.AuditTraceFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -37,19 +39,18 @@ public class SecurityController {
 
 
     @PostMapping("validate/{validationType}")
-    MicroserviceResponse validate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String validationType) throws RouterException, IOException {
+    ResponseEntity<Object> validate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String validationType) throws RouterException, IOException {
 
         auditTraceFilter.setLogRequestAndResponse(false);
         System.out.println(" ====== validation type ====== " + validationType);
         MicroserviceResponse response = validatorFactory.getValidator(validationType).validate(request, httpHeaders);
-        System.out.println(" ====== validation response ====== " + objectMapper.writeValueAsString(response));
 
-        response.setStatus(Constants.SUCCESS_STATUS);
+        response.setStatus("success");
         response.setMessage("Validation has been done of type: " + validationType);
-
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("status", response.getStatus());
-        return response;
+        System.out.println(" ====== validation response ====== " + objectMapper.writeValueAsString(response));
+        return  new ResponseEntity<>(response,responseHeaders, HttpStatus.OK);
 
     }
     @PostMapping("encryptResponse")
