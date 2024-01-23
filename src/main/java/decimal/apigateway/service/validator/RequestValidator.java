@@ -10,9 +10,11 @@ import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.model.Request;
 import decimal.apigateway.service.security.AuthenticationSession;
 import decimal.apigateway.service.security.CryptographyService;
+import decimal.logs.model.RequestIdentifier;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.java.Log;
 import io.jsonwebtoken.Jwts;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,13 +42,15 @@ public class RequestValidator implements Validator {
 
     public MicroserviceResponse validate(String request, Map<String, String> httpHeaders) throws RouterException
     {
+        RequestIdentifier requestIdentifier = auditTraceFilter.getRequestIdentifier(auditTraceFilter);
+
         String authorizationToken = httpHeaders.get(HEADER_STRING);
         String requestId = httpHeaders.get(Headers.requestid.name());
         System.out.println("authorizationToken:"+authorizationToken);
 
         String securityVersion = httpHeaders.get(Constants.ROUTER_HEADER_SECURITY_VERSION);
 
-        log.info("Validating  request authorization token ");
+        log.info("Validating  request authorization token " );
 
         if (authorizationToken == null || !authorizationToken.startsWith(TOKEN_PREFIX)) {
             log.info("Error in processing request because of invalid authorization token found in the request");
@@ -70,7 +74,6 @@ public class RequestValidator implements Validator {
 
             List<String> userNameData = RouterOperations.getStringArray(username.toString(), Constants.TILD_SPLITTER);
             if (userNameData.size() > 3) {
-                //checkApplicationSessionExpiry(username.toString(), requestId, requestIdentifier);
                 checkApplicationSessionExpiry(username.toString(), requestId);
 
             } else {
@@ -102,11 +105,10 @@ public class RequestValidator implements Validator {
             throw new RouterException(RouterResponseCode.JWT_DECRYPTION_ERROR, e, Constants.ROUTER_ERROR_TYPE_SECURITY, "There is some error in decrypting JWT token");
         }
 
-        log.info("Validating authorization token is success.");
+        log.info("Validating authorization token is success: ");
 
         return response;
     }
-
     private void checkApplicationSessionExpiry(String username, String requestId) throws RouterException {
         try {
 
