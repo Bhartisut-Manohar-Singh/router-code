@@ -26,10 +26,11 @@ public class SecurityController {
     private final ValidatorFactory validatorFactory;
 
     @Autowired
-    public SecurityController(SecurityServiceEnc securityServiceEnc,ValidatorFactory validatorFactory) {
+    public SecurityController(SecurityServiceEnc securityServiceEnc, ValidatorFactory validatorFactory) {
         this.securityServiceEnc = securityServiceEnc;
-        this.validatorFactory=validatorFactory;
+        this.validatorFactory = validatorFactory;
     }
+
     @Autowired
     AuditTraceFilter auditTraceFilter;
 
@@ -37,8 +38,7 @@ public class SecurityController {
     ObjectMapper objectMapper;
 
 
-
-    @PostMapping("validate/{validationType}")
+    @PostMapping(value = "validate/{validationType}", produces = "application/json")
     ResponseEntity<Object> validate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String validationType) throws RouterException, IOException {
 
         auditTraceFilter.setLogRequestAndResponse(false);
@@ -50,13 +50,14 @@ public class SecurityController {
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("status", response.getStatus());
         System.out.println(" ====== validation response ====== " + objectMapper.writeValueAsString(response));
-        return  new ResponseEntity<>(response,responseHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
 
     }
-    @PostMapping("encryptResponse")
+
+    @PostMapping(value = "encryptResponse", produces = "application/json")
     MicroserviceResponse encryptResponse(@RequestBody Object finalResponse, @RequestHeader Map<String, String> httpHeaders) {
 
-        return securityServiceEnc.encryptResponse(finalResponse.toString(),httpHeaders);
+        return securityServiceEnc.encryptResponse(finalResponse.toString(), httpHeaders);
 
     }
 }
