@@ -1,4 +1,3 @@
-/*
 package decimal.apigateway.aspects.feignclients;
 
 import decimal.apigateway.commons.Constant;
@@ -60,4 +59,3 @@ public class RateLimiterAspect {
         rateLimitValidator.validateRateLimit(Arrays.asList(appValidatiorDto, ipValidatorDto, serviceValidatorDto));
     }
 }
-*/
