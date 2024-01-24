@@ -54,7 +54,7 @@ public class SecurityController {
 
     }
 
-    @PostMapping(value = "encryptResponse", produces = "application/json")
+    @PostMapping(value = "encryptResponse", consumes = "application/json")
     MicroserviceResponse encryptResponse(@RequestBody Object finalResponse, @RequestHeader Map<String, String> httpHeaders) {
 
         return securityServiceEnc.encryptResponse(finalResponse.toString(), httpHeaders);
