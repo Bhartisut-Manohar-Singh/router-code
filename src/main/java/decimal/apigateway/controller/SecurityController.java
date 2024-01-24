@@ -11,6 +11,7 @@ import decimal.logs.filters.AuditTraceFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,7 +39,7 @@ public class SecurityController {
     ObjectMapper objectMapper;
 
 
-    @PostMapping(value = "validate/{validationType}")
+    @PostMapping(value = "validate/{validationType}",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     ResponseEntity<Object> validate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String validationType) throws RouterException, IOException {
 
         auditTraceFilter.setLogRequestAndResponse(false);
