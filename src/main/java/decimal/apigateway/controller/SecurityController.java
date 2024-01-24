@@ -45,13 +45,6 @@ public class SecurityController {
         auditTraceFilter.setLogRequestAndResponse(false);
         System.out.println(" ====== validation type ====== " + validationType);
         validatorFactory.getValidator(validationType).validate(request, httpHeaders);
-
-        MicroserviceResponse response = new MicroserviceResponse();
-        response.setStatus("success");
-        response.setMessage("Validated");
-        HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("status", response.getStatus());
-        System.out.println(" ====== validation response ====== " + objectMapper.writeValueAsString(response));
         return new ResponseEntity<>(HttpStatus.OK);
 
     }

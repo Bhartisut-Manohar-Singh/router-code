@@ -1,5 +1,6 @@
 package decimal.apigateway.aspects.feignclients;
 
+/*
 import decimal.apigateway.commons.Constant;
 import decimal.ratelimiter.dto.ValidatorDTO;
 import decimal.ratelimiter.util.RateLimitValidator;
@@ -59,3 +60,4 @@ public class RateLimiterAspect {
         rateLimitValidator.validateRateLimit(Arrays.asList(appValidatiorDto, ipValidatorDto, serviceValidatorDto));
     }
 }
+*/
