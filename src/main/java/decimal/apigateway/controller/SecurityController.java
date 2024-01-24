@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "security/",consumes = "application/json",produces ="application/json" )
+@RequestMapping(value = "security/" )
 public class SecurityController {
 
     private SecurityServiceEnc securityServiceEnc;
