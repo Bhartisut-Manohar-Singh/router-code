@@ -48,7 +48,7 @@ public class SecurityController {
 
         MicroserviceResponse response = new MicroserviceResponse();
         response.setStatus("success");
-        response.setMessage("Validation has been done of type: " + validationType);
+        response.setMessage("Validated");
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("status", response.getStatus());
         System.out.println(" ====== validation response ====== " + objectMapper.writeValueAsString(response));
