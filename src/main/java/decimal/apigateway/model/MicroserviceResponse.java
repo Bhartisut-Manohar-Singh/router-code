@@ -28,13 +28,4 @@ public class MicroserviceResponse {
     public MicroserviceResponse(MicroserviceResponse microserviceResponse) {
     }
 
-    @Override
-    public String toString() {
-        return "MicroserviceResponse{" +
-                "status='" + status + '\'' +
-                ", message='" + message + '\'' +
-                ", response=" + response +
-                ", customData=" + customData +
-                '}';
-    }
 }
