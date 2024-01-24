@@ -38,7 +38,7 @@ public class SecurityController {
     ObjectMapper objectMapper;
 
 
-    @PostMapping(value = "validate/{validationType}", produces = "application/json")
+    @PostMapping(value = "validate/{validationType}", consumes = "application/json")
     ResponseEntity<Object> validate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String validationType) throws RouterException, IOException {
 
         auditTraceFilter.setLogRequestAndResponse(false);
