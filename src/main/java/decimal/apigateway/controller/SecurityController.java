@@ -39,13 +39,14 @@ public class SecurityController {
     ObjectMapper objectMapper;
 
 
-    @PostMapping(value = "validate/{validationType}",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "validate/{validationType}")
     ResponseEntity<Object> validate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String validationType) throws RouterException, IOException {
 
         auditTraceFilter.setLogRequestAndResponse(false);
         System.out.println(" ====== validation type ====== " + validationType);
-        MicroserviceResponse response = validatorFactory.getValidator(validationType).validate(request, httpHeaders);
+        validatorFactory.getValidator(validationType).validate(request, httpHeaders);
 
+        MicroserviceResponse response = new MicroserviceResponse();
         response.setStatus("success");
         response.setMessage("Validation has been done of type: " + validationType);
         HttpHeaders responseHeaders = new HttpHeaders();
