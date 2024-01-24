@@ -52,7 +52,7 @@ public class SecurityController {
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("status", response.getStatus());
         System.out.println(" ====== validation response ====== " + objectMapper.writeValueAsString(response));
-        return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
 
     }
 
