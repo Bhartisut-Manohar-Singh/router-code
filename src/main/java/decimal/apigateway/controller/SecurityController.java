@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "security/")
+@RequestMapping(value = "security/",consumes = "application/json",produces ="application/json" )
 public class SecurityController {
 
     private SecurityServiceEnc securityServiceEnc;
@@ -38,7 +38,7 @@ public class SecurityController {
     ObjectMapper objectMapper;
 
 
-    @PostMapping(value = "validate/{validationType}", consumes = "application/json")
+    @PostMapping(value = "validate/{validationType}")
     ResponseEntity<Object> validate(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String validationType) throws RouterException, IOException {
 
         auditTraceFilter.setLogRequestAndResponse(false);
@@ -54,7 +54,7 @@ public class SecurityController {
 
     }
 
-    @PostMapping(value = "encryptResponse", consumes = "application/json")
+    @PostMapping(value = "encryptResponse")
     MicroserviceResponse encryptResponse(@RequestBody Object finalResponse, @RequestHeader Map<String, String> httpHeaders) {
 
         return securityServiceEnc.encryptResponse(finalResponse.toString(), httpHeaders);
