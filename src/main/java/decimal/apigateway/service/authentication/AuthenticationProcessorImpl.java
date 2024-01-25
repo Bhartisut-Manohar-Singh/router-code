@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static decimal.apigateway.commons.ConstantsAuth.*;
+import static decimal.apigateway.commons.Constant.*;
 
 @Service
 @Log

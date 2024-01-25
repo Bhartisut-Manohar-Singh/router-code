@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
-import static decimal.apigateway.commons.ConstantsAuth.*;
+import static decimal.apigateway.commons.Constant.*;
 
 @Service
 @Log

@@ -66,7 +66,7 @@ public class AuthSecurityImpl implements AuthSecurity {
             throw ex;
         } catch (Exception e) {
             log.info("Exception in decrypting header data for key: " + key + " and headerData: " + headerData.trim() + " \n because of : " + e.getMessage()+" Exception: "+ e);
-            throw new RouterException(RouterResponseCode.AUTH_HEADER_DATA_DECRYPTION_ERROR, e, Constants.ROUTER_ERROR_TYPE_SECURITY, "Exception in data decryption header data");
+            throw new RouterException(RouterResponseCode.AUTH_HEADER_DATA_DECRYPTION_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "Exception in data decryption header data");
         }
     }
 
@@ -85,7 +85,7 @@ public class AuthSecurityImpl implements AuthSecurity {
             throw e;
         } catch (Exception e) {
             log.info("Error in nounce validation. Exception: "+ e);
-            throw new RouterException(RouterResponseCode.NOUNCE_VALIDATION_ERROR, e, Constants.ROUTER_ERROR_TYPE_SECURITY, "Error when validating nounce data");
+            throw new RouterException(RouterResponseCode.NOUNCE_VALIDATION_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "Error when validating nounce data");
         }
 
     }
@@ -97,7 +97,7 @@ public class AuthSecurityImpl implements AuthSecurity {
             return new String(CryptoUtil.hexStringToByteArray(data.trim().toCharArray()));
         } catch (Exception e) {
             log.info("Exception in decode header data - Authentication" + e.getLocalizedMessage());
-            throw new RouterException(RouterResponseCode.DECODE_HEX_STRING, e, Constants.ROUTER_ERROR_TYPE_SECURITY, null);
+            throw new RouterException(RouterResponseCode.DECODE_HEX_STRING, e, Constant.ROUTER_ERROR_TYPE_SECURITY, null);
         }
     }
 
@@ -112,11 +112,11 @@ public class AuthSecurityImpl implements AuthSecurity {
         if (null != account.getAccountData().get("hash") && !headerHash.equalsIgnoreCase(account.getAccountData().get("hash").toString())) {
 
             log.info("Header Hash is invalid. Server HASH is:" + headerHash + " and HASH sent by device is:" + account.getAccountData().get("hash"));
-            throw new RouterException(RouterResponseCode.INVALID_HTTP_HEADER_HASH, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "Header hash is invalid");
+            throw new RouterException(RouterResponseCode.INVALID_HTTP_HEADER_HASH, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Header hash is invalid");
         } else {
             if (null == account.getAccountData().get("hash")) {
                 log.info("Header HASH sent by device is null.");
-                throw new RouterException(RouterResponseCode.BLANK_HTTP_HEADER_HASH, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "Header hash is null or empty");
+                throw new RouterException(RouterResponseCode.BLANK_HTTP_HEADER_HASH, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Header hash is null or empty");
             }
         }
     }
@@ -127,7 +127,7 @@ public class AuthSecurityImpl implements AuthSecurity {
         {
             log.info("Invalid nounce found in request " + account.getAccountData().get("nounce"));
 
-            throw new RouterException(RouterResponseCode.INVALID_NOUNCE, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "Invalid nounce found");
+            throw new RouterException(RouterResponseCode.INVALID_NOUNCE, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Invalid nounce found");
         }
 
         log.info("Calculating time difference between the client and server");
@@ -150,7 +150,7 @@ public class AuthSecurityImpl implements AuthSecurity {
         if (minutes > deviceTimeDiffAllowedInMinutes)
         {
             log.info("Nounce time is invalid because time difference between server and client is " + minutes + " minutes which is more than allowed time difference " + deviceTimeDiffAllowedInMinutes);
-            throw new RouterException(RouterResponseCode.INVALID_NOUNCE_TIME, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "Nounce time is invalid");
+            throw new RouterException(RouterResponseCode.INVALID_NOUNCE_TIME, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Nounce time is invalid");
         }
     }
 
@@ -161,12 +161,12 @@ public class AuthSecurityImpl implements AuthSecurity {
 
             log.info(" === inside decryptAuthorizationPayload === ");
             List<String> data = RouterOperations.getStringArray(secret, ":");
-            authData.put(Constants.ROUTER_HEADER_USERNAME, data.get(0));
+            authData.put(Constant.ROUTER_HEADER_USERNAME, data.get(0));
             authData.put("auth-type", data.get(1));
             authData.put("nounce", data.get(2));
         } catch (Exception e) {
             log.info("Error while splitting data(:) for header secret.Secret is:" + secret);
-            throw new RouterException(RouterResponseCode.HEADER_SECRET_VALIDATION_ERROR, e, Constants.ROUTER_ERROR_TYPE_SECURITY, "Error while splitting data(:) for header secret");
+            throw new RouterException(RouterResponseCode.HEADER_SECRET_VALIDATION_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "Error while splitting data(:) for header secret");
         }
         return authData;
 
@@ -188,7 +188,7 @@ public class AuthSecurityImpl implements AuthSecurity {
 
         String userName = httpHeaders.get(username.name());
         String requestId = httpHeaders.get(requestid.name());
-        String securityVersion = httpHeaders.get(Constants.ROUTER_HEADER_SECURITY_VERSION);
+        String securityVersion = httpHeaders.get(Constant.ROUTER_HEADER_SECURITY_VERSION);
 
         log.info("Decrypting request process has been initiated");
 
@@ -201,7 +201,7 @@ public class AuthSecurityImpl implements AuthSecurity {
         if(!session.isPresent())
         {
             log.info("Unable to decrypt the request because session is invalid for userName " + userName);
-            throw new RouterException(RouterResponseCode.INVALID_USER_SESSION, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, "Session is invalid");
+            throw new RouterException(RouterResponseCode.INVALID_USER_SESSION, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "Session is invalid");
         }
 
         log.info("Session is found so fetching RSA keys from session");
@@ -226,7 +226,7 @@ public class AuthSecurityImpl implements AuthSecurity {
                 throw e;
             }
 
-            throw new RouterException(RouterResponseCode.REQUEST_DATA_DECRYPTION_ERROR, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "Error when decryption data");
+            throw new RouterException(RouterResponseCode.REQUEST_DATA_DECRYPTION_ERROR, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Error when decryption data");
         }
     }
 
@@ -235,10 +235,10 @@ public class AuthSecurityImpl implements AuthSecurity {
 
     @Override
     public String getAesKey(Map<String, String> httpHeaders) throws RouterException {
-        String txnKey = httpHeaders.get(Constants.ROUTER_HEADER_TXN_KEY);
+        String txnKey = httpHeaders.get(Constant.ROUTER_HEADER_TXN_KEY);
 
         String requestId = httpHeaders.get(Headers.requestid.name());
-        String securityVersion = httpHeaders.get(Constants.ROUTER_HEADER_SECURITY_VERSION);
+        String securityVersion = httpHeaders.get(Constant.ROUTER_HEADER_SECURITY_VERSION);
 
         String username = httpHeaders.get(Headers.username.name());
 

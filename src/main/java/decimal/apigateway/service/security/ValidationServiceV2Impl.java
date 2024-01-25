@@ -1,6 +1,6 @@
 package decimal.apigateway.service.security;
 
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.domain.ApiAuthorizationConfig;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.enums.RequestValidationTypes;
@@ -48,7 +48,7 @@ public class ValidationServiceV2Impl implements ValidationServiceV2 {
         destinationAppValidator(request, httpHeaders);
 
         MicroserviceResponse response = new MicroserviceResponse();
-        response.setStatus(Constants.SUCCESS_STATUS);
+        response.setStatus(Constant.SUCCESS_STATUS);
         response.setMessage("Validation for executing a request has been done successfully");
 
         MicroserviceResponse validationResponse = validatorFactory.getValidator(SERVICE_NAME.name()).validate(request, httpHeaders);
@@ -63,7 +63,7 @@ public class ValidationServiceV2Impl implements ValidationServiceV2 {
         List<String> logsEnabledList = logs.stream().map(ServiceDef::getIsAuditEnabled).collect(Collectors.toList());
 
         customData.put("serviceLog", logsEnabledList.contains("Y") ? "Y" : "N");
-        customData.put(Constants.KEYS_TO_MASK, keysToMask);
+        customData.put(Constant.KEYS_TO_MASK, keysToMask);
         customData.put("logpurgedays", logs.get(0).getLogPurgeDays());
         customData.put("destinationOrgId", httpHeaders.get(Headers.destinationorgid.name()));
         response.setCustomData(customData);

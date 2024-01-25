@@ -2,7 +2,7 @@ package decimal.apigateway.service.validator;
 
 //import decimal.logs.connector.LogsConnector;
 //import decimal.logs.model.RequestIdentifier;
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.exception.RouterException;
@@ -41,13 +41,13 @@ public class InActiveSessionValidator implements Validator
 
 //        RequestIdentifier requestIdentifier = auditTraceFilter.getRequestIdentifier(auditTraceFilter);
 
-        String clientId = httpHeaders.get(Constants.CLIENT_ID);
-        String requestId = httpHeaders.get(Constants.ROUTER_HEADER_REQUEST_ID);
-        String userName = httpHeaders.get(Constants.ROUTER_HEADER_USERNAME);
+        String clientId = httpHeaders.get(Constant.CLIENT_ID);
+        String requestId = httpHeaders.get(Constant.ROUTER_HEADER_REQUEST_ID);
+        String userName = httpHeaders.get(Constant.ROUTER_HEADER_USERNAME);
 
         log.info("Validating  inactive session: "+userName);
 
-        List<String> clientIdData = RouterOperations.getStringArray(clientId, Constants.TILD_SPLITTER);
+        List<String> clientIdData = RouterOperations.getStringArray(clientId, Constant.TILD_SPLITTER);
 
         ApplicationDef applicationDef = applicationDefConfig.findByOrgIdAndAppId(clientIdData.get(0), clientIdData.get(1));
 
@@ -59,7 +59,7 @@ public class InActiveSessionValidator implements Validator
 
         String token = httpHeaders.get("username");
 
-        if(RouterOperations.getStringArray(userName, Constants.TILD_SPLITTER).size() > 3 && applicationDef.getIsUserInactiveSessionRequired() != null && applicationDef.getIsUserInactiveSessionRequired().equalsIgnoreCase("Y"))
+        if(RouterOperations.getStringArray(userName, Constant.TILD_SPLITTER).size() > 3 && applicationDef.getIsUserInactiveSessionRequired() != null && applicationDef.getIsUserInactiveSessionRequired().equalsIgnoreCase("Y"))
         {
             Object tokenDetails = redisKeyValuePairRepository.get(token);
 

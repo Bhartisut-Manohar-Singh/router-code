@@ -1,6 +1,6 @@
 package decimal.apigateway.service.validator;
 
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.ApplicationDef;
@@ -35,7 +35,7 @@ public class SourceIpValidator implements Validator {
         log.info("Validating source Ip.");
 
         ApplicationDef applicationDef = applicationDefConfig.findByOrgIdAndAppId(orgId, appId);
-        String sourceIp = httpHeaders.get(Constants.ROUTER_HEADER_SOURCE_IP.toLowerCase());
+        String sourceIp = httpHeaders.get(Constant.ROUTER_HEADER_SOURCE_IP.toLowerCase());
 
         String sourceIpValReq = applicationDef.getIsSourceIPValidationRequired();
 
@@ -49,7 +49,7 @@ public class SourceIpValidator implements Validator {
         if (sourceIps == null || sourceIps.isEmpty())
             return new MicroserviceResponse();
 
-        List<String> sourceIpList = Arrays.asList(sourceIps.split(Constants.TILD_SPLITTER));
+        List<String> sourceIpList = Arrays.asList(sourceIps.split(Constant.TILD_SPLITTER));
 
         if (sourceIpList.contains(sourceIp)) {
             log.info("Validating  source ip is success.");
@@ -57,6 +57,6 @@ public class SourceIpValidator implements Validator {
         }
 
         log.info("Error in validating remote IP Address. Remote addresses allowed are :" + applicationDef.getAllowedSourceIPs() + " and Request originator IP is:" + sourceIp);
-        throw new RouterException(RouterResponseCode.NON_AUTHENTICATED_REMOTE_ADDRESS, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "Validating remote IP Address failed.");
+        throw new RouterException(RouterResponseCode.NON_AUTHENTICATED_REMOTE_ADDRESS, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Validating remote IP Address failed.");
     }
 }

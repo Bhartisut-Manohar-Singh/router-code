@@ -1,7 +1,7 @@
 package decimal.apigateway.service.validator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.domain.ServiceConfig;
@@ -48,16 +48,16 @@ public class ServiceValidator implements Validator{
 
         log.info("Validating service with name " + serviceName);
 
-        String version = httpHeaders.get(Constants.ROUTER_HEADER_SERVICE_VERSION);
+        String version = httpHeaders.get(Constant.ROUTER_HEADER_SERVICE_VERSION);
 
         if(version == null){
             log.info("Service version is null so setting it to latest version");
             version = "";
         }
 
-        List<String> serviceNamesData = RouterOperations.getStringArray(serviceName, Constants.TILD_SPLITTER);
+        List<String> serviceNamesData = RouterOperations.getStringArray(serviceName, Constant.TILD_SPLITTER);
 
-        List<String> serviceNamesVersions = RouterOperations.getStringArray(version, Constants.TILD_SPLITTER);
+        List<String> serviceNamesVersions = RouterOperations.getStringArray(version, Constant.TILD_SPLITTER);
 
         List<ServiceDef> logFlags = new ArrayList<>();
 
@@ -81,7 +81,7 @@ public class ServiceValidator implements Validator{
 
         log.info("Validating  service is success.");
 
-       return new MicroserviceResponse(Constants.SUCCESS_STATUS, "Validation is done successfully", logFlags);
+       return new MicroserviceResponse(Constant.SUCCESS_STATUS, "Validation is done successfully", logFlags);
     }
 
 
@@ -95,7 +95,7 @@ public class ServiceValidator implements Validator{
         if (configDataByOrgIdAndAppIdAndApiName.isEmpty())
         {
             log.info("No service configuration found for given serviceName " + serviceName);
-            throw new RouterException(RouterResponseCode.ROUTER_SERVICE_NOT_FOUND, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, "No Service found for given details. " + details);
+            throw new RouterException(RouterResponseCode.ROUTER_SERVICE_NOT_FOUND, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "No Service found for given details. " + details);
         }
 
         ServiceConfig redisCommonConfig;
@@ -103,7 +103,7 @@ public class ServiceValidator implements Validator{
             redisCommonConfig = configDataByOrgIdAndAppIdAndApiName.stream().sorted(new VersionComparator()).collect(Collectors.toList()).get(0);
 
             if (redisCommonConfig==null)
-                throw new RouterException(RouterResponseCode.ROUTER_SERVICE_NOT_FOUND_FOR_VERSION, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, "No Service found for given details.");
+                throw new RouterException(RouterResponseCode.ROUTER_SERVICE_NOT_FOUND_FOR_VERSION, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "No Service found for given details.");
             
 
 

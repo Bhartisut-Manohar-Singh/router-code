@@ -205,7 +205,7 @@ public class CryptoUtilV3 implements ICryptoUtil{
         } catch (Exception e) {
             log.info(e.getMessage() + e);
 
-            throw new RouterException(AuthRouterResponseCode.REQUEST_DATA_DECRYPTION_ERROR, e, ConstantsAuth.ROUTER_ERROR_TYPE_SECURITY, null);
+            throw new RouterException(AuthRouterResponseCode.REQUEST_DATA_DECRYPTION_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, null);
         }
     }
 
@@ -237,7 +237,7 @@ public class CryptoUtilV3 implements ICryptoUtil{
 
         } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
             log.info(e.getMessage() + e);
-            throw new RouterException(AuthRouterResponseCode.ERROR_GENERATING_RSA_KEYS, e, ConstantsAuth.ROUTER_ERROR_TYPE_SECURITY, "Error when generating RSA keys");
+            throw new RouterException(AuthRouterResponseCode.ERROR_GENERATING_RSA_KEYS, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "Error when generating RSA keys");
         }
     }
 
@@ -250,7 +250,7 @@ public class CryptoUtilV3 implements ICryptoUtil{
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
             return new String(cipher.doFinal(hexStringToByteArray(encryptedAESKey.toCharArray())));
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException | InvalidKeyException | InvalidKeySpecException e) {
-            throw new RouterException(AuthRouterResponseCode.TXN_ID_DECRYPTION_ERROR, e, ConstantsAuth.ROUTER_ERROR_TYPE_SECURITY, "Error when decrypting AES key");
+            throw new RouterException(AuthRouterResponseCode.TXN_ID_DECRYPTION_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "Error when decrypting AES key");
         }
     }
 
@@ -279,7 +279,7 @@ public class CryptoUtilV3 implements ICryptoUtil{
             return sb.toString();
 
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            throw new RouterException(AuthRouterResponseCode.TXN_ID_DECRYPTION_ERROR, e, ConstantsAuth.ROUTER_ERROR_TYPE_SECURITY, null);
+            throw new RouterException(AuthRouterResponseCode.TXN_ID_DECRYPTION_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, null);
         }
     }
 

@@ -2,7 +2,7 @@ package decimal.apigateway.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import decimal.apigateway.commons.ConstantsAuth;
+import decimal.apigateway.commons.Constant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,11 +49,11 @@ public class UserLoginDetails{
 		this.userLoginLongitude = interfaces.get("DEVICE_LONGITUDE");
 		this.userLoginTimestamp = new Date();
 
-		this.deviceUdid = interfaces.get(ConstantsAuth.ROUTER_HEADER_IMEI_NO);
-		this.deviceMake = interfaces.get(ConstantsAuth.ROUTER_HEADER_DEVICE_MAKE);
-		this.deviceModel = interfaces.get(ConstantsAuth.ROUTER_HEADER_DEVICE_MODEL);
-		this.appVersionNo = interfaces.get(ConstantsAuth.ROUTER_HEADER_APPLICATION_VERSION);
-		this.installLatitude = interfaces.get(ConstantsAuth.ROUTER_HEADER_DEVICE_LATITUDE);
-		this.installLongitude = interfaces.get(ConstantsAuth.ROUTER_HEADER_DEVICE_LONGITUDE);
+		this.deviceUdid = interfaces.get(Constant.ROUTER_HEADER_IMEI_NO);
+		this.deviceMake = interfaces.get(Constant.ROUTER_HEADER_DEVICE_MAKE);
+		this.deviceModel = interfaces.get(Constant.ROUTER_HEADER_DEVICE_MODEL);
+		this.appVersionNo = interfaces.get(Constant.ROUTER_HEADER_APPLICATION_VERSION);
+		this.installLatitude = interfaces.get(Constant.ROUTER_HEADER_DEVICE_LATITUDE);
+		this.installLongitude = interfaces.get(Constant.ROUTER_HEADER_DEVICE_LONGITUDE);
 	}
 }

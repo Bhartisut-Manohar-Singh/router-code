@@ -1,7 +1,7 @@
 package decimal.apigateway.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.domain.ApplicationDefRedisConfig;
@@ -41,7 +41,7 @@ public class ApplicationDefConfig {
 
         if (!applicationDefConfig.isPresent()) {
             log.info("OrgId and AppId is not registered for given details: " + metaData);
-            throw new RouterException(RouterResponseCode.APPID_DEF_NOT_FOUND, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, "OrgId and AppId is not registered for given details: " + metaData);
+            throw new RouterException(RouterResponseCode.APPID_DEF_NOT_FOUND, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "OrgId and AppId is not registered for given details: " + metaData);
         }
 
         ApplicationDef applicationDef;
@@ -51,12 +51,12 @@ public class ApplicationDefConfig {
         }
         catch (IOException e) {
             log.info("No valid configuration found for given orgId and appId " + metaData);
-            throw new RouterException(RouterResponseCode.APPID_DEF_NOT_FOUND, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, "No valid configuration found for given orgId and appId " + metaData);
+            throw new RouterException(RouterResponseCode.APPID_DEF_NOT_FOUND, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "No valid configuration found for given orgId and appId " + metaData);
         }
 
-        if(!Constants.ACTIVE.equalsIgnoreCase(applicationDef.getStatus())){
+        if(!Constant.ACTIVE.equalsIgnoreCase(applicationDef.getStatus())){
             log.info("Application is not active for given details " + metaData);
-            throw new RouterException(RouterResponseCode.APPID_DEF_NOT_ACTIVE, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, "Application is not active for given details " + metaData);
+            throw new RouterException(RouterResponseCode.APPID_DEF_NOT_ACTIVE, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "Application is not active for given details " + metaData);
         }
 
         try {
@@ -69,8 +69,8 @@ public class ApplicationDefConfig {
 
     public String getIsLogsRequiredFlag(Map<String, String> httpHeaders) throws RouterException {
 
-        String clientId = httpHeaders.get(Constants.CLIENT_ID);
-        List<String> clientIdData = RouterOperations.getStringArray(clientId, Constants.TILD_SPLITTER);
+        String clientId = httpHeaders.get(Constant.CLIENT_ID);
+        List<String> clientIdData = RouterOperations.getStringArray(clientId, Constant.TILD_SPLITTER);
 
         ApplicationDef applicationDef = findByOrgIdAndAppId(clientIdData.get(0), clientIdData.get(1));
 

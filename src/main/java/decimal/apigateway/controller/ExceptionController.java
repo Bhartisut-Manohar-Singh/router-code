@@ -32,7 +32,6 @@ import java.time.Instant;
 
 import static decimal.apigateway.commons.Constant.*;
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
-import static decimal.apigateway.commons.ConstantsAuth.STATUS;
 import static decimal.apigateway.commons.RouterResponseCode.ROUTER_MULTIPLE_SESSION;
 
 @RestControllerAdvice

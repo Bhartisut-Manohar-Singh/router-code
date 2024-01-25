@@ -1,10 +1,9 @@
 package decimal.apigateway.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.enums.Headers;
-import decimal.apigateway.commons.ConstantsAuth;
 import decimal.apigateway.commons.AuthRouterOperations;
-import decimal.apigateway.enums.Headers;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +12,6 @@ import lombok.Setter;
 import java.util.List;
 import java.util.Map;
 
-import static decimal.apigateway.service.util.BuiltInUtility.stringFormat;
 import static decimal.apigateway.service.util.BuiltInUtility.stringFormat;
 
 @Setter
@@ -93,7 +91,7 @@ public class LastLoginDetails {
 
 
         String userName = httpHeaders.get(Headers.username.name());
-        List<String> userNameData = AuthRouterOperations.getStringArray(userName, ConstantsAuth.TILD_SPLITTER);
+        List<String> userNameData = AuthRouterOperations.getStringArray(userName, Constant.TILD_SPLITTER);
 
         this.orgId = userNameData.get(0);
         this.appId = userNameData.get(1);

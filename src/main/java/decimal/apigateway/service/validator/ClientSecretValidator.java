@@ -1,7 +1,7 @@
 package decimal.apigateway.service.validator;
 
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.model.MicroserviceResponse;
-import decimal.apigateway.commons.Constants;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
@@ -31,14 +31,14 @@ public class ClientSecretValidator implements Validator
         String orgId = httpHeaders.get(Headers.orgid.name());
         String appId = httpHeaders.get(Headers.appid.name());
 
-        String clientSecret = httpHeaders.get(Constants.CLIENT_SECRET);
+        String clientSecret = httpHeaders.get(Constant.CLIENT_SECRET);
 
         log.info("Validating client secret.");
 
         if(clientSecret == null || clientSecret.isEmpty())
         {
             log.info("Client secret can not be empty or blank");
-            throw new RouterException(RouterResponseCode.ROUTER_CLIENT_SECRET_MISSING, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, "Client secret is missing from the request");
+            throw new RouterException(RouterResponseCode.ROUTER_CLIENT_SECRET_MISSING, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "Client secret is missing from the request");
         }
 
         ApplicationDef applicationDef = applicationDefConfig.findByOrgIdAndAppId(orgId, appId);
@@ -48,7 +48,7 @@ public class ClientSecretValidator implements Validator
         if(!applicationDef.getClientSecret().equalsIgnoreCase(clientSecret))
         {
             log.info("Invalid Client Secret");
-            throw new RouterException(RouterResponseCode.INVALID_CLIENT_SECRET, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "Invalid Client Secret.");
+            throw new RouterException(RouterResponseCode.INVALID_CLIENT_SECRET, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Invalid Client Secret.");
         }
 
         log.info("Validation of client secret is success.");

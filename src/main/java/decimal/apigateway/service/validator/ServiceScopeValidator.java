@@ -1,6 +1,6 @@
 package decimal.apigateway.service.validator;
 
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.enums.Headers;
@@ -38,15 +38,15 @@ public class ServiceScopeValidator implements Validator{
         String orgId = httpHeaders.get(Headers.orgid.name());
         String appId = httpHeaders.get(Headers.appid.name());
 
-        String version = httpHeaders.get(Constants.ROUTER_HEADER_SERVICE_VERSION);
+        String version = httpHeaders.get(Constant.ROUTER_HEADER_SERVICE_VERSION);
 
         log.info("Validating Service scope for services name " + serviceName);
         if(version == null)
             version = "";
 
-        List<String> serviceNamesData = RouterOperations.getStringArray(serviceName, Constants.TILD_SPLITTER);
+        List<String> serviceNamesData = RouterOperations.getStringArray(serviceName, Constant.TILD_SPLITTER);
 
-        List<String> serviceNamesVersions = RouterOperations.getStringArray(version, Constants.TILD_SPLITTER);
+        List<String> serviceNamesVersions = RouterOperations.getStringArray(version, Constant.TILD_SPLITTER);
 
         log.info("Number of services to be validated are " + serviceNamesData.size());
         log.info("Validating service scope one by one");
@@ -70,7 +70,7 @@ public class ServiceScopeValidator implements Validator{
 
     private void validateScope(ServiceDef serviceDef, String scopeToCheck, String userName) throws RouterException {
 
-       int size = RouterOperations.getStringArray(userName, Constants.TILD_SPLITTER).size();
+       int size = RouterOperations.getStringArray(userName, Constant.TILD_SPLITTER).size();
 
        boolean isUserSession = size > 3;
 
@@ -82,7 +82,7 @@ public class ServiceScopeValidator implements Validator{
        {
            String msg = "It seems that service scope is configured as " + serviceScope + " but it is called as PUBLIC for " + details;
            log.info(msg);
-           throw new RouterException(RouterResponseCode.INVALID_REQUEST_SCOPE, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, msg);
+           throw new RouterException(RouterResponseCode.INVALID_REQUEST_SCOPE, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, msg);
        }
 
        if(!isUserSession && serviceScope.equalsIgnoreCase("SECURE"))
@@ -90,7 +90,7 @@ public class ServiceScopeValidator implements Validator{
 
            String msg = "It seems that service scope is configured as " + serviceScope + " but it is called as OPEN for " + details;
            log.info(msg);
-           throw new RouterException(RouterResponseCode.INVALID_REQUEST_SCOPE, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, msg);
+           throw new RouterException(RouterResponseCode.INVALID_REQUEST_SCOPE, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, msg);
        }
 
     }

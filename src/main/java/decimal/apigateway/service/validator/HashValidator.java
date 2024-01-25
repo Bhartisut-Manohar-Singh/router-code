@@ -1,10 +1,9 @@
 package decimal.apigateway.service.validator;
 
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.model.MicroserviceResponse;
-import decimal.apigateway.commons.Constants;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.exception.RouterException;
-import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.model.Request;
 import decimal.apigateway.service.security.EncryptionDecryptionService;
 import lombok.extern.java.Log;
@@ -41,7 +40,7 @@ public class HashValidator implements Validator {
         if(requestHash == null || !requestHash.equalsIgnoreCase(responseHash))
         {
             log.info("Hash received by client is: " + requestHash + " and created by server is: " + responseHash);
-            throw new RouterException(RouterResponseCode.REQUEST_HASH_MISMATCH, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, "Either hash is null or provided hash is mismatched with server hash");
+            throw new RouterException(RouterResponseCode.REQUEST_HASH_MISMATCH, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "Either hash is null or provided hash is mismatched with server hash");
         }
 
         log.info("Validating hash is success.");

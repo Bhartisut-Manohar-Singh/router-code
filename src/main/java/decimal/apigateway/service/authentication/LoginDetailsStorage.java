@@ -1,8 +1,8 @@
 package decimal.apigateway.service.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import decimal.apigateway.commons.ConstantsAuth;
 import decimal.apigateway.commons.AuthRouterOperations;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.domain.UserLoginDetails;
 import decimal.apigateway.enums.Headers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class LoginDetailsStorage {
     private void parseDataFromHeaders(Map<String, String> httpHeaders, UserLoginDetails userLoginDetails) {
         String userName = httpHeaders.get(Headers.username.name());
 
-        List<String> clientData = AuthRouterOperations.getStringArray(userName, ConstantsAuth.TILD_SPLITTER);
+        List<String> clientData = AuthRouterOperations.getStringArray(userName, Constant.TILD_SPLITTER);
 
         userLoginDetails.setOrgId(clientData.get(0));
         userLoginDetails.setAppId(clientData.get(1));
@@ -34,8 +34,8 @@ public class LoginDetailsStorage {
 
         userLoginDetails.setRequestId(httpHeaders.get(Headers.requestid.name()));
 
-        userLoginDetails.setPlatform(httpHeaders.get(ConstantsAuth.ROUTER_HEADER_PLATFORM));
-        userLoginDetails.setPlatformDetails(httpHeaders.get(ConstantsAuth.ROUTER_HEADER_CLIENT_DETAILS));
-        userLoginDetails.setIpAddress(httpHeaders.get(ConstantsAuth.ROUTER_HEADER_SOURCE_IP));
+        userLoginDetails.setPlatform(httpHeaders.get(Constant.ROUTER_HEADER_PLATFORM));
+        userLoginDetails.setPlatformDetails(httpHeaders.get(Constant.ROUTER_HEADER_CLIENT_DETAILS));
+        userLoginDetails.setIpAddress(httpHeaders.get(Constant.ROUTER_HEADER_SOURCE_IP));
     }
 }

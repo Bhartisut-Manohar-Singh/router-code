@@ -3,7 +3,7 @@ package decimal.apigateway.service.authentication.sessionmgmt;
 import com.google.gson.Gson;
 import decimal.apigateway.commons.AuthRouterOperations;
 import decimal.apigateway.commons.AuthRouterResponseCode;
-import decimal.apigateway.commons.ConstantsAuth;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.domain.PublicAuthSession;
 import decimal.apigateway.domain.Session;
 import decimal.apigateway.enums.Headers;
@@ -27,7 +27,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static decimal.apigateway.commons.ConstantsAuth.LOGIN_ID;
+import static decimal.apigateway.commons.Constant.LOGIN_ID;
 
 
 @Service
@@ -63,7 +63,7 @@ public class AuthenticationSessionService implements SessionStrategry {
     private Session createSession(Map<String, String> httpHeaders, Map<String, Object> rsaKeys, String jwtToken) throws RouterException {
 
 
-        String securityVersion = httpHeaders.get(ConstantsAuth.ROUTER_HEADER_SECURITY_VERSION);
+        String securityVersion = httpHeaders.get(Constant.ROUTER_HEADER_SECURITY_VERSION);
         String requestId = httpHeaders.get(Headers.requestid.name());
         String userName = httpHeaders.get(Headers.username.name());
 
@@ -72,7 +72,7 @@ public class AuthenticationSessionService implements SessionStrategry {
         Map<String, String> rsaData = new HashMap<>();
         rsaData.put("rsa", new Gson().toJson(rsaKeys));
 
-        List<String> clientId = AuthRouterOperations.getStringArray(userName, ConstantsAuth.TILD_SPLITTER);
+        List<String> clientId = AuthRouterOperations.getStringArray(userName, Constant.TILD_SPLITTER);
 
         String orgId = clientId.get(0);
         String appId = clientId.get(1);
@@ -303,16 +303,16 @@ public class AuthenticationSessionService implements SessionStrategry {
     private PublicAuthSession createPublicSession(Map<String, String> httpHeaders, Map<String, Object> rsaKeys, String jwtToken) throws RouterException {
 
 
-        String securityVersion = httpHeaders.get(ConstantsAuth.ROUTER_HEADER_SECURITY_VERSION);
+        String securityVersion = httpHeaders.get(Constant.ROUTER_HEADER_SECURITY_VERSION);
         String requestId = httpHeaders.get(Headers.requestid.name());
-        String clientId = httpHeaders.get(ConstantsAuth.CLIENT_ID);
+        String clientId = httpHeaders.get(Constant.CLIENT_ID);
         String loginId = httpHeaders.get(LOGIN_ID);
 
 
         Map<String, String> rsaData = new HashMap<>();
         rsaData.put("rsa", new Gson().toJson(rsaKeys));
 
-        List<String> clientIdData = AuthRouterOperations.getStringArray(clientId, ConstantsAuth.TILD_SPLITTER);
+        List<String> clientIdData = AuthRouterOperations.getStringArray(clientId, Constant.TILD_SPLITTER);
 
         String orgId = clientIdData.get(0);
         String appId = clientIdData.get(1);
@@ -324,7 +324,7 @@ public class AuthenticationSessionService implements SessionStrategry {
         publicSession.setSessionId(requestId);
         publicSession.setJwtKey(jwtToken);
         publicSession.setRequestId(requestId);
-        publicSession.setUsername(clientId + ConstantsAuth.TILD_SPLITTER + loginId);
+        publicSession.setUsername(clientId + Constant.TILD_SPLITTER + loginId);
         publicSession.setLastLogin(BuiltInUtility.simpleDateFormat());
 
         publicSession.setSecurityVersion(securityVersion);

@@ -1,7 +1,7 @@
 package decimal.apigateway.service.validator;
 
 
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.exception.RouterException;
@@ -32,16 +32,16 @@ public class ApplicationValidator implements Validator {
 
 /*        RequestIdentifier requestIdentifier = requestObj.getRequestIdentifier(requestObj);*/
 
-        String clientId = httpHeaders.get(Constants.CLIENT_ID);
+        String clientId = httpHeaders.get(Constant.CLIENT_ID);
 
         /*logsConnector.textPayload("Validating application Id for existing", requestIdentifier);*/
 
         if (clientId == null || clientId.isEmpty()) {
             /*logsConnector.textPayload("Client Id is missing from the request headers", requestIdentifier);*/
-            throw new RouterException(RouterResponseCode.ORGID_APPID_ERROR, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, "Client Id is missing from the request");
+            throw new RouterException(RouterResponseCode.ORGID_APPID_ERROR, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "Client Id is missing from the request");
         }
 
-        List<String> clientIdData = RouterOperations.getStringArray(clientId, Constants.TILD_SPLITTER);
+        List<String> clientIdData = RouterOperations.getStringArray(clientId, Constant.TILD_SPLITTER);
 
         applicationDefConfig.findByOrgIdAndAppId(clientIdData.get(0), clientIdData.get(1));
 

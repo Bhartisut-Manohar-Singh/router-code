@@ -1,6 +1,6 @@
 package decimal.apigateway.service.security;
 
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.ICryptoUtil;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.commons.RouterResponseCode;
@@ -44,7 +44,7 @@ public class EncryptionDecryptionServiceImpl implements EncryptionDecryptionServ
     @Override
     public MicroserviceResponse generateResponseHash(String request, Map<String, String> httpHeaders) throws RouterException {
         log.info("In security service - generate response hash.....");
-        List<String> clientId = RouterOperations.getStringArray(httpHeaders.get("clientid"), Constants.TILD_SPLITTER);
+        List<String> clientId = RouterOperations.getStringArray(httpHeaders.get("clientid"), Constant.TILD_SPLITTER);
 
         String orgId = clientId.get(0);
         String appId = clientId.get(1);
@@ -58,8 +58,8 @@ public class EncryptionDecryptionServiceImpl implements EncryptionDecryptionServ
 
         String clientSecret = byOrgIdAndAppId.getClientSecret();
 
-        String securityVersion = httpHeaders.get(Constants.ROUTER_HEADER_SECURITY_VERSION);
-        String requestId = httpHeaders.get(Constants.ROUTER_HEADER_REQUEST_ID);
+        String securityVersion = httpHeaders.get(Constant.ROUTER_HEADER_SECURITY_VERSION);
+        String requestId = httpHeaders.get(Constant.ROUTER_HEADER_REQUEST_ID);
 
 
         ICryptoUtil securityVersion1 = cryptoFactory.getSecurityVersion(securityVersion, requestId);
@@ -71,7 +71,7 @@ public class EncryptionDecryptionServiceImpl implements EncryptionDecryptionServ
         log.info("Response hash generated.....");
 
         MicroserviceResponse response = new MicroserviceResponse();
-        response.setStatus(Constants.SUCCESS_STATUS);
+        response.setStatus(Constant.SUCCESS_STATUS);
         response.setMessage(responseHash);
 
         return response;
@@ -82,7 +82,7 @@ public class EncryptionDecryptionServiceImpl implements EncryptionDecryptionServ
 
         String plainRequest = String.valueOf(authSecurity.decryptRequestV1(request, httpHeaders));
         MicroserviceResponse response = new MicroserviceResponse();
-        response.setStatus(Constants.SUCCESS_STATUS);
+        response.setStatus(Constant.SUCCESS_STATUS);
         response.setResponse(plainRequest);
 
         return response;
@@ -93,7 +93,7 @@ public class EncryptionDecryptionServiceImpl implements EncryptionDecryptionServ
         Map<String,String> customMap = new HashMap<>();
         String requestId = httpHeaders.get(requestid.name());
         String clientSecret = httpHeaders.get(Headers.clientsecret.name());
-        String securityVersion = httpHeaders.get(Constants.ROUTER_HEADER_SECURITY_VERSION);
+        String securityVersion = httpHeaders.get(Constant.ROUTER_HEADER_SECURITY_VERSION);
 
         ICryptoUtil iCryptoUtil = cryptoFactory.getSecurityVersion ( securityVersion, requestId );
         MicroserviceResponse response = new MicroserviceResponse();
@@ -113,14 +113,14 @@ public class EncryptionDecryptionServiceImpl implements EncryptionDecryptionServ
 
             if (!hash.equalsIgnoreCase(signature)) {
                 System.out.println("-----------------hmac validation failed--------------");
-                throw new RouterException(RouterResponseCode.INVALID_SIGNATURE, Constants.ROUTER_ERROR_TYPE_SECURITY, "Signature verification failed","Signature verification failed",null);
+                throw new RouterException(RouterResponseCode.INVALID_SIGNATURE, Constant.ROUTER_ERROR_TYPE_SECURITY, "Signature verification failed","Signature verification failed",null);
             }
 
 
 
         }
 
-        response.setStatus(Constants.SUCCESS_STATUS);
+        response.setStatus(Constant.SUCCESS_STATUS);
         response.setCustomData(customMap);
 
         return response;
@@ -132,14 +132,14 @@ public class EncryptionDecryptionServiceImpl implements EncryptionDecryptionServ
         String decryptedAESKey = authSecurity.getAesKey(httpHeaders);
 
         String requestId = httpHeaders.get(Headers.requestid.name());
-        String securityVersion = httpHeaders.get(Constants.ROUTER_HEADER_SECURITY_VERSION);
+        String securityVersion = httpHeaders.get(Constant.ROUTER_HEADER_SECURITY_VERSION);
 
         ICryptoUtil iCryptoUtil = cryptoFactory.getSecurityVersion(securityVersion, requestId);
 
         String responseHash = iCryptoUtil.generateSHA512Hash ( body, decryptedAESKey );
 
         MicroserviceResponse response = new MicroserviceResponse();
-        response.setStatus(Constants.SUCCESS_STATUS);
+        response.setStatus(Constant.SUCCESS_STATUS);
         response.setMessage(responseHash);
 
         return response;
@@ -151,14 +151,14 @@ public class EncryptionDecryptionServiceImpl implements EncryptionDecryptionServ
         String decryptedAESKey = authSecurity.getAesKey(httpHeaders);
 
         String txnKey = httpHeaders.get("txnkey");
-        String securityVersion = httpHeaders.get(Constants.ROUTER_HEADER_SECURITY_VERSION);
+        String securityVersion = httpHeaders.get(Constant.ROUTER_HEADER_SECURITY_VERSION);
 
         ICryptoUtil iCryptoUtil = cryptoFactory.getSecurityVersion(securityVersion, txnKey);
 
         String responseHash = iCryptoUtil.encryptTextUsingAES ( request, decryptedAESKey );
 
         MicroserviceResponse response = new MicroserviceResponse();
-        response.setStatus(Constants.SUCCESS_STATUS);
+        response.setStatus(Constant.SUCCESS_STATUS);
         response.setMessage(responseHash);
 
         return response;
@@ -169,7 +169,7 @@ public class EncryptionDecryptionServiceImpl implements EncryptionDecryptionServ
 
         String txnKey = httpHeaders.get(Headers.txnkey.name());
         String clientSecret = httpHeaders.get(Headers.clientsecret.name());
-        String securityVersion = httpHeaders.get(Constants.ROUTER_HEADER_SECURITY_VERSION);
+        String securityVersion = httpHeaders.get(Constant.ROUTER_HEADER_SECURITY_VERSION);
 
         ICryptoUtil iCryptoUtil = cryptoFactory.getSecurityVersion(securityVersion, txnKey);
 
@@ -177,7 +177,7 @@ public class EncryptionDecryptionServiceImpl implements EncryptionDecryptionServ
         String responseHash = iCryptoUtil.encryptTextUsingAES(request, decryptedTxnKey);
 
         MicroserviceResponse response = new MicroserviceResponse();
-        response.setStatus(Constants.SUCCESS_STATUS);
+        response.setStatus(Constant.SUCCESS_STATUS);
         response.setMessage(responseHash);
 
         return response;

@@ -43,7 +43,7 @@ public class ResponseOperationsAuth {
     ObjectNode servicesNode = mapper.createObjectNode();
     ObjectNode finalResponse = mapper.createObjectNode();
 
-    response.setStatus(ConstantsAuth.SUCCESS_STATUS);
+    response.setStatus(Constant.SUCCESS_STATUS);
     if (routerOutput.getRouterError() == null) {
       for (ServiceOutput serviceOutput : routerOutput.getServiceOutputList()) {
         try {
@@ -96,7 +96,7 @@ public class ResponseOperationsAuth {
       } else {
         // Handle Record level Data
         apiObject.set(ERROR, JacksonAuth.objectToJson(apiLevelError));
-        response.setStatus(ConstantsAuth.FAILURE_STATUS);
+        response.setStatus(Constant.FAILURE_STATUS);
       }
       apisObject.set(apiName, apiObject);
     }
@@ -111,7 +111,7 @@ public class ResponseOperationsAuth {
     ObjectNode o = mapper.createObjectNode();
     o.set(ERROR, JacksonAuth.objectToJson(routerError));
     object.set(serviceOutput.getServiceName(), o);
-    response.setStatus(ConstantsAuth.FAILURE_STATUS);
+    response.setStatus(Constant.FAILURE_STATUS);
     return object;
   }
 
@@ -123,7 +123,7 @@ public class ResponseOperationsAuth {
       generateAPIObject(listApiOutput, servicesNode);
     } else {
       parseServiceObjectError(servicesNode, serviceOutput, serviceOutput.getServiceError());
-      response.setStatus(ConstantsAuth.FAILURE_STATUS);
+      response.setStatus(Constant.FAILURE_STATUS);
     }
     return servicesNode;
 
@@ -150,7 +150,7 @@ public class ResponseOperationsAuth {
 
       } else {
         // Handle Record level Data
-        response.setStatus(ConstantsAuth.FAILURE_STATUS);
+        response.setStatus(Constant.FAILURE_STATUS);
         oneRecordData.set(ERROR, JacksonAuth.stringToJsonNode(recordOutput.getRecordError()));
       }
       recordsArray.add(oneRecordData);
@@ -169,11 +169,11 @@ public class ResponseOperationsAuth {
       try {
         ObjectMapper mapper=new ObjectMapper();
         String objectData=mapper.writeValueAsString(singleRecordObject);
-        List<String> priKeysList= AuthRouterOperations.getStringArray(recordPrimaryKeyKeyName, ConstantsAuth.TILD_SPLITTER);
+        List<String> priKeysList= AuthRouterOperations.getStringArray(recordPrimaryKeyKeyName, Constant.TILD_SPLITTER);
         for(String priKey:priKeysList){
-          value.append(JsonPath.read(objectData,priKey)+ ConstantsAuth.TILD_SPLITTER);
+          value.append(JsonPath.read(objectData,priKey)+ Constant.TILD_SPLITTER);
         }
-        if(value.toString().endsWith(ConstantsAuth.TILD_SPLITTER))
+        if(value.toString().endsWith(Constant.TILD_SPLITTER))
         {
           primaryKey=value.substring(0,value.toString().length()-1);
         }

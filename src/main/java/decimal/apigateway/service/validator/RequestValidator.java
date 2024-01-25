@@ -1,6 +1,6 @@
 package decimal.apigateway.service.validator;
 
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.domain.Session;
@@ -14,7 +14,6 @@ import decimal.logs.model.RequestIdentifier;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.java.Log;
 import io.jsonwebtoken.Jwts;
-import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -48,14 +47,14 @@ public class RequestValidator implements Validator {
         String requestId = httpHeaders.get(Headers.requestid.name());
         System.out.println("authorizationToken:"+authorizationToken);
 
-        String securityVersion = httpHeaders.get(Constants.ROUTER_HEADER_SECURITY_VERSION);
+        String securityVersion = httpHeaders.get(Constant.ROUTER_HEADER_SECURITY_VERSION);
 
         log.info("Validating  request authorization token " );
 
         if (authorizationToken == null || !authorizationToken.startsWith(TOKEN_PREFIX)) {
             log.info("Error in processing request because of invalid authorization token found in the request");
 
-            throw new RouterException(RouterResponseCode.ERROR_IN_PROCESSING_REQUEST, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "Error in processing request because of invalid authorization token found in the request");
+            throw new RouterException(RouterResponseCode.ERROR_IN_PROCESSING_REQUEST, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Error in processing request because of invalid authorization token found in the request");
         }
 
         String encryptedJWTToken;
@@ -72,7 +71,7 @@ public class RequestValidator implements Validator {
 
             Object username = cryptographyService.decryptJWTToken(securityVersion, systemKey, e.getClaims().getSubject(), requestId);
 
-            List<String> userNameData = RouterOperations.getStringArray(username.toString(), Constants.TILD_SPLITTER);
+            List<String> userNameData = RouterOperations.getStringArray(username.toString(), Constant.TILD_SPLITTER);
             if (userNameData.size() > 3) {
                 checkApplicationSessionExpiry(username.toString(), requestId);
 
@@ -80,13 +79,13 @@ public class RequestValidator implements Validator {
                 authenticationSession.removeSession(username.toString());
             }
             // If App session is not valid then throw App Authentication failure
-            throw new RouterException(RouterResponseCode.APP_AUTHENTICATION_FAILURE, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "JWT token has been expired");
+            throw new RouterException(RouterResponseCode.APP_AUTHENTICATION_FAILURE, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "JWT token has been expired");
 
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("=============="+RouterResponseCode.JWT_PARSING_ERROR+"=================");
             log.info("Error while parsing Bearer JWT Token. Token is:" + authorizationToken+" Exception: "+e);
-            throw new RouterException(RouterResponseCode.JWT_PARSING_ERROR, e, Constants.ROUTER_ERROR_TYPE_SECURITY, "It seems that there is some error when parsing JWT token. Check your token if it is valid or not");
+            throw new RouterException(RouterResponseCode.JWT_PARSING_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "It seems that there is some error when parsing JWT token. Check your token if it is valid or not");
         }
 
         log.info("JWT Token is parsed. Let Decrypt it now");
@@ -102,7 +101,7 @@ public class RequestValidator implements Validator {
             System.out.println("=============="+RouterResponseCode.JWT_DECRYPTION_ERROR+"=================");
             e.printStackTrace();
             log.info("Error while decrypting Bearer JWT Token. Token is:" + encryptedJWTToken+" Exception: "+ e);
-            throw new RouterException(RouterResponseCode.JWT_DECRYPTION_ERROR, e, Constants.ROUTER_ERROR_TYPE_SECURITY, "There is some error in decrypting JWT token");
+            throw new RouterException(RouterResponseCode.JWT_DECRYPTION_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "There is some error in decrypting JWT token");
         }
 
         log.info("Validating authorization token is success: ");
@@ -112,11 +111,11 @@ public class RequestValidator implements Validator {
     private void checkApplicationSessionExpiry(String username, String requestId) throws RouterException {
         try {
 
-            List<String> userNameData = RouterOperations.getStringArray(username, Constants.TILD_SPLITTER);
+            List<String> userNameData = RouterOperations.getStringArray(username, Constant.TILD_SPLITTER);
 
             authenticationSession.removeSession(username);
 
-            String applicationUser =  RouterOperations.getJoiningString(Constants.TILD_SPLITTER, userNameData.get(0), userNameData.get(1), userNameData.get(3));
+            String applicationUser =  RouterOperations.getJoiningString(Constant.TILD_SPLITTER, userNameData.get(0), userNameData.get(1), userNameData.get(3));
 
             Session session = authenticationSession.getSession(applicationUser);
 
@@ -125,13 +124,13 @@ public class RequestValidator implements Validator {
                 String encryptedJWTToken = Jwts.parser().setSigningKey(systemKey).parseClaimsJws(session.getAppJwtKey()).getBody().getSubject();
             }
 
-            throw new RouterException(RouterResponseCode.USER_AUTHENTICATION_FAILURE, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "Not able to find user session");
+            throw new RouterException(RouterResponseCode.USER_AUTHENTICATION_FAILURE, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Not able to find user session");
         } catch (ExpiredJwtException ae) {
             log.info("Exception for authentication in app level session check."+ae);
 
             // Fetching App session stratergy data to remove session
             List<String> userNameData = RouterOperations.getStringArray(username, "~");
-            String applicationUser = RouterOperations.getJoiningString(Constants.TILD_SPLITTER, userNameData.get(0), userNameData.get(1), userNameData.get(3));
+            String applicationUser = RouterOperations.getJoiningString(Constant.TILD_SPLITTER, userNameData.get(0), userNameData.get(1), userNameData.get(3));
 
             authenticationSession.removeSession(applicationUser);
 
@@ -141,7 +140,7 @@ public class RequestValidator implements Validator {
 
         } catch (Exception e1) {
             log.info("Exception for authentication in app level session check."+ e1);
-            throw new RouterException(RouterResponseCode.ERROR_IN_PROCESSING_REQUEST, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "Exception for authentication in app level session");
+            throw new RouterException(RouterResponseCode.ERROR_IN_PROCESSING_REQUEST, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Exception for authentication in app level session");
         }
     }
 

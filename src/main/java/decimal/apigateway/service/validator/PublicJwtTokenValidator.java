@@ -1,7 +1,7 @@
 package decimal.apigateway.service.validator;
 
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.model.MicroserviceResponse;
-import decimal.apigateway.commons.Constants;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.Map;
 
-import static decimal.apigateway.service.validator.RequestValidator.HEADER_STRING;
 import static decimal.apigateway.service.validator.RequestValidator.HEADER_STRING;
 import static decimal.apigateway.service.validator.RequestValidator.TOKEN_PREFIX;
 
@@ -37,10 +36,10 @@ public class PublicJwtTokenValidator implements Validator{
 
         log.info("public authorizationToken:"+ authorizationToken);
 
-        String securityVersion = httpHeaders.get(Constants.ROUTER_HEADER_SECURITY_VERSION);
+        String securityVersion = httpHeaders.get(Constant.ROUTER_HEADER_SECURITY_VERSION);
 
         if (authorizationToken == null || !authorizationToken.startsWith(TOKEN_PREFIX)) {
-            throw new RouterException(RouterResponseCode.ERROR_IN_PROCESSING_REQUEST, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "Error in processing request because of invalid authorization token found in the request");
+            throw new RouterException(RouterResponseCode.ERROR_IN_PROCESSING_REQUEST, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Error in processing request because of invalid authorization token found in the request");
         }
 
         String encryptedJWTToken;
@@ -53,10 +52,10 @@ public class PublicJwtTokenValidator implements Validator{
             encryptedJWTToken = Jwts.parser().setSigningKey(systemKey).parseClaimsJws(token).getBody().getSubject();
             System.out.println("public token after parsing: " + encryptedJWTToken);
         } catch (ExpiredJwtException e) {
-            throw new RouterException(RouterResponseCode.APP_AUTHENTICATION_FAILURE, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "JWT token has been expired");
+            throw new RouterException(RouterResponseCode.APP_AUTHENTICATION_FAILURE, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "JWT token has been expired");
         } catch (Exception e) {
             System.out.println("=============="+RouterResponseCode.JWT_PARSING_ERROR+"=================");
-            throw new RouterException(RouterResponseCode.JWT_PARSING_ERROR, e, Constants.ROUTER_ERROR_TYPE_SECURITY, "It seems that there is some error when parsing JWT token. Check your token if it is valid or not");
+            throw new RouterException(RouterResponseCode.JWT_PARSING_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "It seems that there is some error when parsing JWT token. Check your token if it is valid or not");
         }
 
         log.info("Encrypted Public JWT Token:"+encryptedJWTToken);
@@ -70,7 +69,7 @@ public class PublicJwtTokenValidator implements Validator{
         } catch (Exception e) {
             System.out.println("=============="+RouterResponseCode.JWT_DECRYPTION_ERROR+"=================");
             e.printStackTrace();
-            throw new RouterException(RouterResponseCode.JWT_DECRYPTION_ERROR, e, Constants.ROUTER_ERROR_TYPE_SECURITY, "There is some error in decrypting JWT token");
+            throw new RouterException(RouterResponseCode.JWT_DECRYPTION_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "There is some error in decrypting JWT token");
         }
 
         return response;

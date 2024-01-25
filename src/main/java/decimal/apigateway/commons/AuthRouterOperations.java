@@ -38,7 +38,7 @@ public class AuthRouterOperations {
             if(ar == null || ar.isEmpty())
             {
                 ERROR_LOGGER.error("OrgId can not be null/empty in application session creation.");
-                throw new RouterException(AuthRouterResponseCode.INVALID_SESSION_PARAMETERS, (Exception) null, ConstantsAuth.ROUTER_ERROR_TYPE_VALIDATION, "Org ID is found null or empty for request");
+                throw new RouterException(AuthRouterResponseCode.INVALID_SESSION_PARAMETERS, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "Org ID is found null or empty for request");
             }
         }
     }

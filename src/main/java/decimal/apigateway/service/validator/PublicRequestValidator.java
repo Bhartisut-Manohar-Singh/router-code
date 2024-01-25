@@ -1,8 +1,8 @@
 package decimal.apigateway.service.validator;
 
 
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.model.MicroserviceResponse;
-import decimal.apigateway.commons.Constants;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.exception.RouterException;
@@ -30,15 +30,15 @@ public class PublicRequestValidator implements Validator {
     @Override
     public MicroserviceResponse validate(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        String clientId = httpHeaders.get(Constants.CLIENT_ID);
+        String clientId = httpHeaders.get(Constant.CLIENT_ID);
 
         if (clientId == null || clientId.isEmpty()) {
-            throw new RouterException(RouterResponseCode.ORGID_APPID_ERROR, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, "Client Id is missing from the request");
+            throw new RouterException(RouterResponseCode.ORGID_APPID_ERROR, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "Client Id is missing from the request");
         }
 
         ApplicationDef def = new ApplicationDef();
         try {
-            List<String> clientIdData = RouterOperations.getStringArray(clientId, Constants.TILD_SPLITTER);
+            List<String> clientIdData = RouterOperations.getStringArray(clientId, Constant.TILD_SPLITTER);
 
             log.info("clientIdData : " +clientIdData);
 
@@ -50,7 +50,7 @@ public class PublicRequestValidator implements Validator {
         } catch (Exception e) {
             String message = "Error in getting OrgId and AppId from ClientId parameter.Please make sure you have passed parameter in header with name clientid with value orgid~appid";
             log.info("  ==========================321====================== ");
-            throw new RouterException(RouterResponseCode.ORGID_APPID_ERROR, e, Constants.ROUTER_ERROR_TYPE_SECURITY, message);
+            throw new RouterException(RouterResponseCode.ORGID_APPID_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, message);
         }
         MicroserviceResponse response = new MicroserviceResponse();
         response.setResponse(def);

@@ -97,11 +97,11 @@ public class KeysGenerator
         String requestId = httpHeaders.get(requestid.name());
         String userName = httpHeaders.get(username.name());
 
-        String securityVersion = httpHeaders.get(ConstantsAuth.ROUTER_HEADER_SECURITY_VERSION);
+        String securityVersion = httpHeaders.get(Constant.ROUTER_HEADER_SECURITY_VERSION);
 
-        List<String> userNameData = AuthRouterOperations.getStringArray(userName, ConstantsAuth.TILD_SPLITTER);
+        List<String> userNameData = AuthRouterOperations.getStringArray(userName, Constant.TILD_SPLITTER);
 
-        StringJoiner applicationUser = new StringJoiner(ConstantsAuth.TILD_SPLITTER);
+        StringJoiner applicationUser = new StringJoiner(Constant.TILD_SPLITTER);
         applicationUser.add(userNameData.get(0));
         applicationUser.add(userNameData.get(1));
         applicationUser.add(userNameData.get(3));
@@ -111,7 +111,7 @@ public class KeysGenerator
         if(!sessionOptional.isPresent())
         {
             log.info("Invalid user session"+requestId);
-            throw new RouterException(AuthRouterResponseCode.INVALID_USER_SESSION, (Exception) null, ConstantsAuth.ROUTER_ERROR_TYPE_VALIDATION, "User session is invalid");
+            throw new RouterException(AuthRouterResponseCode.INVALID_USER_SESSION, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "User session is invalid");
         }
 
         Map<String, String> rsaKeys = sessionOptional.get().getSessionData();
@@ -134,7 +134,7 @@ public class KeysGenerator
 
         String securityVersion = httpHeaders.get("security-version");
         String requestId = httpHeaders.get(requestid.name());
-        String clientid = httpHeaders.get(ConstantsAuth.CLIENT_ID);
+        String clientid = httpHeaders.get(Constant.CLIENT_ID);
 
 //        Map<String, Object> rsaKeys = generateRsaKeys(securityVersion, requestId);
         Map<String, Object> res = new HashMap<>();

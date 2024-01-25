@@ -2,7 +2,7 @@ package decimal.apigateway.service.authentication;
 
 import decimal.apigateway.commons.AuthRouterOperations;
 import decimal.apigateway.commons.AuthRouterResponseCode;
-import decimal.apigateway.commons.ConstantsAuth;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.Account;
 import decimal.apigateway.model.ApplicationDef;
@@ -66,7 +66,7 @@ public class TokenHandler {
         } catch (Exception e)
         {
             log.info("Unable to create a new JWT token because of: " + e.getMessage()+":"+account.getRequestId()+":"+e);
-            throw new RouterException( AuthRouterResponseCode.JWT_CREATION_ERROR, e, ConstantsAuth.ROUTER_ERROR_TYPE_SECURITY, "Unable to create a JWT token" );
+            throw new RouterException( AuthRouterResponseCode.JWT_CREATION_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "Unable to create a JWT token" );
 
         }
         return jwtToken;
@@ -88,7 +88,7 @@ public class TokenHandler {
             throw e;
         } catch (Exception e) {
             log.info("Error while parsing Bearer JWT Token. Token is:" + token+":"+requestId+":"+e);
-            throw new RouterException( AuthRouterResponseCode.JWT_PARSING_ERROR, e , ConstantsAuth.ROUTER_ERROR_TYPE_SECURITY, "It seems that there is some error when parsing JWT token. Check your token if it is valid or not");
+            throw new RouterException( AuthRouterResponseCode.JWT_PARSING_ERROR, e , Constant.ROUTER_ERROR_TYPE_SECURITY, "It seems that there is some error when parsing JWT token. Check your token if it is valid or not");
         }
         log.info("JWT Token is parsed. Let Decrypt it now"+requestId);
 
@@ -97,7 +97,7 @@ public class TokenHandler {
         } catch (Exception e) {
 
             log.info("Error while decrypting Bearer JWT Token. Token is:" + encryptedJWTToken+":"+requestId+":"+e);
-            throw new RouterException( AuthRouterResponseCode.JWT_DECRYPTION_ERROR, e , ConstantsAuth.ROUTER_ERROR_TYPE_SECURITY, "There is some error in decrypting JWT token");
+            throw new RouterException( AuthRouterResponseCode.JWT_DECRYPTION_ERROR, e , Constant.ROUTER_ERROR_TYPE_SECURITY, "There is some error in decrypting JWT token");
         }
     }
 
@@ -135,7 +135,7 @@ public class TokenHandler {
 
     public String build(String securityVersion, String systemKey, String userName, String requestId) throws RouterException {
 
-        List<String> userNameData = AuthRouterOperations.getStringArray(userName, ConstantsAuth.TILD_SPLITTER);
+        List<String> userNameData = AuthRouterOperations.getStringArray(userName, Constant.TILD_SPLITTER);
 
         ApplicationDef applicationDef = applicationDefConfig.findByOrgIdAndAppId(userNameData.get(0), userNameData.get(1));
 
@@ -155,7 +155,7 @@ public class TokenHandler {
         } catch (Exception e)
         {
             log.info("Unable to create a new JWT token because of: " + e.getMessage()+":"+requestId+":"+e);
-            throw new RouterException( AuthRouterResponseCode.JWT_CREATION_ERROR, e, ConstantsAuth.ROUTER_ERROR_TYPE_SECURITY, "Unable to create a JWT token" );
+            throw new RouterException( AuthRouterResponseCode.JWT_CREATION_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "Unable to create a JWT token" );
 
         }
         return jwtToken;
@@ -163,7 +163,7 @@ public class TokenHandler {
 
 
     public String buildPublicToken(String securityVersion, String systemKey, String clientId, String requestId) throws RouterException {
-        List<String> clientIdData = Arrays.asList(clientId.split(ConstantsAuth.TILD_SPLITTER));
+        List<String> clientIdData = Arrays.asList(clientId.split(Constant.TILD_SPLITTER));
 
         ApplicationDef applicationDef = applicationDefConfig.findByOrgIdAndAppId(clientIdData.get(0), clientIdData.get(1));
 
@@ -185,7 +185,7 @@ public class TokenHandler {
         } catch (Exception e)
         {
             log.info("Unable to create a new JWT token because of: " + e.getMessage()+":"+requestId+":"+e);
-            throw new RouterException(AuthRouterResponseCode.JWT_CREATION_ERROR, e, ConstantsAuth.ROUTER_ERROR_TYPE_SECURITY, "Unable to create a JWT token" );
+            throw new RouterException(AuthRouterResponseCode.JWT_CREATION_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "Unable to create a JWT token" );
 
         }
         return jwtToken;

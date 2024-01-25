@@ -1,6 +1,6 @@
 package decimal.apigateway.service.validator;
 
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.exception.RouterException;
@@ -51,7 +51,7 @@ public class AuthHeaderValidator implements Validator {
 
         // Security Checks for authentications of Application auth or User auth
         Map<String, String> responseData = authSecurity.decryptAuthHeader(account.getSecurityVersion(), account, account.getAuthorization());
-        account.setUsername(responseData.get(Constants.ROUTER_HEADER_USERNAME));
+        account.setUsername(responseData.get(Constant.ROUTER_HEADER_USERNAME));
         account.setNounce(responseData.get("nounce"));
 
         // Validate nounce data
@@ -76,14 +76,14 @@ public class AuthHeaderValidator implements Validator {
             account.setRequestId(requestId);
             account.setNounce(httpHeaders.get(nounce.name()));
             account.setAuthorization(httpHeaders.get("authorization").replace("Basic ", ""));
-            account.setSecurityVersion(httpHeaders.get(Constants.ROUTER_HEADER_SECURITY_VERSION));
+            account.setSecurityVersion(httpHeaders.get(Constant.ROUTER_HEADER_SECURITY_VERSION));
 
         } catch (Exception e) {
             String message = "Error in getting parameters from header parameters.Please make sure you have passed header parameters with name nounce, authorization, requestid";
 
             log.info(message + " Exception: " + e.getMessage());
 
-            throw new RouterException(RouterResponseCode.SET_ACCOUNT_DATA_ERROR, e, Constants.ROUTER_ERROR_TYPE_SECURITY, message);
+            throw new RouterException(RouterResponseCode.SET_ACCOUNT_DATA_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, message);
         }
 
         setApplicationDefData(account);
@@ -110,7 +110,7 @@ public class AuthHeaderValidator implements Validator {
             String message = "Error in getting OrgId and AppId from ClientId parameter.Please make sure you have passed parameter in header with name clientid with value orgid~appid";
             log.info(message + " Exception: " + e.getMessage());
 
-            throw new RouterException(RouterResponseCode.ORGID_APPID_ERROR, e, Constants.ROUTER_ERROR_TYPE_SECURITY, message);
+            throw new RouterException(RouterResponseCode.ORGID_APPID_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, message);
         }
 
         log.info("Validation for orgId and appId to be exist in redis is done");

@@ -1,6 +1,6 @@
 package decimal.apigateway.service.validator;
 
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.domain.ApiAuthorizationConfig;
 import decimal.apigateway.enums.Headers;
@@ -49,16 +49,16 @@ public class ApiAuthorizationValidator implements Validator {
             if (apiAuthorizationConfig.getAccessApiListSet().stream().noneMatch(apiListResponse -> apiListResponse.getApiName().equalsIgnoreCase(serviceName))) {
                 String msg = "Source app is not authenticated to utilize APIs" +
                         " by destination app";
-                throw new RouterException(RouterResponseCode.SOURCE_APP_AUTHENTICATION_FAILURE, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, msg);
+                throw new RouterException(RouterResponseCode.SOURCE_APP_AUTHENTICATION_FAILURE, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, msg);
             }
 
         } else {
             String msg = "Source app is not subscribing the destination app: " + destinationAppId;
-            throw new RouterException(RouterResponseCode.SOURCE_APP_AUTHENTICATION_FAILURE, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, msg);
+            throw new RouterException(RouterResponseCode.SOURCE_APP_AUTHENTICATION_FAILURE, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, msg);
         }
 
         log.info("Validating service scope is success.");
 
-        return new MicroserviceResponse(Constants.SUCCESS_STATUS, "Validation is done successfully", apiAuthorizationConfig);
+        return new MicroserviceResponse(Constant.SUCCESS_STATUS, "Validation is done successfully", apiAuthorizationConfig);
     }
 }

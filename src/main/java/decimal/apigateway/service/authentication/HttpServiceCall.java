@@ -2,7 +2,7 @@ package decimal.apigateway.service.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import decimal.apigateway.commons.ConstantsAuth;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.model.AnalyticsRequest;
 import decimal.apigateway.model.InstallationDetails;
 import decimal.apigateway.model.LastLoginDetails;
@@ -32,7 +32,7 @@ public class HttpServiceCall {
     @Async
     public void callAnalyticsPortalInstallationDetailsApi(String request, Map<String, String> httpHeaders) {
         try {
-            String url = analyticsUrlBase + (analyticsUrlBase.endsWith("/") ? "" : "/") + ConstantsAuth.ANALYTICS_INSTALLATION_MAPPING;
+            String url = analyticsUrlBase + (analyticsUrlBase.endsWith("/") ? "" : "/") + Constant.ANALYTICS_INSTALLATION_MAPPING;
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-Type", "application/json");
@@ -41,9 +41,9 @@ public class HttpServiceCall {
             HttpEntity<Object> entity = new HttpEntity(analyticsRequest, headers);
             restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
         } catch (Exception e) {
-            log.info(ConstantsAuth.RESPONSE_KEY + "error in Installation Details Api: ");
+            log.info(Constant.RESPONSE_KEY + "error in Installation Details Api: ");
             log.info(e.toString());
-            log.info(ConstantsAuth.RESPONSE_KEY + "error in Installation Details Api: ");
+            log.info(Constant.RESPONSE_KEY + "error in Installation Details Api: ");
             log.info(e.getMessage());
             e.printStackTrace();
         }
@@ -52,7 +52,7 @@ public class HttpServiceCall {
     @Async
     public void callAnalyticsPortalLastLoginDetailsApi(String request, Map<String, String> httpHeaders,String status) {
         try {
-            String url = analyticsUrlBase + (analyticsUrlBase.endsWith("/") ? "" : "/") + ConstantsAuth.ANALYTICS_LAST_LOGIN_MAPPING;
+            String url = analyticsUrlBase + (analyticsUrlBase.endsWith("/") ? "" : "/") + Constant.ANALYTICS_LAST_LOGIN_MAPPING;
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-Type", "application/json");
@@ -66,9 +66,9 @@ public class HttpServiceCall {
             restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
         } catch (Exception e) {
-            log.info(ConstantsAuth.RESPONSE_KEY + "error in Last Login Details Api: ");
+            log.info(Constant.RESPONSE_KEY + "error in Last Login Details Api: ");
             log.info(e.toString());
-            log.info(ConstantsAuth.RESPONSE_KEY + "error in Last Login Details Api: ");
+            log.info(Constant.RESPONSE_KEY + "error in Last Login Details Api: ");
             log.info(e.getMessage());
             e.printStackTrace();
         }
@@ -77,7 +77,7 @@ public class HttpServiceCall {
     @Async
     public void callAnalyticsPortalSummaryDetailsApi(Map<String, String> httpHeaders,String status) {
         try {
-            String url = analyticsUrlBase + (analyticsUrlBase.endsWith("/") ? "" : "/") + ConstantsAuth.ANALYTICS_SUMMARY_MAPPING;
+            String url = analyticsUrlBase + (analyticsUrlBase.endsWith("/") ? "" : "/") + Constant.ANALYTICS_SUMMARY_MAPPING;
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-Type", "application/json");
@@ -91,9 +91,9 @@ public class HttpServiceCall {
             restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
         } catch (Exception e) {
-            log.info(ConstantsAuth.RESPONSE_KEY + "error in Summary Details Api: ");
+            log.info(Constant.RESPONSE_KEY + "error in Summary Details Api: ");
             log.info(e.toString());
-            log.info(ConstantsAuth.RESPONSE_KEY + "error in Summary Details Api: ");
+            log.info(Constant.RESPONSE_KEY + "error in Summary Details Api: ");
             log.info(e.getMessage());
             e.printStackTrace();
         }

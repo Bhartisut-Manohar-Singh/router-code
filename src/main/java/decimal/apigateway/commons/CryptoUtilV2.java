@@ -104,7 +104,7 @@ public class CryptoUtilV2 implements ICryptoUtil{
             return new String ( decrypted, ENCODING_SCHEME );
         } catch (NoSuchPaddingException | UnsupportedEncodingException | NoSuchAlgorithmException e) {
            log.info(e.getMessage()+":"+e);
-            throw new RouterException( AuthRouterResponseCode.REQUEST_DATA_DECRYPTION_ERROR, e, ConstantsAuth.ROUTER_ERROR_TYPE_SECURITY, null);
+            throw new RouterException( AuthRouterResponseCode.REQUEST_DATA_DECRYPTION_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, null);
         }
     }
 
@@ -138,7 +138,7 @@ public class CryptoUtilV2 implements ICryptoUtil{
         } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e)
         {
             logger.error(e.getMessage(), e);
-            throw new RouterException( AuthRouterResponseCode.ERROR_GENERATING_RSA_KEYS, e , ConstantsAuth.ROUTER_ERROR_TYPE_SECURITY, "Error in generating RSA keys");
+            throw new RouterException( AuthRouterResponseCode.ERROR_GENERATING_RSA_KEYS, e , Constant.ROUTER_ERROR_TYPE_SECURITY, "Error in generating RSA keys");
         }
         return keys;
 
@@ -156,7 +156,7 @@ public class CryptoUtilV2 implements ICryptoUtil{
             cipher.init ( Cipher.DECRYPT_MODE, privateKey );
             return new String ( cipher.doFinal ( hexStringToByteArray ( encryptedAESKey.toCharArray () ) ) );
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException | InvalidKeyException | InvalidKeySpecException e) {
-            throw new RouterException( AuthRouterResponseCode.TXN_ID_DECRYPTION_ERROR, e, ConstantsAuth.ROUTER_ERROR_TYPE_SECURITY, "Error when decrypting AES key" );
+            throw new RouterException( AuthRouterResponseCode.TXN_ID_DECRYPTION_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "Error when decrypting AES key" );
         }
 
     }
@@ -194,7 +194,7 @@ public class CryptoUtilV2 implements ICryptoUtil{
             result = bytesToHex ( mac_data );
             return result;
         } catch (UnsupportedEncodingException | NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new RouterException( AuthRouterResponseCode.HMAC_DECRYPTION_ERROR, e , ConstantsAuth.ROUTER_ERROR_TYPE_SECURITY, null);
+            throw new RouterException( AuthRouterResponseCode.HMAC_DECRYPTION_ERROR, e , Constant.ROUTER_ERROR_TYPE_SECURITY, null);
         }
     }
 

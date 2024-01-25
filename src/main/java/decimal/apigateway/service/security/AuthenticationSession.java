@@ -2,7 +2,7 @@ package decimal.apigateway.service.security;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.domain.Session;
@@ -35,12 +35,12 @@ public class AuthenticationSession
         log.info(" ==== userName for getting session ==== " + userName);
         Optional<Session> sessionOptional = authenticationSessionRepo.findById(userName);
 
-        int size = RouterOperations.getStringArray(userName, Constants.TILD_SPLITTER).size();
+        int size = RouterOperations.getStringArray(userName, Constant.TILD_SPLITTER).size();
 
         if(!sessionOptional.isPresent())
         {
             log.info("No session found for given userName " + userName);
-            throw new RouterException(size > 3 ? RouterResponseCode.INVALID_USER_SESSION : RouterResponseCode.INVALID_APPLICATION_SESSION, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, "User session is invalid");
+            throw new RouterException(size > 3 ? RouterResponseCode.INVALID_USER_SESSION : RouterResponseCode.INVALID_APPLICATION_SESSION, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "User session is invalid");
         }
 
         log.info("Session is found for given userName " + userName);

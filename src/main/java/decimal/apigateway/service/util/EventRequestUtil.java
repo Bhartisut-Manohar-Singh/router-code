@@ -3,8 +3,8 @@ package decimal.apigateway.service.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import decimal.apigateway.commons.ConstantsAuth;
 import decimal.apigateway.commons.AuthRouterOperations;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.enums.Headers;
 import decimal.logs.model.EventRequest;
 import lombok.extern.java.Log;
@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
-import static decimal.apigateway.commons.ConstantsAuth.*;
+import static decimal.apigateway.commons.Constant.EVENT_SOURCE;
+import static decimal.apigateway.commons.Constant.REGISTER_EVENT_NAME;
+import static decimal.apigateway.commons.Constant.*;
 import static decimal.apigateway.service.util.BuiltInUtility.*;
 
 
@@ -59,7 +61,7 @@ public class EventRequestUtil {
         setEventFromHeaders(eventRequest, httpHeaders, request);
 
         String userName = httpHeaders.get(Headers.username.name());
-        List<String> userNameData = AuthRouterOperations.getStringArray(userName, ConstantsAuth.TILD_SPLITTER);
+        List<String> userNameData = AuthRouterOperations.getStringArray(userName, TILD_SPLITTER);
 
         eventRequest.setEventName(eventName);
         eventRequest.setEventSource(EVENT_SOURCE);
@@ -82,7 +84,7 @@ public class EventRequestUtil {
         setEventFromHeaders(eventRequest, httpHeaders, request);
 
         String userName = httpHeaders.get(Headers.username.name());
-        List<String> userNameData = AuthRouterOperations.getStringArray(userName, ConstantsAuth.TILD_SPLITTER);
+        List<String> userNameData = AuthRouterOperations.getStringArray(userName, Constant.TILD_SPLITTER);
 
         eventRequest.setEventName(eventName);
         eventRequest.setEventSource(EVENT_SOURCE);

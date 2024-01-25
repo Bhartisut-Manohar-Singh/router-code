@@ -1,7 +1,7 @@
 package decimal.apigateway.model;
 
 import decimal.apigateway.commons.AuthRouterOperations;
-import decimal.apigateway.commons.ConstantsAuth;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.enums.Headers;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,7 +29,7 @@ public class SummaryDetails {
 
 
         String userName = httpHeaders.get(Headers.username.name());
-        List<String> userNameData = AuthRouterOperations.getStringArray(userName, ConstantsAuth.TILD_SPLITTER);
+        List<String> userNameData = AuthRouterOperations.getStringArray(userName, Constant.TILD_SPLITTER);
 
         this.orgId = userNameData.get(0);
         this.appId = userNameData.get(1);

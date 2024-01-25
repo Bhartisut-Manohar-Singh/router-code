@@ -1,8 +1,8 @@
 package decimal.apigateway.service.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import decimal.apigateway.commons.ConstantsAuth;
 import decimal.apigateway.commons.AuthRouterOperations;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.domain.SSOTokenRedis;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.ApplicationDef;
@@ -47,21 +47,21 @@ public class VahanaSSOServiceImpl implements VahanaSSOService{
                 ssoTokenRedis.get().setData(ssoTokenModel.getData());
                 //
                 ssoTokenRepo.save(ssoTokenRedis.get());
-                return new SSOTokenResponse(ConstantsAuth.SUCCESS_STATUS, ConstantsAuth.TOKEN_MSG, null, ssoTokenRedis.get().getSsoToken());
+                return new SSOTokenResponse(Constant.SUCCESS_STATUS, Constant.TOKEN_MSG, null, ssoTokenRedis.get().getSsoToken());
             } else {
                 SSOTokenRedis ssoTokenRedis1 = new SSOTokenRedis(ssoTokenModel);
                 ssoTokenRepo.save(ssoTokenRedis1);
-                return new SSOTokenResponse(ConstantsAuth.SUCCESS_STATUS, ConstantsAuth.TOKEN_MSG, null, ssoTokenRedis1.getSsoToken());
+                return new SSOTokenResponse(Constant.SUCCESS_STATUS, Constant.TOKEN_MSG, null, ssoTokenRedis1.getSsoToken());
             }
         }
         else{
-            return new SSOTokenResponse(ConstantsAuth.FAILURE_STATUS, ConstantsAuth.TOKEN_MSG_FAILURE, ConstantsAuth.ERROR_DETAILS, null);
+            return new SSOTokenResponse(Constant.FAILURE_STATUS, Constant.TOKEN_MSG_FAILURE, Constant.ERROR_DETAILS, null);
         }
     }
 
     private Boolean validateGenerateTokenRequest(SSOTokenModel ssoTokenModel, Map<String, String> httpHeaders) throws RouterException, IOException {
         Boolean status=true;
-        List<String> clientId = AuthRouterOperations.getStringArray(httpHeaders.get(ConstantsAuth.CLIENT_ID), "~");
+        List<String> clientId = AuthRouterOperations.getStringArray(httpHeaders.get(Constant.CLIENT_ID), "~");
 
         String orgId = clientId.get(0);
         String appId = clientId.get(1);
@@ -98,9 +98,9 @@ public class VahanaSSOServiceImpl implements VahanaSSOService{
         Optional<SSOTokenRedis> ssoUserDetails = ssoTokenRepo.findByOrgIdAndAppIdAndLoginIdAndSsoToken(
                 ssoTokenModel.getOrgId(), ssoTokenModel.getAppId(), ssoTokenModel.getLoginId(), ssoTokenModel.getSsoToken());
 
-        return ssoUserDetails.map(ssoTokenRedis -> new SSOTokenResponse(ConstantsAuth.SUCCESS_STATUS,
+        return ssoUserDetails.map(ssoTokenRedis -> new SSOTokenResponse(Constant.SUCCESS_STATUS,
                         "SSO Login Details received successfully", null, null, ssoTokenRedis.getData()))
-                .orElseGet(() -> new SSOTokenResponse(ConstantsAuth.FAILURE_STATUS, "NO_DATA_FOUND",
+                .orElseGet(() -> new SSOTokenResponse(Constant.FAILURE_STATUS, "NO_DATA_FOUND",
                         "No Login Details Found for the requested details",
                         null));
     }

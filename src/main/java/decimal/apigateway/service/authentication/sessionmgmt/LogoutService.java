@@ -3,7 +3,7 @@ package decimal.apigateway.service.authentication.sessionmgmt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import decimal.apigateway.commons.AuthRouterResponseCode;
-import decimal.apigateway.commons.ConstantsAuth;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.util.EventRequestUtil;
 import decimal.apigateway.service.authentication.HttpServiceCall;
@@ -16,7 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-import static decimal.apigateway.commons.ConstantsAuth.*;
+import static decimal.apigateway.commons.Constant.LOGOUT_EVENT_NAME;
+import static decimal.apigateway.commons.Constant.ROUTER_ERROR_TYPE_SECURITY;
 
 @Service
 @Log
@@ -44,7 +45,7 @@ public class LogoutService {
 
 
     public void doLogout(Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
-        String username = httpHeaders.get(ConstantsAuth.ROUTER_HEADER_USERNAME);
+        String username = httpHeaders.get(Constant.ROUTER_HEADER_USERNAME);
 
         log.info("Username trying to logout -- " + username);
 

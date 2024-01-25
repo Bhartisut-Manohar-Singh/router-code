@@ -1,6 +1,6 @@
 package decimal.apigateway.service.security;
 
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.domain.TxnKey;
 import decimal.apigateway.exception.RouterException;
@@ -76,7 +76,7 @@ public class ValidateTxnKeyImpl implements ValidateTxnKey {
                             + ". This txnId is not valid because difference in minutes with server is "
                             + diffInMinutes + ". Hence its invalid txnId.");
                     log.info(" ==== exception thrown ==== ");
-                    throw new RouterException(RouterResponseCode.INVALID_TXN_ID, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "Txn Id is not valid.");
+                    throw new RouterException(RouterResponseCode.INVALID_TXN_ID, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Txn Id is not valid.");
                 } else {
                     TxnKey txnKey = new TxnKey(txnId);
                     txnKeyRepo.save(txnKey);
@@ -86,12 +86,12 @@ public class ValidateTxnKeyImpl implements ValidateTxnKey {
                 throw ex;
             } catch (Exception e) {
                 log.info("TxnId is not valid.Error:" + e.getMessage());
-                throw new RouterException(RouterResponseCode.VALIDATING_TXN_ID_EXCEPTION, e, Constants.ROUTER_ERROR_TYPE_SECURITY, "Error when validating txn key");
+                throw new RouterException(RouterResponseCode.VALIDATING_TXN_ID_EXCEPTION, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "Error when validating txn key");
             }
 
         } else {
             log.info("TxnId is duplicate.");
-            throw new RouterException(RouterResponseCode.DUPLICATE_TXN_ID, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "Txn Id is duplicate");
+            throw new RouterException(RouterResponseCode.DUPLICATE_TXN_ID, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Txn Id is duplicate");
         }
     }
 

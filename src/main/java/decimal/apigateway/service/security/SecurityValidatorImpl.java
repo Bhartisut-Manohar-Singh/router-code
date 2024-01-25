@@ -1,6 +1,6 @@
 package decimal.apigateway.service.security;
 
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.domain.ApiAuthorizationConfig;
@@ -71,7 +71,7 @@ public class SecurityValidatorImpl implements SecurityValidator {
         // Validate hash data and application client secret
         authSecurity.checkAuthDataHash(account.getSecurityVersion(), account, account.getAuthorization(), account.getRequestId());
 
-        return new MicroserviceResponse(Constants.SUCCESS_STATUS, "Success", account);
+        return new MicroserviceResponse(Constant.SUCCESS_STATUS, "Success", account);
     }
 
     @Autowired
@@ -85,7 +85,7 @@ public class SecurityValidatorImpl implements SecurityValidator {
 
         Account account = (Account) microserviceResponse.getResponse();
 
-        List<java.lang.String> userNameData = RouterOperations.getStringArray(account.getUsername(), Constants.TILD_SPLITTER);
+        List<java.lang.String> userNameData = RouterOperations.getStringArray(account.getUsername(), Constant.TILD_SPLITTER);
 
         httpHeaders.put(Headers.orgid.name(), userNameData.get(0));
         httpHeaders.put(Headers.appid.name(), userNameData.get(1));
@@ -97,16 +97,16 @@ public class SecurityValidatorImpl implements SecurityValidator {
         String keysToMask = serviceDefs.stream().filter(serviceDef -> serviceDef.getKeysToMask() != null && !serviceDef.getKeysToMask().isEmpty()).map(ServiceDef::getKeysToMask).collect(Collectors.joining(","));
 
         Map<String, String> customData = new HashMap<>();
-        customData.put(Constants.KEYS_TO_MASK, keysToMask);
+        customData.put(Constant.KEYS_TO_MASK, keysToMask);
 
         List<String> logsEnabledList = serviceDefs.stream().map(ServiceDef::getIsAuditEnabled).collect(Collectors.toList());
 
         customData.put("serviceLog", logsEnabledList.contains("Y") ? "Y" : "N");
-        customData.put(Constants.KEYS_TO_MASK, keysToMask);
+        customData.put(Constant.KEYS_TO_MASK, keysToMask);
         customData.put("logpurgedays",serviceDefs.get(0).getLogPurgeDays());
         customData.put("appLogs", applicationDefConfig.getIsLogsRequiredFlag(httpHeaders));
 
-        StringJoiner applicationUser = new StringJoiner(Constants.TILD_SPLITTER);
+        StringJoiner applicationUser = new StringJoiner(Constant.TILD_SPLITTER);
         applicationUser.add(userNameData.get(0));
         applicationUser.add(userNameData.get(1));
         applicationUser.add(userNameData.get(3));
@@ -120,7 +120,7 @@ public class SecurityValidatorImpl implements SecurityValidator {
         log.info("Request has been decrypted successfully");
         log.info("Validation for authentication request has been done successfully");
 
-        return new MicroserviceResponse(Constants.SUCCESS_STATUS, account.getUsername(), plainRequest, customData);
+        return new MicroserviceResponse(Constant.SUCCESS_STATUS, account.getUsername(), plainRequest, customData);
     }
 
     @Override
@@ -133,7 +133,7 @@ public class SecurityValidatorImpl implements SecurityValidator {
 
         Account account = (Account) microserviceResponse.getResponse();
 
-        List<java.lang.String> userNameData = RouterOperations.getStringArray(account.getUsername(), Constants.TILD_SPLITTER);
+        List<java.lang.String> userNameData = RouterOperations.getStringArray(account.getUsername(), Constant.TILD_SPLITTER);
 
         httpHeaders.put(Headers.orgid.name(), userNameData.get(0));
         httpHeaders.put(Headers.appid.name(), userNameData.get(1));
@@ -141,7 +141,7 @@ public class SecurityValidatorImpl implements SecurityValidator {
         log.info("Current org Id - " + userNameData.get(0));
         log.info("Current app Id - " + userNameData.get(1));
 
-        StringJoiner applicationUser = new StringJoiner(Constants.TILD_SPLITTER);
+        StringJoiner applicationUser = new StringJoiner(Constant.TILD_SPLITTER);
         applicationUser.add(userNameData.get(0));
         applicationUser.add(userNameData.get(1));
         applicationUser.add(userNameData.get(3));
@@ -187,12 +187,12 @@ public class SecurityValidatorImpl implements SecurityValidator {
         String keysToMask = serviceDefs.stream().filter(serviceDef -> serviceDef.getKeysToMask() != null && !serviceDef.getKeysToMask().isEmpty()).map(ServiceDef::getKeysToMask).collect(Collectors.joining(","));
 
         Map<String, String> customData = new HashMap<>();
-        customData.put(Constants.KEYS_TO_MASK, keysToMask);
+        customData.put(Constant.KEYS_TO_MASK, keysToMask);
 
         List<String> logsEnabledList = serviceDefs.stream().map(ServiceDef::getIsAuditEnabled).collect(Collectors.toList());
 
         customData.put("serviceLog", logsEnabledList.contains("Y") ? "Y" : "N");
-        customData.put(Constants.KEYS_TO_MASK, keysToMask);
+        customData.put(Constant.KEYS_TO_MASK, keysToMask);
         customData.put("logpurgedays",serviceDefs.get(0).getLogPurgeDays());
         customData.put("appLogs", applicationDefConfig.getIsLogsRequiredFlag(httpHeaders));
         customData.put("destinationOrgId", destinationOrgId);
@@ -208,7 +208,7 @@ public class SecurityValidatorImpl implements SecurityValidator {
 
         log.info("Validation for authentication request has been done successfully");
 
-        return new MicroserviceResponse(Constants.SUCCESS_STATUS, account.getUsername(), plainRequest, customData);
+        return new MicroserviceResponse(Constant.SUCCESS_STATUS, account.getUsername(), plainRequest, customData);
 
     }
 
@@ -249,16 +249,16 @@ public class SecurityValidatorImpl implements SecurityValidator {
 
         log.info("Validating client secret...");
 
-        String clientSecret = httpHeaders.get(Constants.CLIENT_SECRET);
+        String clientSecret = httpHeaders.get(Constant.CLIENT_SECRET);
 
 
         if(!applicationDef.getClientSecret().equals(clientSecret)){
             log.info("Invalid client secret : " + clientSecret);
             log.info("Actual client secret : " + applicationDef.getClientSecret());
-            throw new RouterException(RouterResponseCode.INVALID_CLIENT_SECRET, (Exception) null, Constants.ROUTER_ERROR_TYPE_SECURITY, "Invalid Client Secret.");
+            throw new RouterException(RouterResponseCode.INVALID_CLIENT_SECRET, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Invalid Client Secret.");
         }
 
-        return new MicroserviceResponse(Constants.SUCCESS_STATUS, "Success", applicationDef);
+        return new MicroserviceResponse(Constant.SUCCESS_STATUS, "Success", applicationDef);
 
     }
 
@@ -285,7 +285,7 @@ public class SecurityValidatorImpl implements SecurityValidator {
         map.put(IS_PAYLOAD_ENCRYPTED, isPayloadEncryptedList.contains("Y") ? "Y" : "N");
         map.put(IS_DIGITALLY_SIGNED, isDigitallySignedList.contains("Y") ? "Y" : "N");
         map.put("logpurgedays",logs.get(0).getLogPurgeDays());
-        map.put(Constants.KEYS_TO_MASK, keysToMask);
+        map.put(Constant.KEYS_TO_MASK, keysToMask);
 
         RequestValidationTypes[] requestValidationTypes = null;
 
@@ -303,7 +303,7 @@ public class SecurityValidatorImpl implements SecurityValidator {
         }
 
         MicroserviceResponse response = new MicroserviceResponse();
-        response.setStatus(Constants.SUCCESS_STATUS);
+        response.setStatus(Constant.SUCCESS_STATUS);
         response.setMessage("Validation for executing a request has been done successfully");
 
 
@@ -327,7 +327,7 @@ public class SecurityValidatorImpl implements SecurityValidator {
         }
 
         MicroserviceResponse response = new MicroserviceResponse();
-        response.setStatus(Constants.SUCCESS_STATUS);
+        response.setStatus(Constant.SUCCESS_STATUS);
         response.setMessage("Validation for executing a request has been done successfully");
 
 
@@ -343,7 +343,7 @@ public class SecurityValidatorImpl implements SecurityValidator {
         List<String> logsEnabledList = logs.stream().map(ServiceDef::getIsAuditEnabled).collect(Collectors.toList());
 
         customData.put("serviceLog", logsEnabledList.contains("Y") ? "Y" : "N");
-        customData.put(Constants.KEYS_TO_MASK, keysToMask);
+        customData.put(Constant.KEYS_TO_MASK, keysToMask);
         customData.put("logpurgedays",logs.get(0).getLogPurgeDays());
 
         response.setCustomData(customData);

@@ -1,7 +1,7 @@
 package decimal.apigateway.exception;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,7 +47,7 @@ public class RouterException extends Exception {
     }
 
     public RouterException(String errorCode, Exception e, String errorType, String errorHint) {
-        this(errorCode, Constants.ROUTER_ERROR_TYPE_SECURITY, "Signature verification failed", "Signature verification failed", e);
+        this(errorCode, Constant.ROUTER_ERROR_TYPE_SECURITY, "Signature verification failed", "Signature verification failed", e);
         this.errorType = errorType;
         this.errorHint = errorHint;
     }

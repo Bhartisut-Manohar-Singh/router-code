@@ -2,7 +2,7 @@ package decimal.apigateway.service.authentication.sessionmgmt;
 
 import decimal.apigateway.commons.AuthRouterOperations;
 import decimal.apigateway.commons.AuthRouterResponseCode;
-import decimal.apigateway.commons.ConstantsAuth;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.domain.Session;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
@@ -39,7 +39,7 @@ public class MultipleSessionService implements MultipleSession {
         String username = httpHeaders.get(Headers.username.name());
         String requestId = httpHeaders.get(Headers.requestid.name());
 
-        List<String> userNameData = AuthRouterOperations.getStringArray(username, ConstantsAuth.TILD_SPLITTER);
+        List<String> userNameData = AuthRouterOperations.getStringArray(username, Constant.TILD_SPLITTER);
 
         String orgId = userNameData.get(0);
 
@@ -60,7 +60,7 @@ public class MultipleSessionService implements MultipleSession {
             authenticationSessionService.removeSessionByOrgIdAndAppIdAndDeviceId(orgId, appId, deviceId);
             List<Session> sessions = authenticationSessionService.findByOrgIdAndAppIdAndLoginId(orgId, appId, loginId);
 
-            manageForceLoginSessions(sessions, httpHeaders.get(ConstantsAuth.IS_FORCE_LOGIN), username, requestId);
+            manageForceLoginSessions(sessions, httpHeaders.get(Constant.IS_FORCE_LOGIN), username, requestId);
         }
 
     }
@@ -114,7 +114,7 @@ public class MultipleSessionService implements MultipleSession {
         if (!Objects.equals("Y", isForceLogin) && !sessions.isEmpty()) {
             log.info("Multiple Session are not allowed, session exists for user:" + userName
                     + ". So user is not allowed to create a new session:" + requestId);
-            throw new RouterException(AuthRouterResponseCode.ROUTER_MULTIPLE_SESSION, (Exception) null, ConstantsAuth.ROUTER_ERROR_TYPE_SECURITY, "User is not allowed to create multiple session because of no multiple session is allowed");
+            throw new RouterException(AuthRouterResponseCode.ROUTER_MULTIPLE_SESSION, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "User is not allowed to create multiple session because of no multiple session is allowed");
         }
 
         authenticationSessionService.removeAllSessions(sessions);

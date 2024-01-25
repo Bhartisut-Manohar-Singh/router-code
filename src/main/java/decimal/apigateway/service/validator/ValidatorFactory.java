@@ -1,6 +1,6 @@
 package decimal.apigateway.service.validator;
 
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.security.TxnKeyValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +60,7 @@ public class ValidatorFactory {
                 validator = applicationContext.getBean(PublicJwtTokenValidator.class);
                 break;
             default:
-                throw new RouterException(Constants.INVALID_VALIDATION_TYPE, "Validation type is invalid: " + validationType, null);
+                throw new RouterException(Constant.INVALID_VALIDATION_TYPE, "Validation type is invalid: " + validationType, null);
         }
 
         return validator;

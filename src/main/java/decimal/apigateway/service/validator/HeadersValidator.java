@@ -1,6 +1,6 @@
 package decimal.apigateway.service.validator;
 
-import decimal.apigateway.commons.Constants;
+import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
@@ -31,19 +31,19 @@ public class HeadersValidator implements Validator {
         if (requestId == null || requestId.isEmpty())
         {
             log.info(RouterResponseCode.ROUTER_REQUEST_ID_MISSING);
-            throw new RouterException(RouterResponseCode.ROUTER_REQUEST_ID_MISSING, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, "Validator class");
+            throw new RouterException(RouterResponseCode.ROUTER_REQUEST_ID_MISSING, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "Validator class");
         }
 
         if (serviceName == null || serviceName.isEmpty())
         {
             log.info(RouterResponseCode.SERVICE_NAME_NOTNULL);
-            throw new RouterException(RouterResponseCode.SERVICE_NAME_NOTNULL, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, "Validator class");
+            throw new RouterException(RouterResponseCode.SERVICE_NAME_NOTNULL, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "Validator class");
         }
 
         if (userName == null || userName.isEmpty())
         {
             log.info(RouterResponseCode.ROUTER_USERNAME_MISSING);
-            throw new RouterException(RouterResponseCode.ROUTER_USERNAME_MISSING, (Exception) null, Constants.ROUTER_ERROR_TYPE_VALIDATION, "Validator class");
+            throw new RouterException(RouterResponseCode.ROUTER_USERNAME_MISSING, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "Validator class");
         }
 
         log.info("Validating  headers is success.");
