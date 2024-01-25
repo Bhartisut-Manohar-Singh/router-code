@@ -3,15 +3,16 @@ package decimal.apigateway.service.executionImplV2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import decimal.apigateway.clients.EsbClientAuth;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.ExecutionServiceV2;
 import decimal.apigateway.service.LogsWriter;
-import decimal.apigateway.service.clients.EsbClient;
-import decimal.apigateway.service.clients.SecurityClient;
+import decimal.apigateway.service.SecurityService;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
+import decimal.apigateway.service.security.SecurityServiceEnc;
 import decimal.apigateway.service.validator.RequestValidatorV2;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.filters.AuditTraceFilter;
@@ -58,10 +59,8 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     ObjectMapper objectMapper;
 
     @Autowired
-    EsbClient esbClient;
+    EsbClientAuth esbClient;
 
-    @Autowired
-    SecurityClient securityClient;
 
     @Autowired
     AuditPayload auditPayload;
@@ -77,6 +76,14 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
     @Value("${server.servlet.context-path}")
     String path;
+
+    @Autowired
+    SecurityServiceEnc securityServiceEnc;
+
+    @Autowired
+    SecurityService securityService;
+
+
     @Override
     public Object executeRequest(String destinationAppId,String serviceNmae, String request, Map<String, String> httpHeaders) throws IOException, RouterException {
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
@@ -106,7 +113,8 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
-        MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
+        MicroserviceResponse decryptedResponse = securityService.decryptRequest(node.get("request"), httpHeaders);
+        //MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), httpHeaders);
 
         String maskRequestBody= JsonMasker.maskMessage(decryptedResponse.getResponse().toString(), maskKeys);
         auditPayload.getRequest().setRequestBody(maskRequestBody);
@@ -126,7 +134,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         auditPayload.getRequestIdentifier().setLogAppId(destinationAppId);
         httpHeaders.put("executionsource","API-GATEWAY");
 
-        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(responseEntity.getBody(), httpHeaders);
+        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(responseEntity.getBody()), httpHeaders);
 
         if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
@@ -164,16 +172,16 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
                 throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send encrypted payload.\"}"));
 
             if(("Y").equalsIgnoreCase(isPayloadEncrypted) && !httpHeaders.containsKey(Headers.txnkey.name()))
-                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send txnkey in Headers as your request payload is encrypted.\"}"));
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send txnkey in HeadersV1 as your request payload is encrypted.\"}"));
 
             if(("Y").equalsIgnoreCase(isDigitallySigned) && !httpHeaders.containsKey(Headers.hash.name()))
-                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send hash in Headers as your request is digitally signed.\"}"));
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send hash in HeadersV1 as your request is digitally signed.\"}"));
 
             httpHeaders.put(IS_DIGITALLY_SIGNED,isDigitallySigned);
             httpHeaders.put(IS_PAYLOAD_ENCRYPTED,isPayloadEncrypted);
             httpHeaders.put(Headers.clientsecret.name(), headers.get(Headers.clientsecret.name()));
 
-            MicroserviceResponse decryptedResponse = securityClient.decryptRequestWithoutSession(("Y").equalsIgnoreCase(isPayloadEncrypted) ? node.get("request").asText() : request, httpHeaders);
+            MicroserviceResponse decryptedResponse = securityService.decryptRequestWithoutSession(("Y").equalsIgnoreCase(isPayloadEncrypted) ? node.get("request").asText() : request, httpHeaders);
 
             if(("Y").equalsIgnoreCase(isPayloadEncrypted))
                 request = decryptedResponse.getResponse().toString();
@@ -216,7 +224,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         if (("Y").equalsIgnoreCase(isPayloadEncrypted))
         {
-            MicroserviceResponse encryptedResponse = securityClient.encryptResponseWithoutSession(responseEntity.getBody(), httpHeaders);
+            MicroserviceResponse encryptedResponse = securityService.encryptResponseWithoutSession(responseEntity, httpHeaders);
             Map<String, String> finalResponseMap = new HashMap<>();
             finalResponseMap.put("response", encryptedResponse.getMessage());
 
@@ -236,7 +244,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
-        MicroserviceResponse decryptedResponse = securityClient.decryptRequest(node.get("request").asText(), updateHttpHeaders);
+        MicroserviceResponse decryptedResponse = securityService.decryptRequest(node, httpHeaders);
 
         String basePath = path + "/engine/v1/dynamic-router/" + serviceName;
 
@@ -286,9 +294,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         }
 
         dynamicResponse.setResponse(exchange.getBody());
-
-
-        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
+        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
 
         if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
             throw new RouterException(decryptedResponse.getResponse());
@@ -465,7 +471,8 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         logsWriter.updateLog(auditPayload);
 
-        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
+        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
+        //MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
@@ -541,7 +548,8 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         logsWriter.updateLog(auditPayload);
 
-        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
+        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
+        //MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
