@@ -47,8 +47,11 @@ public class ExecutionControllerV2 {
         log.info("======================Gateway Execute V2 Called=============================");
         /*httpHeaders.put("sourceAppId", sourceAppId);
         httpHeaders.put("sourceOrgId", sourceOrgId);*/
-        httpHeaders.put("destinationAppId", destinationAppId);
-        httpHeaders.put("serviceName",serviceName);
+        /*
+        Because of network call previous header keys were in camel case.
+        */
+         httpHeaders.put("destinationappid", destinationAppId);
+        httpHeaders.put("servicename",serviceName);
 
         log.info("Headers for v2 execute-----");
         httpHeaders.forEach((k,v) -> log.info(k + "->" + v));
