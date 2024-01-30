@@ -5,8 +5,10 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.domain.ApiAuthorizationConfig;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
+import decimal.apigateway.repository.SecApiAuthorizationConfigRepo;
 import decimal.apigateway.service.ExecutionServiceV2;
 import decimal.apigateway.service.validator.ApiAuthorizationValidator;
+import decimal.ratelimiter.repo.ApiAuthorizationConfigRepo;
 import lombok.extern.java.Log;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 
 @RestController
@@ -29,7 +32,7 @@ public class ExecutionControllerV2 {
     ExecutionServiceV2 executionServiceV2;
 
     @Autowired
-    ModelMapper modelMapper;
+    SecApiAuthorizationConfigRepo apiAuthorizationConfigRepo;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -120,11 +123,11 @@ public class ExecutionControllerV2 {
         log.info("File Size= "+files.length);
         log.info("===============================Dynamic-router/DMS=============================");
         httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
-        MicroserviceResponse validate = apiAuthorizationValidator.validate(request, httpHeaders);
-        ApiAuthorizationConfig apiAuthorizationConfig = objectMapper.convertValue(validate, ApiAuthorizationConfig.class);
-        httpHeaders.put("destinationAppId",apiAuthorizationConfig.getDestinationOrgId());
-        httpHeaders.put("destinationOrgId",apiAuthorizationConfig.getDestinationAppId());
-
+        Optional<ApiAuthorizationConfig> bySourceAppIdAndDestinationAppId = apiAuthorizationConfigRepo.findBySourceOrgIdAndSourceAppId(httpHeaders.get("orgId"),httpHeaders.get("appId"));
+        if(bySourceAppIdAndDestinationAppId.isPresent()){
+            httpHeaders.put("destinationOrgId",bySourceAppIdAndDestinationAppId.get().getDestinationOrgId());
+            httpHeaders.put("destinationAppId",bySourceAppIdAndDestinationAppId.get().getDestinationAppId());
+        }
         return executionServiceV2.executeFileRequest(httpServletRequest,request,httpHeaders,serviceName,mediaDataObjects,files);
 
     }
