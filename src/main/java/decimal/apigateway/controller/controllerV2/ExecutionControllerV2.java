@@ -122,10 +122,8 @@ public class ExecutionControllerV2 {
         httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
         MicroserviceResponse validate = apiAuthorizationValidator.validate(request, httpHeaders);
         ApiAuthorizationConfig apiAuthorizationConfig = objectMapper.convertValue(validate, ApiAuthorizationConfig.class);
-        String destinationOrgId = apiAuthorizationConfig.getDestinationOrgId();
-        String destinationAppId = apiAuthorizationConfig.getDestinationAppId();
-        httpHeaders.put("destinationAppId",destinationAppId);
-        httpHeaders.put("destinationOrgId",destinationOrgId);
+        httpHeaders.put("destinationAppId",apiAuthorizationConfig.getDestinationOrgId());
+        httpHeaders.put("destinationOrgId",apiAuthorizationConfig.getDestinationAppId());
 
         return executionServiceV2.executeFileRequest(httpServletRequest,request,httpHeaders,serviceName,mediaDataObjects,files);
 
