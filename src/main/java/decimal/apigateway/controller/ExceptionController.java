@@ -68,7 +68,7 @@ public class ExceptionController {
     LogsWriter logsWriter;
 
     @ExceptionHandler(value = RouterException.class)
-    public ResponseEntity<Object> handleRouterExceptionV1(RouterException ex) throws JsonProcessingException {
+    public ResponseEntity<Object> handleRouterExceptionV1(RouterException ex ,WebRequest webRequest) throws JsonProcessingException {
 
         log.info("================================In Router Exception==============================");
 
@@ -96,7 +96,7 @@ public class ExceptionController {
             isLogoutSuccess = jsonNode.hasNonNull("status") ? jsonNode.get("status").asText().equalsIgnoreCase("625") : false;
         }*/
 
-        Map<String, String> map = new HaschMap<>();
+        Map<String, String> map = new HashMap<>();
         map.put("status", ex.getErrorCode());
         map.put("errorHint", ex.getErrorHint());
         setMessage(ex, map, webRequest);
@@ -301,7 +301,7 @@ public class ExceptionController {
                 try {
                     data = objectMapper.readValue(messageMasterConfigs.get().getApiData(), ObjectNode.class);
                 } catch (IOException e) {
-                    logsConnector.textPayload("Some error occurred in parsing response of api-data");
+                    log.info("Some error occurred in parsing response of api-data");
                 }
                 String message = data.get("message") != null ? data.get("message").asText() : ex.getErrorHint();
                 map.put("message", message);
