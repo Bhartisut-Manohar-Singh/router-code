@@ -119,7 +119,7 @@ public class RequestValidator implements Validator {
 
             Session session = authenticationSession.getSession(applicationUser);
 
-            log.info("session------------------details-------"+session.toString());
+            log.info("application session details----------"+session);
 
             if(session != null)
             {
@@ -137,6 +137,7 @@ public class RequestValidator implements Validator {
             authenticationSession.removeSession(applicationUser);
 
         } catch (RouterException e1) {
+            e1.printStackTrace();
             log.info("Exception for authentication in app level session check."+e1);
             throw e1;
 
