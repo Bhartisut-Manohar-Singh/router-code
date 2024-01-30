@@ -233,14 +233,10 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 
 
-    private MicroserviceResponse callSecurityClientForEncryptResponse(String finalResponse, Map<String, String> httpHeaders) {
+    private MicroserviceResponse callSecurityClientForEncryptResponse(String finalResponse, Map<String, String> httpHeaders) throws RouterException {
 
-        try {
             MicroserviceResponse microserviceResponse = encryptionDecryptionService.encryptResponse(finalResponse, httpHeaders);
             return new MicroserviceResponse(microserviceResponse);
-        } catch (RouterException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
