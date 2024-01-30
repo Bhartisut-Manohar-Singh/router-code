@@ -106,7 +106,7 @@ public class ExceptionController {
             isLogoutSuccess = false;
 
        if(auditPayload != null && auditPayload.getResponse()!=null) {
-            auditPayload.getResponse().setResponse(ex.getResponse() != null ? mapper.writeValueAsString(ex.getResponse()) : "");
+            auditPayload.getResponse().setResponse(ex.getResponse() != null ?mapper.writeValueAsString(map): "");
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
             auditPayload.getResponse().setTimestamp(Instant.now());
             auditPayload.setStatus(isLogoutSuccess ? SUCCESS_STATUS : FAILURE_STATUS);
@@ -114,7 +114,7 @@ public class ExceptionController {
         }
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("status", isLogoutSuccess ? SUCCESS_STATUS : FAILURE_STATUS);
-        return new ResponseEntity<>(ex.getResponse(), responseHeaders, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(map, responseHeaders, HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(value = HttpServerErrorException.class)
     public ResponseEntity<Object> handleHttpServerErrorException(HttpServerErrorException exception) throws JsonProcessingException {
