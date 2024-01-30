@@ -129,14 +129,11 @@ public class RegistrationServiceImpl implements RegistrationService {
         return finalResponse;
     }
 
-    private MicroserviceResponse callSecurityServiceForResponseHash(String request, Map<String, String> httpHeaders) {
+    private MicroserviceResponse callSecurityServiceForResponseHash(String request, Map<String, String> httpHeaders) throws RouterException {
 
-        try {
             MicroserviceResponse microserviceResponse = encryptionDecryptionService.generateResponseHash(request, httpHeaders);
             return new MicroserviceResponse(microserviceResponse);
-        } catch (RouterException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     @Override
