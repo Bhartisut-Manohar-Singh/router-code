@@ -119,6 +119,8 @@ public class RequestValidator implements Validator {
 
             Session session = authenticationSession.getSession(applicationUser);
 
+            log.info("session------------------details-------"+session.toString());
+
             if(session != null)
             {
                 String encryptedJWTToken = Jwts.parser().setSigningKey(systemKey).parseClaimsJws(session.getAppJwtKey()).getBody().getSubject();
