@@ -10,31 +10,31 @@ import java.util.Map;
 
 public interface SecurityService {
 
-    Object validateRegistration(String request, Map<String, String> httpHeaders);
+    Object validateRegistration(String request, Map<String, String> httpHeaders) throws RouterException, IOException;
 
-    MicroserviceResponse validateExecutionRequestV2(String request, Map<String, String> httpHeaders);
+    MicroserviceResponse validateExecutionRequestV2(String request, Map<String, String> httpHeaders) throws RouterException, IOException;
 
-    MicroserviceResponse decryptRequest(JsonNode node, Map<String, String> httpHeaders);
+    MicroserviceResponse decryptRequest(JsonNode node, Map<String, String> httpHeaders) throws RouterException;
 
 
 
-    MicroserviceResponse decryptRequestWithoutSession(String request, Map<String, String> httpHeaders);
+    MicroserviceResponse decryptRequestWithoutSession(String request, Map<String, String> httpHeaders) throws RouterException;
 
-    MicroserviceResponse encryptResponseWithoutSession(ResponseEntity<Object> responseEntity, Map<String, String> httpHeaders);
+    MicroserviceResponse encryptResponseWithoutSession(ResponseEntity<Object> responseEntity, Map<String, String> httpHeaders) throws RouterException;
 
-    MicroserviceResponse generateResponseHash(String finalResponse, Map<String, String> httpHeaders);
+    MicroserviceResponse generateResponseHash(String finalResponse, Map<String, String> httpHeaders) throws RouterException;
 
     MicroserviceResponse validate(String request, Map<String, String> httpHeaders, String name) throws RouterException, IOException;
 
-    MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders);
+    MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterException, IOException;
 
-    MicroserviceResponse generateAuthResponseHash(String string, Map<String, String> httpHeaders);
+    MicroserviceResponse generateAuthResponseHash(String string, Map<String, String> httpHeaders) throws RouterException;
 
-    MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders, String serviceName);
+    MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException;
 
-    MicroserviceResponse validateExecutionRequest(String request, Map<String, String> httpHeaders);
+    MicroserviceResponse validateExecutionRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException;
 
     Object validatePublicRegistration(String request, Map<String, String> httpHeaders) throws RouterException, IOException;
 
-    MicroserviceResponse validateAuthenticationV2(String request, Map<String, String> httpHeaders);
+    MicroserviceResponse validateAuthenticationV2(String request, Map<String, String> httpHeaders) throws RouterException, IOException;
 }

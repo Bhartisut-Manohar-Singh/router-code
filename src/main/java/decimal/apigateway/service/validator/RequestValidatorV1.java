@@ -35,12 +35,12 @@ public class RequestValidatorV1 {
         this.securityService = securityService;
     }
 
-    public Object validateRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterException {
+    public Object validateRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
         log.info("=== calling validateRegistrationRequest to security client === " + new Gson().toJson(httpHeaders));
         return securityService.validateRegistration(request, httpHeaders);
     }
 
-    public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders,String serviceName) throws RouterException {
+    public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders,String serviceName) throws RouterException, IOException {
         httpHeaders.put("scopeToCheck", "PUBLIC");
         httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
         httpHeaders.put("username", httpHeaders.get("clientid"));
@@ -129,7 +129,7 @@ public class RequestValidatorV1 {
         return httpHeaders;
     }
 
-    public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterException {
+    public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
         return securityService.validateAuthentication(request, httpHeaders);
     }
 

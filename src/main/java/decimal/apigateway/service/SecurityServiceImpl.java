@@ -47,19 +47,16 @@ public class SecurityServiceImpl implements SecurityService {
 
 
     @Override
-    public Object validateRegistration(String request, Map<String, String> httpHeaders) {
-        try {
+    public Object validateRegistration(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
+
 
             return securityValidator.validateRegistration(request, httpHeaders).getResponse();
-        } catch (RouterException | IOException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     @Override
-    public MicroserviceResponse validateExecutionRequestV2(String request, Map<String, String> httpHeaders) {
+    public MicroserviceResponse validateExecutionRequestV2(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
             log.info("validateExecutionRequestV2 httpheaders------------ "+httpHeaders);
-        try {
             log.info(httpHeaders.get("sourceAppId"));
             log.info(httpHeaders.get("sourceOrgId"));
             auditPayload=auditPayload();
@@ -76,15 +73,12 @@ public class SecurityServiceImpl implements SecurityService {
             logsWriter.updateLog(auditPayload);
             return microserviceResponse;
 
-        } catch (RouterException | IOException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
 
     @Override
-    public MicroserviceResponse decryptRequest(JsonNode node, Map<String, String> httpHeaders) {
-        try {
+    public MicroserviceResponse decryptRequest(JsonNode node, Map<String, String> httpHeaders) throws RouterException {
             auditPayload=auditPayload();
             auditPayload = logsWriter.initializeLog(node.toString(), JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
@@ -99,16 +93,13 @@ public class SecurityServiceImpl implements SecurityService {
             logsWriter.updateLog(auditPayload);
             log.info("MicroserviceResponse  " + microserviceResponse);
             return microserviceResponse;
-        } catch (RouterException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
 
     @Override
-    public MicroserviceResponse decryptRequestWithoutSession(String request, Map<String, String> httpHeaders) {
+    public MicroserviceResponse decryptRequestWithoutSession(String request, Map<String, String> httpHeaders) throws RouterException {
 
-        try {
             auditPayload=auditPayload();
             auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
@@ -122,15 +113,12 @@ public class SecurityServiceImpl implements SecurityService {
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
             return microserviceResponse;
-        } catch (RouterException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     @Override
-    public MicroserviceResponse encryptResponseWithoutSession(ResponseEntity<Object> responseEntity, Map<String, String> httpHeaders) {
+    public MicroserviceResponse encryptResponseWithoutSession(ResponseEntity<Object> responseEntity, Map<String, String> httpHeaders) throws RouterException {
 
-        try {
             auditPayload=auditPayload();
             auditPayload = logsWriter.initializeLog(responseEntity.toString(), JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
@@ -144,15 +132,11 @@ public class SecurityServiceImpl implements SecurityService {
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
             return microserviceResponse;
-        } catch (RouterException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
-    public MicroserviceResponse generateResponseHash(String finalResponse, Map<String, String> httpHeaders) {
+    public MicroserviceResponse generateResponseHash(String finalResponse, Map<String, String> httpHeaders) throws RouterException {
 
-        try {
             auditPayload=auditPayload();
             auditPayload = logsWriter.initializeLog(finalResponse, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
@@ -166,9 +150,7 @@ public class SecurityServiceImpl implements SecurityService {
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
             return microserviceResponse;
-        } catch (RouterException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     @Override
@@ -194,9 +176,8 @@ public class SecurityServiceImpl implements SecurityService {
     }
 
     @Override
-    public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) {
+    public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        try {
             auditPayload=auditPayload();
             auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
@@ -210,15 +191,12 @@ public class SecurityServiceImpl implements SecurityService {
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
             return microserviceResponse;
-        } catch (RouterException | IOException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     @Override
-    public MicroserviceResponse generateAuthResponseHash(String finalResponse, Map<String, String> httpHeaders) {
+    public MicroserviceResponse generateAuthResponseHash(String finalResponse, Map<String, String> httpHeaders) throws RouterException {
 
-        try {
             auditPayload=auditPayload();
             auditPayload = logsWriter.initializeLog(finalResponse, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
@@ -232,14 +210,12 @@ public class SecurityServiceImpl implements SecurityService {
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
             return microserviceResponse;
-        } catch (RouterException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     @Override
-    public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders, String serviceName) {
-        try {
+    public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
+
             auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(request);
@@ -249,15 +225,12 @@ public class SecurityServiceImpl implements SecurityService {
             ResponseEntity response = securityValidator.validatePlainRequest(request, httpHeaders, serviceName);
             log.info("====== inside validatePlainRequest =======" + new Gson().toJson(response.getBody()));
             return new MicroserviceResponse(response.getStatusCode().toString(), "", response.getBody());
-        } catch (RouterException | IOException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     @Override
-    public MicroserviceResponse validateExecutionRequest(String request, Map<String, String> httpHeaders) {
+    public MicroserviceResponse validateExecutionRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        try {
             auditPayload=auditPayload();
             auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
@@ -271,9 +244,6 @@ public class SecurityServiceImpl implements SecurityService {
             responseHeaders.set("status", response.getStatus());
             logsWriter.updateLog(auditPayload);
             return response;
-        } catch (RouterException | IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -284,9 +254,8 @@ public class SecurityServiceImpl implements SecurityService {
 
 
 
-    public MicroserviceResponse validateAuthenticationV2(String request, Map<String, String> httpHeaders) {
+    public MicroserviceResponse validateAuthenticationV2(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        try {
             auditPayload=auditPayload();
             auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
@@ -300,9 +269,7 @@ public class SecurityServiceImpl implements SecurityService {
             responseHeaders.set("status", response.getStatus());
             logsWriter.updateLog(auditPayload);
             return response;
-        } catch (RouterException | IOException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     public AuditPayload auditPayload() {

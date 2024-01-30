@@ -29,7 +29,7 @@ public class RequestValidatorV2 {
     }
 
 
-    public Object validateRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterException {
+    public Object validateRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
         return securityService.validateRegistration(request, httpHeaders);
         //return securityClient.validateRegistration(request, httpHeaders).getResponse();
@@ -82,7 +82,7 @@ public class RequestValidatorV2 {
 
     }
 
-    public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders, String serviceName) {
+    public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
         httpHeaders.put("scopeToCheck", "PUBLIC");
         httpHeaders.put("clientid", httpHeaders.get("sourceOrgId") + "~" + httpHeaders.get("sourceAppId"));
         httpHeaders.put("username", httpHeaders.get("clientid"));
@@ -139,13 +139,13 @@ public class RequestValidatorV2 {
         return securityService.validatePublicRegistration(request, httpHeaders);
     }
 
-    public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) {
+    public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
         //return securityClient.validateAuthentication(request, httpHeaders);
         return securityService.validateAuthentication(request, httpHeaders);
     }
 
 
-    public MicroserviceResponse validateAuthenticationV2(String request, Map<String, String> httpHeaders) {
+    public MicroserviceResponse validateAuthenticationV2(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
         return securityService.validateAuthenticationV2(request, httpHeaders);
     }
 }
