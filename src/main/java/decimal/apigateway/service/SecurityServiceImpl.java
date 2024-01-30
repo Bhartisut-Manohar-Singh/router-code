@@ -172,7 +172,7 @@ public class SecurityServiceImpl implements SecurityService {
     }
 
     @Override
-    public MicroserviceResponse validate(String request, Map<String, String> httpHeaders, String name) {
+    public MicroserviceResponse validate(String request, Map<String, String> httpHeaders, String name) throws RouterException, IOException {
 
             log.info("request----" + request);
             log.info("httpHeaders------" + httpHeaders + "    name-----------" + name);

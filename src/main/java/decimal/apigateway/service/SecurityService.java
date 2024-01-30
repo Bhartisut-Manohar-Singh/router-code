@@ -24,7 +24,7 @@ public interface SecurityService {
 
     MicroserviceResponse generateResponseHash(String finalResponse, Map<String, String> httpHeaders);
 
-    MicroserviceResponse validate(String request, Map<String, String> httpHeaders, String name);
+    MicroserviceResponse validate(String request, Map<String, String> httpHeaders, String name) throws RouterException, IOException;
 
     MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders);
 
