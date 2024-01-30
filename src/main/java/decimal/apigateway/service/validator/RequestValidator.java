@@ -117,6 +117,8 @@ public class RequestValidator implements Validator {
 
             String applicationUser =  RouterOperations.getJoiningString(Constant.TILD_SPLITTER, userNameData.get(0), userNameData.get(1), userNameData.get(3));
 
+            log.info("application user details -------------"+applicationUser);
+
             Session session = authenticationSession.getSession(applicationUser);
 
             log.info("application session details----------"+session);

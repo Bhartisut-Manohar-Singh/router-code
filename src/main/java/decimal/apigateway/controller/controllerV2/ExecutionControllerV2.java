@@ -1,9 +1,14 @@
 package decimal.apigateway.controller.controllerV2;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
+import decimal.apigateway.domain.ApiAuthorizationConfig;
 import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.ExecutionServiceV2;
+import decimal.apigateway.service.validator.ApiAuthorizationValidator;
 import lombok.extern.java.Log;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +27,15 @@ public class ExecutionControllerV2 {
 
     @Autowired
     ExecutionServiceV2 executionServiceV2;
+
+    @Autowired
+    ModelMapper modelMapper;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @Autowired
+    ApiAuthorizationValidator apiAuthorizationValidator;
 
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
@@ -92,7 +106,7 @@ public class ExecutionControllerV2 {
 
     }
 
-    @PostMapping(value = "dynamic-router/upload-file/{serviceName}/**",consumes = "multipart/form-data")
+    @PostMapping(value = "dynamic-router/upload-file/{destinationAppId}/{serviceName}/**",consumes = "multipart/form-data")
     public Object executeFileRequest(
             @RequestPart String request,
             @RequestHeader Map<String, String> httpHeaders,
@@ -106,6 +120,13 @@ public class ExecutionControllerV2 {
         log.info("File Size= "+files.length);
         log.info("===============================Dynamic-router/DMS=============================");
         httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
+        MicroserviceResponse validate = apiAuthorizationValidator.validate(request, httpHeaders);
+        ApiAuthorizationConfig apiAuthorizationConfig = objectMapper.convertValue(validate, ApiAuthorizationConfig.class);
+        String destinationOrgId = apiAuthorizationConfig.getDestinationOrgId();
+        String destinationAppId = apiAuthorizationConfig.getDestinationAppId();
+        httpHeaders.put("destinationAppId",destinationAppId);
+        httpHeaders.put("destinationOrgId",destinationOrgId);
+
         return executionServiceV2.executeFileRequest(httpServletRequest,request,httpHeaders,serviceName,mediaDataObjects,files);
 
     }
