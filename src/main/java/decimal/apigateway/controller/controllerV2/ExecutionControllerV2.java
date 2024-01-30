@@ -32,8 +32,6 @@ public class ExecutionControllerV2 {
     @Autowired
     ExecutionServiceV2 executionServiceV2;
 
-    @Autowired
-    SecApiAuthorizationConfigRepo apiAuthorizationConfigRepo;
 
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
@@ -118,12 +116,6 @@ public class ExecutionControllerV2 {
         log.info("File Size= "+files.length);
         log.info("===============================Dynamic-router/DMS=============================");
         httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
-        Optional<ApiAuthorizationConfig> bySourceAppIdAndDestinationAppId = apiAuthorizationConfigRepo.findBySourceOrgIdAndSourceAppId(httpHeaders.get(Headers.orgid),httpHeaders.get(Headers.appid));
-
-        if(bySourceAppIdAndDestinationAppId.isPresent()){
-            httpHeaders.put(String.valueOf(Headers.orgid),bySourceAppIdAndDestinationAppId.get().getDestinationOrgId());
-            httpHeaders.put(String.valueOf(Headers.appid),bySourceAppIdAndDestinationAppId.get().getDestinationAppId());
-        }
 
         return executionServiceV2.executeFileRequest(httpServletRequest,request,httpHeaders,serviceName,mediaDataObjects,files);
     }
