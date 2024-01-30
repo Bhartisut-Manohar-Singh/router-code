@@ -174,7 +174,6 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public MicroserviceResponse validate(String request, Map<String, String> httpHeaders, String name) {
 
-        try {
             log.info("request----" + request);
             log.info("httpHeaders------" + httpHeaders + "    name-----------" + name);
             auditPayload=auditPayload();
@@ -191,9 +190,6 @@ public class SecurityServiceImpl implements SecurityService {
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
             return microserviceResponse;
-        } catch (RouterException | IOException e) {
-            throw new RuntimeException(e);
-        }
 
     }
 
