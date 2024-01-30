@@ -38,9 +38,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
     @Override
-    public ResponseEntity<Object> register(String request, Map<String, String> httpHeaders) {
-
-        try {
+    public ResponseEntity<Object> register(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
             auditPayload = auditPayload();
             auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "authentication-service", auditPayload);
@@ -56,15 +54,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
             return new ResponseEntity<>(microserviceResponse, responseHeaders, HttpStatus.OK);
-        } catch (IOException | RouterException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     @Override
-    public ResponseEntity<Object> authenticateV2(Object plainRequest, Map<String, String> httpHeaders) {
+    public ResponseEntity<Object> authenticateV2(Object plainRequest, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        try {
             auditPayload = auditPayload();
             auditPayload = logsWriter.initializeLog(null, JSON,httpHeaders, "authentication-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
@@ -79,9 +74,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
             return new ResponseEntity<>(microserviceResponse, responseHeaders, HttpStatus.OK);
-        } catch (IOException | RouterException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -125,29 +117,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public ResponseEntity<Object> authenticate(Object plainRequest, Map<String, String> httpHeaders) {
+    public ResponseEntity<Object> authenticate(Object plainRequest, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        try {
             MicroserviceResponse microserviceResponse = authenticationProcessor.authenticate(String.valueOf(plainRequest), httpHeaders);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             return new ResponseEntity<>(microserviceResponse, responseHeaders, HttpStatus.OK);
-        } catch (IOException | RouterException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     @Override
-    public ResponseEntity<Object> publicRegister(String request, Map<String, String> httpHeaders) {
+    public ResponseEntity<Object> publicRegister(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        try {
             MicroserviceResponse response = authenticationProcessor.publicRegister(request, httpHeaders);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", response.getStatus());
             return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
-        } catch (IOException | RouterException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     public AuditPayload auditPayload() {

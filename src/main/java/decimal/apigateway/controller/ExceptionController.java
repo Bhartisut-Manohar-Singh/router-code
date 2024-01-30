@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import decimal.apigateway.domain.MessageMasterConfig;
 import decimal.apigateway.exception.PublicTokenCreationException;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.model.ResponseOutput;
+import decimal.apigateway.repository.MessageMasterConfigRepo;
 import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.ServiceMonitoringAudit;
 import decimal.logs.connector.LogsConnector;
@@ -26,9 +28,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.context.request.WebRequest;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static decimal.apigateway.commons.Constant.*;
 import static decimal.apigateway.commons.Loggers.ERROR_LOGGER;
@@ -47,16 +53,22 @@ public class ExceptionController {
     LogsConnector logsConnector;
 
     @Autowired
+    MessageMasterConfigRepo masterConfigRepo;
+
+    @Autowired
     ServiceMonitoringAudit serviceMonitoringAudit;
 
     @Autowired
     AuditPayload auditPayload;
 
     @Autowired
+    ObjectMapper objectMapper;
+
+    @Autowired
     LogsWriter logsWriter;
 
-    /*@ExceptionHandler(value = RouterException.class)
-    public ResponseEntity<Object> handleRouterExceptionV1(RouterException ex) throws JsonProcessingException {
+    @ExceptionHandler(value = RouterException.class)
+    public ResponseEntity<Object> handleRouterExceptionV1(RouterException ex ,WebRequest webRequest) throws JsonProcessingException {
 
         log.info("================================In Router Exception==============================");
 
@@ -79,23 +91,31 @@ public class ExceptionController {
         } catch (Exception e) {
         }
 
-        if (ex.getResponse() != null) {
+       /* if (ex.getResponse() != null) {
             JsonNode jsonNode = mapper.convertValue(ex.getResponse(), JsonNode.class);
             isLogoutSuccess = jsonNode.hasNonNull("status") ? jsonNode.get("status").asText().equalsIgnoreCase("625") : false;
-        }
+        }*/
 
-      *//* if(auditPayload != null && auditPayload.getResponse()!=null) {
-            auditPayload.getResponse().setResponse(ex.getResponse() != null ? mapper.writeValueAsString(ex.getResponse()) : "");
+        Map<String, String> map = new HashMap<>();
+        map.put("status", ex.getErrorCode());
+        map.put("errorHint", ex.getErrorHint());
+        setMessage(ex, map, webRequest);
+        map.put("errorType", ex.getErrorType());
+
+        if("625".equals(ex.getErrorCode()))
+            isLogoutSuccess = false;
+
+       if(auditPayload != null && auditPayload.getResponse()!=null) {
+            auditPayload.getResponse().setResponse(ex.getResponse() != null ?mapper.writeValueAsString(map): "");
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
             auditPayload.getResponse().setTimestamp(Instant.now());
             auditPayload.setStatus(isLogoutSuccess ? SUCCESS_STATUS : FAILURE_STATUS);
             logsWriter.updateLog(auditPayload);
-        }*//*
+        }
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("status", isLogoutSuccess ? SUCCESS_STATUS : FAILURE_STATUS);
-        return new ResponseEntity<>(ex.getResponse(), responseHeaders, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(map, responseHeaders, HttpStatus.BAD_REQUEST);
     }
-*/
     @ExceptionHandler(value = HttpServerErrorException.class)
     public ResponseEntity<Object> handleHttpServerErrorException(HttpServerErrorException exception) throws JsonProcessingException {
         log.info("================================In Exception Controller==============================");
@@ -222,7 +242,7 @@ public class ExceptionController {
     }
 
 
-    @ExceptionHandler(value = RouterException.class)
+    /*@ExceptionHandler(value = RouterException.class)
     public ResponseEntity<Object> handleRouterException(RouterException ex) throws JsonProcessingException {
 
         log.info("Inside handleRouterException exception handler - " + ex.getMessage());
@@ -235,12 +255,12 @@ public class ExceptionController {
         MicroserviceResponse response = new MicroserviceResponse();
         response.setStatus(ex.getErrorCode());
         response.setMessage(ex.getErrorMessage());
-        response.setResponse(String.valueOf(ex.getErrorHint()));
+        response.setResponse(ex.getResponse());
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set(STATUS, ROUTER_MULTIPLE_SESSION);
         return new ResponseEntity<>(response, responseHeaders, HttpStatus.BAD_REQUEST);
     }
-
+*/
 
     @ExceptionHandler(value = RuntimeException.class)
     public ResponseEntity<Object> handleRouterException(RuntimeException ex) throws JsonProcessingException {
@@ -267,4 +287,27 @@ public class ExceptionController {
         HttpHeaders responseHeaders = new HttpHeaders();
         return new ResponseEntity<>(response, responseHeaders, HttpStatus.BAD_REQUEST);
     }*/
+
+
+    private void setMessage(RouterException ex, Map<String, String> map, WebRequest request) {
+        String userName = request.getHeader("username");
+        if (userName==null || userName.isEmpty()) {
+            map.put("message", ex.getErrorHint());
+        } else {
+            String user[] = userName.split("~");
+            Optional<MessageMasterConfig> messageMasterConfigs = masterConfigRepo.findByOrgIdAndAppIdAndApiName(user[0], user[1], ex.getErrorCode());
+            if (messageMasterConfigs.isPresent()) {
+                ObjectNode data = null;
+                try {
+                    data = objectMapper.readValue(messageMasterConfigs.get().getApiData(), ObjectNode.class);
+                } catch (IOException e) {
+                    log.info("Some error occurred in parsing response of api-data");
+                }
+                String message = data.get("message") != null ? data.get("message").asText() : ex.getErrorHint();
+                map.put("message", message);
+            } else {
+                map.put("message", ex.getErrorHint());
+            }
+        }
+    }
 }

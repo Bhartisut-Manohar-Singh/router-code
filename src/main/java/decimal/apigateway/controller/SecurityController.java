@@ -47,7 +47,7 @@ public class SecurityController {
     }
 
     @PostMapping(value = "encryptResponse")
-    MicroserviceResponse encryptResponse(@RequestBody Object finalResponse, @RequestHeader Map<String, String> httpHeaders) {
+    MicroserviceResponse encryptResponse(@RequestBody Object finalResponse, @RequestHeader Map<String, String> httpHeaders) throws RouterException {
 
         return securityServiceEnc.encryptResponse(finalResponse.toString(), httpHeaders);
 

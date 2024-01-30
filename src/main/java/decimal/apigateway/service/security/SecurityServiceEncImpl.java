@@ -31,9 +31,8 @@ public class SecurityServiceEncImpl implements SecurityServiceEnc {
 
 
 
-    public MicroserviceResponse encryptResponse(String body, Map<String, String> httpHeaders) {
+    public MicroserviceResponse encryptResponse(String body, Map<String, String> httpHeaders) throws RouterException {
 
-        try {
             auditPayload=auditPayload();
             auditPayload = logsWriter.initializeLog(body, JSON,httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
@@ -48,9 +47,7 @@ public class SecurityServiceEncImpl implements SecurityServiceEnc {
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
             return microserviceResponse;
-        } catch (RouterException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
 

@@ -356,7 +356,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
 
     @Override
-    public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, JsonProcessingException {
+    public Object executeDynamicRequestPlain(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
 
         auditPayload=logsWriter.initializeLog(request,JSON,httpHeaders);
         auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);

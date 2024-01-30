@@ -15,6 +15,7 @@ import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Map;
 
 import static decimal.apigateway.enums.RequestValidationTypes.*;
@@ -34,12 +35,12 @@ public class RequestValidatorV1 {
         this.securityService = securityService;
     }
 
-    public Object validateRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterException {
+    public Object validateRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
         log.info("=== calling validateRegistrationRequest to security client === " + new Gson().toJson(httpHeaders));
         return securityService.validateRegistration(request, httpHeaders);
     }
 
-    public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders,String serviceName) throws RouterException {
+    public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders,String serviceName) throws RouterException, IOException {
         httpHeaders.put("scopeToCheck", "PUBLIC");
         httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
         httpHeaders.put("username", httpHeaders.get("clientid"));
@@ -48,7 +49,7 @@ public class RequestValidatorV1 {
         return securityService.validatePlainRequest(request, httpHeaders, serviceName);
     }
 
-    public void validatePlainDynamicRequest(String request, Map<String, String> httpHeaders) throws RouterException {
+    public void validatePlainDynamicRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
         httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
 
@@ -62,7 +63,7 @@ public class RequestValidatorV1 {
     @Autowired
     AuditTraceFilter auditTraceFilter;
 
-    public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) throws RouterException {
+    public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) throws RouterException, IOException {
         String clientId = httpHeaders.get("clientid");
 
         httpHeaders.put("orgid", clientId.split(Constant.TILD_SPLITTER)[0]);
@@ -103,7 +104,7 @@ public class RequestValidatorV1 {
         return httpHeaders;
     }
 
-    public Map<String, String> validateDynamicRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) {
+    public Map<String, String> validateDynamicRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) throws RouterException, IOException {
 
         String clientId = httpHeaders.get("clientid");
 
@@ -128,11 +129,11 @@ public class RequestValidatorV1 {
         return httpHeaders;
     }
 
-    public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterException {
+    public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
         return securityService.validateAuthentication(request, httpHeaders);
     }
 
-    public MicroserviceResponse validateLogout(String request, Map<String, String> httpHeaders) throws RouterException {
+    public MicroserviceResponse validateLogout(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
         return securityService.validate(request, httpHeaders, REQUEST.name());
     }
