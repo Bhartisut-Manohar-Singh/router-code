@@ -3,6 +3,7 @@ package decimal.apigateway.controller.controllerV2;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.domain.ApiAuthorizationConfig;
+import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.repository.SecApiAuthorizationConfigRepo;
@@ -33,12 +34,6 @@ public class ExecutionControllerV2 {
 
     @Autowired
     SecApiAuthorizationConfigRepo apiAuthorizationConfigRepo;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
-    ApiAuthorizationValidator apiAuthorizationValidator;
 
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
@@ -109,7 +104,7 @@ public class ExecutionControllerV2 {
 
     }
 
-    @PostMapping(value = "dynamic-router/upload-file/{destinationAppId}/{serviceName}/**",consumes = "multipart/form-data")
+    @PostMapping(value = "dynamic-router/upload-file/{serviceName}/**",consumes = "multipart/form-data")
     public Object executeFileRequest(
             @RequestPart String request,
             @RequestHeader Map<String, String> httpHeaders,
@@ -123,13 +118,14 @@ public class ExecutionControllerV2 {
         log.info("File Size= "+files.length);
         log.info("===============================Dynamic-router/DMS=============================");
         httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
-        Optional<ApiAuthorizationConfig> bySourceAppIdAndDestinationAppId = apiAuthorizationConfigRepo.findBySourceOrgIdAndSourceAppId(httpHeaders.get("orgId"),httpHeaders.get("appId"));
-        if(bySourceAppIdAndDestinationAppId.isPresent()){
-            httpHeaders.put("destinationOrgId",bySourceAppIdAndDestinationAppId.get().getDestinationOrgId());
-            httpHeaders.put("destinationAppId",bySourceAppIdAndDestinationAppId.get().getDestinationAppId());
-        }
-        return executionServiceV2.executeFileRequest(httpServletRequest,request,httpHeaders,serviceName,mediaDataObjects,files);
+        Optional<ApiAuthorizationConfig> bySourceAppIdAndDestinationAppId = apiAuthorizationConfigRepo.findBySourceOrgIdAndSourceAppId(httpHeaders.get(Headers.orgid),httpHeaders.get(Headers.appid));
 
+        if(bySourceAppIdAndDestinationAppId.isPresent()){
+            httpHeaders.put(String.valueOf(Headers.orgid),bySourceAppIdAndDestinationAppId.get().getDestinationOrgId());
+            httpHeaders.put(String.valueOf(Headers.appid),bySourceAppIdAndDestinationAppId.get().getDestinationAppId());
+        }
+
+        return executionServiceV2.executeFileRequest(httpServletRequest,request,httpHeaders,serviceName,mediaDataObjects,files);
     }
 
 }
