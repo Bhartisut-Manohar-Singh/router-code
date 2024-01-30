@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.clients.EsbClientAuth;
 import decimal.apigateway.commons.Constant;
+import decimal.apigateway.domain.ApiAuthorizationConfig;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
+import decimal.apigateway.repository.SecApiAuthorizationConfigRepo;
 import decimal.apigateway.service.ExecutionServiceV2;
 import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.SecurityService;
@@ -60,6 +62,10 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
     @Autowired
     EsbClientAuth esbClient;
+
+
+    @Autowired
+    SecApiAuthorizationConfigRepo apiAuthorizationConfigRepo;
 
 
     @Autowired
@@ -486,6 +492,12 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     public Object executeFileRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String mediaDataObjects, MultipartFile[] files) throws RouterException, IOException {
 
         log.info("==========================================Inside DMS Service Layer=========================================" );
+        Optional<ApiAuthorizationConfig> bySourceAppIdAndDestinationAppId = apiAuthorizationConfigRepo.findBySourceOrgIdAndSourceAppId(httpHeaders.get(Headers.orgid),httpHeaders.get(Headers.appid));
+
+        if(bySourceAppIdAndDestinationAppId.isPresent()){
+            httpHeaders.put(String.valueOf(Headers.orgid),bySourceAppIdAndDestinationAppId.get().getDestinationOrgId());
+            httpHeaders.put(String.valueOf(Headers.appid),bySourceAppIdAndDestinationAppId.get().getDestinationAppId());
+        }
 
         auditPayload = logsWriter.initializeLog(mediaDataObjects,MULTIPART, httpHeaders);
 
