@@ -492,6 +492,8 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     public Object executeFileRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String mediaDataObjects, MultipartFile[] files) throws RouterException, IOException {
 
         log.info("==========================================Inside DMS Service Layer=========================================" );
+        log.info("orgId from headers =================  " + httpHeaders.get(Headers.orgid));
+        log.info("appId from headers =================  " + httpHeaders.get(Headers.appid));
         try {
             Optional<ApiAuthorizationConfig> bySourceOrgIdAndSourceAppId = apiAuthorizationConfigRepo.findBySourceOrgIdAndSourceAppId(httpHeaders.get(Headers.orgid), httpHeaders.get(Headers.appid));
             log.info("orgId is   " + bySourceOrgIdAndSourceAppId.get().getDestinationOrgId());
