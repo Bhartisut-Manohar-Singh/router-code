@@ -492,12 +492,17 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     public Object executeFileRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String mediaDataObjects, MultipartFile[] files) throws RouterException, IOException {
 
         log.info("==========================================Inside DMS Service Layer=========================================" );
-        Optional<ApiAuthorizationConfig> bySourceAppIdAndDestinationAppId = apiAuthorizationConfigRepo.findBySourceOrgIdAndSourceAppId(httpHeaders.get(Headers.orgid),httpHeaders.get(Headers.appid));
+        try {
+            Optional<ApiAuthorizationConfig> bySourceOrgIdAndSourceAppId = apiAuthorizationConfigRepo.findBySourceOrgIdAndSourceAppId(httpHeaders.get(Headers.orgid), httpHeaders.get(Headers.appid));
 
-        if(bySourceAppIdAndDestinationAppId.isPresent()){
-            httpHeaders.put(String.valueOf(Headers.orgid),bySourceAppIdAndDestinationAppId.get().getDestinationOrgId());
-            httpHeaders.put(String.valueOf(Headers.appid),bySourceAppIdAndDestinationAppId.get().getDestinationAppId());
+            if(bySourceOrgIdAndSourceAppId.isPresent()){
+                httpHeaders.put(String.valueOf(Headers.orgid),bySourceOrgIdAndSourceAppId.get().getDestinationOrgId());
+                httpHeaders.put(String.valueOf(Headers.appid),bySourceOrgIdAndSourceAppId.get().getDestinationAppId());
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
+
 
         auditPayload = logsWriter.initializeLog(mediaDataObjects,MULTIPART, httpHeaders);
 
