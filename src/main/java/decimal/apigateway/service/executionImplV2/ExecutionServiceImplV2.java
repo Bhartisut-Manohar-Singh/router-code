@@ -494,6 +494,8 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         log.info("==========================================Inside DMS Service Layer=========================================" );
         try {
             Optional<ApiAuthorizationConfig> bySourceOrgIdAndSourceAppId = apiAuthorizationConfigRepo.findBySourceOrgIdAndSourceAppId(httpHeaders.get(Headers.orgid), httpHeaders.get(Headers.appid));
+            log.info("orgId is   " + bySourceOrgIdAndSourceAppId.get().getDestinationOrgId());
+            log.info("appId is  " + bySourceOrgIdAndSourceAppId.get().getDestinationAppId());
 
             if(bySourceOrgIdAndSourceAppId.isPresent()){
                 httpHeaders.put(String.valueOf(Headers.orgid),bySourceOrgIdAndSourceAppId.get().getDestinationOrgId());
