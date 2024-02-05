@@ -11,14 +11,13 @@ import org.springframework.data.redis.core.RedisHash;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@RedisHash("RATE_LIMITER_APP_AND_SERVICE")
-public class RateLimitAppAndServiceConfig {
+@RedisHash("RATE_LIMITER_SERVICE")
+public class RateLimitServiceConfig {
     @Id
     String id;
     String orgId;
     String appId;
     String serviceName;
-    RateLimitEntity rateLimitEntityApp;
     RateLimitEntity rateLimitEntityService;
 
 }

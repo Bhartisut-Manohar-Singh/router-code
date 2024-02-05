@@ -21,6 +21,7 @@ public class RateLimiterAspect2 {
     @Autowired
     RateLimitService rateLimitService;
 
+
     @Pointcut(
             "within(decimal.apigateway.controller..*)"
                     + "&& execution(public * * (..)) && args(requestBody, httpHeaders,..)")
@@ -51,17 +52,8 @@ public class RateLimiterAspect2 {
         String appId = clientId.split(Constant.TILD_SPLITTER)[1];
         String sourceIp = httpHeaders.get(Constant.ROUTER_HEADER_SOURCE_IP.toLowerCase());
 
-        //code for ip
-        Boolean isRateLimitIpSuccessful = rateLimitService.allowRequestForIp(sourceIp);
-        if(isRateLimitIpSuccessful){
-            Boolean isRateLimitAppSuccessful = rateLimitService.allowRequest(orgid,appId,serviceName);
+        Boolean isRateLimitAppSuccessful = rateLimitService.allowRequest22(orgid,appId,serviceName);
 
-        }else{
-            // write code that the controller request should not get executed
-            return;
-        }
-        //code for application
-        //code for service
 
 
 
