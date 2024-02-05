@@ -178,9 +178,9 @@ public class RateLimitService {
     }
 
     private Bucket createBucketForApp(String orgId, String appId) {
-        Optional<RateLimitAppConfig> rateLimitAppConfig = rateLimitAppRepo.findById(orgId + "+" + appId);
+        Optional<RateLimitAppConfig> rateLimitAppConfig = rateLimitAppRepo.findById(appId);
         if (rateLimitAppConfig.isPresent()) {
-            RateLimitEntityApp rateLimitEntityApp = rateLimitAppConfig.get().getRateLimitEntityApp();
+            RateLimitEntity rateLimitEntityApp = rateLimitAppConfig.get().getRateLimitEntityApp();
             return createGlobalBucket(rateLimitEntityApp.getNoOfAllowedHits(), rateLimitEntityApp.getTime(), rateLimitEntityApp.getUnit());
         }
         // Return a default bucket if configuration not found
@@ -188,9 +188,9 @@ public class RateLimitService {
     }
 
     private Bucket createBucketForService(String orgId, String appId, String serviceName) {
-        Optional<RateLimitServiceConfig> rateLimitServiceConfig = rateLimitServiceRepo.findById(orgId + "+" + appId + "+" + serviceName);
+        Optional<RateLimitServiceConfig> rateLimitServiceConfig = rateLimitServiceRepo.findById(appId + "+" + serviceName);
         if (rateLimitServiceConfig.isPresent()) {
-            RateLimitEntityService rateLimitEntityService = rateLimitServiceConfig.get().getRateLimitEntityService();
+            RateLimitEntity rateLimitEntityService = rateLimitServiceConfig.get().getRateLimitEntityService();
             return createGlobalBucket(rateLimitEntityService.getNoOfAllowedHits(), rateLimitEntityService.getTime(), rateLimitEntityService.getUnit());
         }
         // Return a default bucket if configuration not found
@@ -198,16 +198,16 @@ public class RateLimitService {
     }
 
     private Bucket createGlobalBucket(long capacity, long duration, TimeUnit timeUnit) {
-        return Bucket4j.builder()
+        return Bucket.builder()
                 .addLimit(Bandwidth.simple(capacity, Duration.of(timeUnit.toMillis(duration))))
                 .build();
     }
 
     private Bucket createDefaultBucket() {
         // Return a default bucket if configuration not found
-        return Bucket4j.builder().build();
+        return Bucket.builder().build();
     }
-}
+
 
     private Bucket createGlobalBucket(long tokens, long refillInterval, long bucketCapacity) {
         Refill refill = Refill.intervally(tokens, Duration.ofMinutes(refillInterval));
