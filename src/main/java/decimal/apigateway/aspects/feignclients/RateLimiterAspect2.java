@@ -52,7 +52,7 @@ public class RateLimiterAspect2 {
         String appId = clientId.split(Constant.TILD_SPLITTER)[1];
         String sourceIp = httpHeaders.get(Constant.ROUTER_HEADER_SOURCE_IP.toLowerCase());
 
-        Boolean isRateLimitAppSuccessful = rateLimitService.allowRequest22(orgid,appId,serviceName);
+        Boolean isRateLimitAppSuccessful = rateLimitService.allowRequest(appId,serviceName);
 
 
 
