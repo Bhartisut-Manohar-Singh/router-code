@@ -148,12 +148,27 @@ public class RateLimitService {
 //    }
 
 
-    public boolean allowRequest(String orgId, String appId, String serviceName) {
-        // Create or retrieve bucket for app
-        Bucket bucketForApp = appBuckets.computeIfAbsent(appId, key -> createBucketForApp(orgId, appId));
+    public boolean allowRequest22(String orgId, String appId, String serviceName) {
+        // Retrieve bucket for app
+        Bucket bucketForApp = appBuckets.computeIfPresent(appId, (key, existingBucket) -> existingBucket);
+        if (bucketForApp==null) {
+            bucketForApp = createBucketForApp(orgId, appId);
+            if(bucketForApp==null){
+                return false;
+            }
 
-        // Create or retrieve bucket for service
-        Bucket bucketForService = serviceBuckets.computeIfAbsent(appId + serviceName, key -> createBucketForService(orgId, appId, serviceName));
+
+
+        }
+        // Retrieve bucket for service
+        Bucket bucketForService = serviceBuckets.computeIfPresent(appId+"+"+serviceName, (key, existingBucket) -> existingBucket);
+        if (bucketForService==null) {
+            bucketForService = createBucketForService(orgId, appId,serviceName);
+            if(bucketForService==null){
+                return false;
+            }
+
+        }
 
         // Check rate limiting for app
         if (bucketForApp.tryConsume(1)) {
@@ -181,32 +196,38 @@ public class RateLimitService {
         Optional<RateLimitAppConfig> rateLimitAppConfig = rateLimitAppRepo.findById(appId);
         if (rateLimitAppConfig.isPresent()) {
             RateLimitEntity rateLimitEntityApp = rateLimitAppConfig.get().getRateLimitEntityApp();
-            return createGlobalBucket(rateLimitEntityApp.getNoOfAllowedHits(), rateLimitEntityApp.getTime(), rateLimitEntityApp.getUnit());
+            Bucket newBucket = createGlobalBucket(rateLimitEntityApp.getNoOfAllowedHits(), rateLimitEntityApp.getTime(), rateLimitEntityApp.getUnit());
+            appBuckets.put(appId, newBucket);
+            return newBucket;
         }
         // Return a default bucket if configuration not found
-        return createDefaultBucket();
+        return null;
     }
 
     private Bucket createBucketForService(String orgId, String appId, String serviceName) {
         Optional<RateLimitServiceConfig> rateLimitServiceConfig = rateLimitServiceRepo.findById(appId + "+" + serviceName);
         if (rateLimitServiceConfig.isPresent()) {
             RateLimitEntity rateLimitEntityService = rateLimitServiceConfig.get().getRateLimitEntityService();
-            return createGlobalBucket(rateLimitEntityService.getNoOfAllowedHits(), rateLimitEntityService.getTime(), rateLimitEntityService.getUnit());
+            Bucket newBucket = createGlobalBucket(rateLimitEntityService.getNoOfAllowedHits(), rateLimitEntityService.getTime(), rateLimitEntityService.getUnit());
+            serviceBuckets.put(appId+"+"+serviceName,newBucket);
+            return newBucket;
         }
         // Return a default bucket if configuration not found
-        return createDefaultBucket();
+        return null;
+    }
+
+    public Bucket createBucket(long capacity, long refillInterval, TimeUnit refillIntervalUnit) {
+        Refill refill = Refill.intervally(capacity, Duration.ofMillis(refillIntervalUnit.toMillis(refillInterval)));
+        Bandwidth limit = Bandwidth.classic(capacity, refill);
+        return Bucket.builder().addLimit(limit).build();
     }
 
     private Bucket createGlobalBucket(long capacity, long duration, TimeUnit timeUnit) {
         return Bucket.builder()
-                .addLimit(Bandwidth.simple(capacity, Duration.of(timeUnit.toMillis(duration))))
+                .addLimit(Bandwidth.classic(capacity, Refill.intervally(capacity, Duration.ofMillis(timeUnit.toMillis(duration)))))
                 .build();
     }
 
-    private Bucket createDefaultBucket() {
-        // Return a default bucket if configuration not found
-        return Bucket.builder().build();
-    }
 
 
     private Bucket createGlobalBucket(long tokens, long refillInterval, long bucketCapacity) {
@@ -214,4 +235,5 @@ public class RateLimitService {
         Bandwidth limit = Bandwidth.classic(bucketCapacity, refill);
         return Bucket.builder().addLimit(limit).build();
     }
+
 }
