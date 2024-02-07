@@ -28,11 +28,11 @@ public class RateLimterController2 {
     @PostMapping
     private String createConfig(@RequestBody RateLimitConfigDto2 rateLimitConfigDto2) {
         String id = rateLimitConfigDto2.getAppId();
-        RateLimitAppConfig rateLimitAppConfig = new RateLimitAppConfig(id, rateLimitConfigDto2.getOrgId(), rateLimitConfigDto2.getAppId(), rateLimitConfigDto2.getAppRateLimitConfig());
+        RateLimitAppConfig rateLimitAppConfig = new RateLimitAppConfig(id, rateLimitConfigDto2.getAppRateLimitConfig());
         rateLimitAppRepo.save(rateLimitAppConfig);
 
         id = rateLimitConfigDto2.getAppId() + "+" + rateLimitConfigDto2.getServiceName();
-        RateLimitServiceConfig rateLimitServiceConfig = new RateLimitServiceConfig(id, rateLimitConfigDto2.getOrgId(), rateLimitConfigDto2.getAppId(), rateLimitConfigDto2.getServiceName(), rateLimitConfigDto2.getServiceRateLimitConfig());
+        RateLimitServiceConfig rateLimitServiceConfig = new RateLimitServiceConfig(id, rateLimitConfigDto2.getServiceRateLimitConfig());
 
         rateLimitServiceRepo.save(rateLimitServiceConfig);
         return "config created";

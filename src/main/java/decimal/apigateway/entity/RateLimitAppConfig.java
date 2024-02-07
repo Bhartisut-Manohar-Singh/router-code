@@ -15,8 +15,6 @@ import org.springframework.data.redis.core.RedisHash;
 public class RateLimitAppConfig {
     @Id
     String id;
-    String orgId;
-    String appId;
-    RateLimitEntity rateLimitEntityApp;
+    RateLimitEntity rateLimitEntity;
 
 }

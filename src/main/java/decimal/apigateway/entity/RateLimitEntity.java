@@ -1,5 +1,6 @@
 package decimal.apigateway.entity;
 
+import io.github.bucket4j.Bucket;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,9 @@ public class RateLimitEntity {
     long time;
     TimeUnit unit;
     long noOfAllowedHits;
+    String rateLimitLevel;
+    Bucket bucket;
+    String bucket1;
 
 
 }

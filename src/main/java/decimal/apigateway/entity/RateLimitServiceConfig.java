@@ -1,5 +1,6 @@
 package decimal.apigateway.entity;
 
+import io.github.bucket4j.Bucket;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,9 +16,5 @@ import org.springframework.data.redis.core.RedisHash;
 public class RateLimitServiceConfig {
     @Id
     String id;
-    String orgId;
-    String appId;
-    String serviceName;
-    RateLimitEntity rateLimitEntityService;
-
+    RateLimitEntity rateLimitEntity;
 }
