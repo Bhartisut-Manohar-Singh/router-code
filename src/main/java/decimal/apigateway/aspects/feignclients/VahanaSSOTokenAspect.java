@@ -62,6 +62,7 @@ public class VahanaSSOTokenAspect {
 
     @Before(value = "execution(* decimal.apigateway.controller.VahanaSSOTokenController.*(..)) && args(ssoTokenModel , httpHeaders)")
     public void generateSSOToken(@RequestBody SSOTokenModel ssoTokenModel, @RequestHeader Map<String, String> httpHeaders) throws ParseException {
+        log.info("in Aspect method()");
         this.verifyClientSecret(ssoTokenModel, httpHeaders);
     }
 
