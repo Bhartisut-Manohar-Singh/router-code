@@ -9,6 +9,8 @@ public class Constant {
     public static final String AUTHENTICATION_MICRO_SERVICE = "authentication-service";
     public static final String SUCCESS_STATUS = "SUCCESS";
     public static final String FAILURE_STATUS = "FAILURE";
+
+
     public static final String TILD_SPLITTER = "~";
     public static final String ESB = "esb";
     public static final String MULTIPART_FILES= "files";
