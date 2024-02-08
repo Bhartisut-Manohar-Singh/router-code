@@ -224,7 +224,7 @@ public class ExceptionController {
 
     @ExceptionHandler(value = RouterException.class)
     public ResponseEntity<Object> handleRouterException(RouterException ex) throws JsonProcessingException {
-
+        ex.printStackTrace();
         log.info("Inside handleRouterException exception handler - " + ex.getMessage());
 
         RouterException exception = new RouterException();
