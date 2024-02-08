@@ -18,7 +18,7 @@ public class RateLimitEntity {
     long noOfAllowedHits;
     String rateLimitLevel;
     Bucket bucket;
-    String bucket1;
+
 
 
 }
