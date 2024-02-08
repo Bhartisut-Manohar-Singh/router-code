@@ -38,7 +38,7 @@ public class VahanaSSOTokenAspect {
 
 
     private void verifyClientSecret(SSOTokenModel ssoTokenModel, Map<String, String> httpHeaders) {
-        String clientSecret = httpHeaders.get(CLIENT_SECRET);
+        String clientSecret = httpHeaders.get("client-secret");
         log.info(" client Secret from headers: {}" + clientSecret);
         String appId = ssoTokenModel.getAppId();
 
