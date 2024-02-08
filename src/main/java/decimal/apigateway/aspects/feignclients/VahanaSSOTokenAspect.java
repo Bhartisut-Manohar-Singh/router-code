@@ -68,16 +68,5 @@ public class VahanaSSOTokenAspect {
         this.verifyClientSecret(ssoTokenModel, httpHeaders);
     }
 
-    @Before(value = "execution(* decimal.apigateway.controller.VahanaSSOTokenController.*(..)) && args(ssoTokenModel , httpHeaders)")
-    public void validateSSOToken(@RequestBody SSOTokenModel ssoTokenModel, @RequestHeader Map<String, String> httpHeaders) throws ParseException {
-
-        this.verifyClientSecret(ssoTokenModel, httpHeaders);
-    }
-
-    @Before(value = "execution(* decimal.apigateway.controller.VahanaSSOTokenController.*(..)) && args(ssoTokenModel , httpHeaders)")
-    public void getSSOLoginDetails(@RequestBody SSOTokenModel ssoTokenModel, @RequestHeader Map<String, String> httpHeaders) throws ParseException {
-
-        this.verifyClientSecret(ssoTokenModel, httpHeaders);
-    }
 }
 
