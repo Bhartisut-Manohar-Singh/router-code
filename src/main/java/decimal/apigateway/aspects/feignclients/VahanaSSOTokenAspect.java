@@ -42,6 +42,8 @@ public class VahanaSSOTokenAspect {
         log.info(" client Secret from headers: {}" + clientSecret);
         String appId = ssoTokenModel.getAppId();
 
+        log.info("appid----------"+appId);
+
         Optional<ApplicationDefRedisConfig> applicationDefConfig = applicationDefConfigRepo.findByAppId(appId);
 
         if (applicationDefConfig.isEmpty()) {
