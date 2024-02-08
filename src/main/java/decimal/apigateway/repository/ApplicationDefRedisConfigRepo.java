@@ -12,4 +12,6 @@ import java.util.Optional;
 public interface ApplicationDefRedisConfigRepo extends CrudRepository<ApplicationDefRedisConfig, String> {
 
     Optional<ApplicationDefRedisConfig> findByOrgIdAndAppId(String orgId, String appId);
+
+    Optional<ApplicationDefRedisConfig> findByAppId(String appId);
 }

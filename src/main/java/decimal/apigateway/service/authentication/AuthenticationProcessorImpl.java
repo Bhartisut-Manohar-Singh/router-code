@@ -123,6 +123,8 @@ public class AuthenticationProcessorImpl implements AuthenticationProcessor {
         String requestId = httpHeaders.get(Headers.requestid.name());
         String loginType = httpHeaders.get(Headers.auth_scheme.name());
 
+        log.info("requestId--------------"+requestId +"loginType---------------"+loginType);
+
         Object authenticationResponse = null;
         try {
             authenticationResponse = userAuthentication.authenticate(request, httpHeaders,loginType);

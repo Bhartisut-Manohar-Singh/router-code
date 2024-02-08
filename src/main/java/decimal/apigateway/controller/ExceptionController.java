@@ -244,7 +244,7 @@ public class ExceptionController {
 
     /*@ExceptionHandler(value = RouterException.class)
     public ResponseEntity<Object> handleRouterException(RouterException ex) throws JsonProcessingException {
-
+        ex.printStackTrace();
         log.info("Inside handleRouterException exception handler - " + ex.getMessage());
 
         RouterException exception = new RouterException();
@@ -264,7 +264,7 @@ public class ExceptionController {
 
     @ExceptionHandler(value = RuntimeException.class)
     public ResponseEntity<Object> handleRouterException(RuntimeException ex) throws JsonProcessingException {
-
+        ex.printStackTrace();
         log.info(" Inside handleRuntimeException - " + ex.getMessage());
 
         MicroserviceResponse response = new MicroserviceResponse();
