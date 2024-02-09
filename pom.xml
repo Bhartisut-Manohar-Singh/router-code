@@ -144,19 +144,6 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.bucket4j</groupId>-->
-<!--            <artifactId>bucket4j-core</artifactId>-->
-<!--            <version>8.7.1</version>-->
-<!--        </dependency>-->
-        <!-- https://mvnrepository.com/artifact/com.github.vladimir-bukhtoyarov/bucket4j-core -->
-<!--        <dependency>-->
-<!--            <groupId>com.github.vladimir-bukhtoyarov</groupId>-->
-<!--            <artifactId>bucket4j-core</artifactId>-->
-<!--            <version>7.6.0</version>-->
-<!--        </dependency>-->
-
-
 
         <dependency>
             <groupId>org.springframework.kafka</groupId>
@@ -169,24 +156,15 @@
             <artifactId>resilience4j-ratelimiter</artifactId>
             <version>1.7.1</version> <!-- Use the latest version available -->
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.bucket4j</groupId>-->
-<!--            <artifactId>bucket4j-core</artifactId>-->
-<!--            <version>8.7.1</version>-->
-<!--        </dependency>-->
 
         <!-- earlier=========================4.9.0 ================-->
         <dependency>
             <groupId>com.github.vladimir-bukhtoyarov</groupId>
             <artifactId>bucket4j-core</artifactId>
-            <version>7.6.0</version>
+            <version>6.0.0</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.bucket4j</groupId>-->
-<!--            <artifactId>bucket4j-core</artifactId>-->
-<!--            <version>8.7.1</version>-->
-<!--        </dependency>-->
+
 
 
     </dependencies>

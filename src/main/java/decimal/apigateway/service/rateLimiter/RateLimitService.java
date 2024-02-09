@@ -32,7 +32,7 @@ public class RateLimitService {
 
 
     public boolean allowRequest(String appId, String serviceName) throws IOException {
-        Bucket bucketForApp;
+        LockFreeBucket bucketForApp;
         Bucket bucketForService;
 
          // checks in redis if config is present
@@ -46,9 +46,7 @@ public class RateLimitService {
         {
             rateLimitAppEntity = rateLimitAppConfig.get().getRateLimitEntity();
             String b1 = getOrCreateBucket(appId, rateLimitAppEntity).getBucket();
-            bucketForApp = Bucket4j.fromString(str);
-
-
+            bucketForApp = objectMapper.convertValue(b1, LockFreeBucket.class);
 
 
             if (!consumeTokensForApp(bucketForApp, rateLimitAppConfig.get())) {
@@ -61,7 +59,7 @@ public class RateLimitService {
         if(rateLimitServiceConfig.isPresent()){
             rateLimitServiceEntity = rateLimitServiceConfig.get().getRateLimitEntity();
             String b2 = getOrCreateBucket(appId + "+" + serviceName, rateLimitServiceEntity).getBucket();
-            bucketForService = objectMapper.convertValue(b2,MyBucket.class);
+            bucketForService = objectMapper.convertValue(b2,Bucket.class);
 
             if (!consumeTokensForService(bucketForService,rateLimitServiceConfig.get())) {
                 return false;
@@ -76,6 +74,7 @@ public class RateLimitService {
 
 
     RateLimitEntity getOrCreateBucket(String id, RateLimitEntity rateLimitEntity){
+        //if bucket is present, return bucket or else, create bucket
         if(rateLimitEntity.getBucket()!=null)
             return rateLimitEntity;
         else{
@@ -120,16 +119,12 @@ public class RateLimitService {
         long capacity = rateLimitEntity.getNoOfAllowedHits();
         long duration = rateLimitEntity.getTime();
         TimeUnit timeUnit = rateLimitEntity.getUnit();
-        BucketConfiguration bucketConfiguration = Bucket4j.configurationBuilder()
-                .addLimit(Bandwidth.classic(capacity, Refill.intervally(capacity, Duration.ofMillis(timeUnit.toMillis(duration)))))
-                .buildConfiguration();
-        Bucket bucket = new LockFreeBucket(bucketConfiguration,TimeMeter.SYSTEM_MILLISECONDS);
-
+//        BucketConfiguration bucketConfiguration = Bucket4j.configurationBuilder()
+//                .addLimit(Bandwidth.classic(capacity, Refill.intervally(capacity, Duration.ofMillis(timeUnit.toMillis(duration)))))
+//                .buildConfiguration();
+////        Bucket bucket = new LockFreeBucket(bucketConfiguration,TimeMeter.SYSTEM_MILLISECONDS);
 //        Bucket bucket = Bucket4j.builder().addConfiguration(bucketConfiguration).build();
-
-
-            return  bucket;
-//        return Bucket.builder().addLimit(Bandwidth.classic(capacity, Refill.intervally(capacity, Duration.ofMillis(timeUnit.toMillis(duration))))).build();
+        return Bucket4j.builder().addLimit(Bandwidth.classic(capacity, Refill.intervally(capacity, Duration.ofMillis(timeUnit.toMillis(duration))))).build();
     }
 
 
