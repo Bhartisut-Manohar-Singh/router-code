@@ -7,8 +7,6 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
-import java.util.function.Supplier;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,6 +15,6 @@ import java.util.function.Supplier;
 public class RateLimitAppConfig{
     @Id
     String id;
-    RateLimitEntity rateLimitEntity;
+    BucketConfig bucketConfig;
 
 }

@@ -1,6 +1,5 @@
 package decimal.apigateway.entity;
 
-import io.github.bucket4j.Bucket;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,12 +11,12 @@ import java.util.concurrent.TimeUnit;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RateLimitEntity {
+public class BucketConfig {
     long time;
     TimeUnit unit;
     long noOfAllowedHits;
     String rateLimitLevel;
-    String bucket;
+    BucketState bucketState;
 
 
 

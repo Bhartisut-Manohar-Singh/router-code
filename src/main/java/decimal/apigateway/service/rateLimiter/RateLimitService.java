@@ -1,23 +1,15 @@
 package decimal.apigateway.service.rateLimiter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.entity.*;
+import decimal.apigateway.entity.BucketState;
 import decimal.apigateway.repository.RateLimitAppRepo;
 import decimal.apigateway.repository.RateLimitServiceRepo;
-import io.github.bucket4j.*;
-import io.github.bucket4j.local.LocalBucket;
-import io.github.bucket4j.local.LocalBucketBuilder;
-import io.github.bucket4j.local.LockFreeBucket;
-import io.github.bucket4j.local.SynchronizedBucket;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-import java.io.IOException;
-import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @Log
@@ -27,66 +19,71 @@ public class RateLimitService {
 
     @Autowired
     RateLimitAppRepo rateLimitAppRepo;
-    @Autowired
-    ObjectMapper objectMapper;
 
 
-    public boolean allowRequest(String appId, String serviceName) throws IOException {
-        LockFreeBucket bucketForApp;
-        Bucket bucketForService;
 
-         // checks in redis if config is present
+    public boolean allowRequest(String appId, String serviceName) {
+
+        BucketState bucketStateForApp;
+        BucketState bucketStateForService;
+
+        // checks in redis if config is present
         Optional<RateLimitAppConfig> rateLimitAppConfig = rateLimitAppRepo.findById(appId);
         Optional<RateLimitServiceConfig> rateLimitServiceConfig = rateLimitServiceRepo.findById(appId + "+" + serviceName);
-        RateLimitEntity rateLimitAppEntity;
-        RateLimitEntity rateLimitServiceEntity;
+        BucketConfig bucketConfigForApp;
+        BucketConfig customBucketForService;
 
 
-        if(rateLimitAppConfig.isPresent())
-        {
-            rateLimitAppEntity = rateLimitAppConfig.get().getRateLimitEntity();
-            String b1 = getOrCreateBucket(appId, rateLimitAppEntity).getBucket();
-            bucketForApp = objectMapper.convertValue(b1, LockFreeBucket.class);
+        if (rateLimitAppConfig.isPresent() && rateLimitAppConfig.get().getBucketConfig() != null) {
+                bucketConfigForApp = rateLimitAppConfig.get().getBucketConfig();
+                bucketConfigForApp = getOrCreateBucket(appId, bucketConfigForApp);
 
+                if (!consumeTokensForApp(bucketConfigForApp, rateLimitAppConfig.get())) {
+                    return false;
+                }
 
-            if (!consumeTokensForApp(bucketForApp, rateLimitAppConfig.get())) {
+            }else{
                 return false;
             }
 
-        }else{
-            return false;}
-
-        if(rateLimitServiceConfig.isPresent()){
-            rateLimitServiceEntity = rateLimitServiceConfig.get().getRateLimitEntity();
-            String b2 = getOrCreateBucket(appId + "+" + serviceName, rateLimitServiceEntity).getBucket();
-            bucketForService = objectMapper.convertValue(b2,Bucket.class);
-
-            if (!consumeTokensForService(bucketForService,rateLimitServiceConfig.get())) {
-                return false;
-            }
-
-        }else{
-            return false;}
-        // Both app and service checks passed
-        return true;
+//        if(rateLimitServiceConfig.isPresent()){
+//            rateLimitServiceEntity = rateLimitServiceConfig.get().getRateLimitEntity();
+//            String b2 = getOrCreateBucket(appId + "+" + serviceName, rateLimitServiceEntity).getBucket();
+//            bucketForService = objectMapper.convertValue(b2,Bucket.class);
+//
+//            if (!consumeTokensForService(bucketForService,rateLimitServiceConfig.get())) {
+//                return false;
+//            }
+//
+//        }else{
+//            return false;}
+            // Both app and service checks passed
+            return true;
+        }
     }
 
 
 
-    RateLimitEntity getOrCreateBucket(String id, RateLimitEntity rateLimitEntity){
+        BucketConfig getOrCreateBucket(String id, BucketConfig bucketConfig){
         //if bucket is present, return bucket or else, create bucket
-        if(rateLimitEntity.getBucket()!=null)
-            return rateLimitEntity;
+        if(bucketConfig.getBucketState()!=null)
+            return bucketConfig;
         else{
-            return createAndSetBucket(id,rateLimitEntity);
+            return createAndSetBucket(id,bucketConfig);
         }
     }
 
-    boolean consumeTokensForApp(Bucket bucket,RateLimitAppConfig rateLimitAppConfig){
-        if (bucket.tryConsume(1)) {
-            rateLimitAppConfig.getRateLimitEntity().setBucket(bucket.toString());
+
+
+    boolean consumeTokensForApp(BucketConfig bucketConfig,RateLimitAppConfig rateLimitAppConfig){
+        // if tokens are there, consume, also check refill
+        //check refill first(update refilll time and tokens) and update in repo
+        long availableTokens = bucketConfig.getBucketState().getAvailableTokens();
+        if (availableTokens > 0) {
+            bucketConfig.getBucketState().setAvailableTokens(--availableTokens);
+            rateLimitAppConfig.setBucketConfig(bucketConfig);
             rateLimitAppRepo.save(rateLimitAppConfig);
-            log.info("Tokens left are "+bucket.getAvailableTokens());
+            log.info("Tokens left are "+ availableTokens);
             return true;
         } else {
             log.info("No tokens left");
@@ -94,38 +91,32 @@ public class RateLimitService {
         }
     }
 
-    boolean consumeTokensForService(Bucket bucket,RateLimitServiceConfig rateLimitServiceConfig){
-        if (bucket.tryConsume(1)) {
-            rateLimitServiceConfig.getRateLimitEntity().setBucket(bucket.toString());
-            rateLimitServiceRepo.save(rateLimitServiceConfig);
-            log.info("Tokens left are "+bucket.getAvailableTokens());
-            log.info(bucket.toString());
-            return true;
-        } else {
-            log.info("No tokens left");
-            return false;
-        }
+//    boolean consumeTokensForService(Bucket bucket,RateLimitServiceConfig rateLimitServiceConfig){
+//        if (bucket.tryConsume(1)) {
+//            rateLimitServiceConfig.getRateLimitEntity().setBucket(bucket.toString());
+//            rateLimitServiceRepo.save(rateLimitServiceConfig);
+//            log.info("Tokens left are "+bucket.getAvailableTokens());
+//            log.info(bucket.toString());
+//            return true;
+//        } else {
+//            log.info("No tokens left");
+//            return false;
+//        }
+//    }
+
+
+    BucketConfig createAndSetBucket(String id, BucketConfig bucketConfig){
+        BucketState newState = createBucketState(bucketConfig);
+        bucketConfig.setBucketState(newState);
+        return bucketConfig;
     }
 
 
-    RateLimitEntity createAndSetBucket(String id, RateLimitEntity rateLimitEntity){
-        Bucket newbucket = createBucket(rateLimitEntity);
-        rateLimitEntity.setBucket(newbucket.toString());
-        return rateLimitEntity;
-    }
-
-
-    Bucket createBucket(RateLimitEntity rateLimitEntity) {
-        long capacity = rateLimitEntity.getNoOfAllowedHits();
-        long duration = rateLimitEntity.getTime();
-        TimeUnit timeUnit = rateLimitEntity.getUnit();
-//        BucketConfiguration bucketConfiguration = Bucket4j.configurationBuilder()
-//                .addLimit(Bandwidth.classic(capacity, Refill.intervally(capacity, Duration.ofMillis(timeUnit.toMillis(duration)))))
-//                .buildConfiguration();
-////        Bucket bucket = new LockFreeBucket(bucketConfiguration,TimeMeter.SYSTEM_MILLISECONDS);
-//        Bucket bucket = Bucket4j.builder().addConfiguration(bucketConfiguration).build();
-        return Bucket4j.builder().addLimit(Bandwidth.classic(capacity, Refill.intervally(capacity, Duration.ofMillis(timeUnit.toMillis(duration))))).build();
+    BucketState createBucketState(BucketConfig bucketConfig) {
+        BucketState createdState = new BucketState(bucketConfig.getNoOfAllowedHits(),null);
+        return createdState;
     }
 
 
 }
+
