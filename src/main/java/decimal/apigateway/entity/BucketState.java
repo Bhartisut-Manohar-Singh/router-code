@@ -14,6 +14,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class BucketState {
     long availableTokens;
-    LocalDateTime lastRefillTime;
+    long lastRefillTime;
 
 }
