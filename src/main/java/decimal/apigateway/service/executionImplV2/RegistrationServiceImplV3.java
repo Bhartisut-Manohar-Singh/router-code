@@ -76,7 +76,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             String clientId = httpHeaders.get(Constant.ORG_ID) + Constant.TILD_SPLITTER + httpHeaders.get(Constant.APP_ID);
             httpHeaders.put(Constant.CLIENT_ID, clientId);
             log.info("------------client id------------" + clientId);
-            List<String> tokenDetails = fetchTokenDetails(httpHeaders);
+//            List<String> tokenDetails = fetchTokenDetails(httpHeaders);
             httpHeaders.put(Constant.LOGIN_ID, tokenDetails.get(0));
             httpHeaders.put(Constant.CLIENT_SECRET, tokenDetails.get(1));
             httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
