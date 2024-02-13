@@ -2,7 +2,6 @@ package decimal.apigateway.controller;
 
 import decimal.apigateway.entity.*;
 import decimal.apigateway.repository.RateLimitAppRepo;
-import decimal.apigateway.repository.RateLimitByIpRepository;
 import decimal.apigateway.repository.RateLimitServiceRepo;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/rate-limit2")
 @Log
 public class RateLimterController2 {
-    @Autowired
-    RateLimitByIpRepository rateLimitByIpRepository;
-
     @Autowired
     RateLimitAppRepo rateLimitAppRepo;
 

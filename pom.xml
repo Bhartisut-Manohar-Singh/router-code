@@ -157,15 +157,6 @@
             <version>1.7.1</version> <!-- Use the latest version available -->
         </dependency>
 
-        <!-- earlier=========================4.9.0 ================-->
-        <dependency>
-            <groupId>com.github.vladimir-bukhtoyarov</groupId>
-            <artifactId>bucket4j-core</artifactId>
-            <version>6.0.0</version>
-        </dependency>
-
-
-
 
     </dependencies>
 
