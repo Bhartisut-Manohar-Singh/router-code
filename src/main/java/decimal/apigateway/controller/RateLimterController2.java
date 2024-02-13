@@ -1,5 +1,6 @@
 package decimal.apigateway.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.entity.*;
 import decimal.apigateway.repository.RateLimitAppRepo;
 import decimal.apigateway.repository.RateLimitServiceRepo;
@@ -20,30 +21,25 @@ public class RateLimterController2 {
     @Autowired
     RateLimitServiceRepo rateLimitServiceRepo;
 
+    @Autowired
+    ObjectMapper objectMapper;
+
 
     @PostMapping
     private String createConfig(@RequestBody RateLimitConfigDto2 rateLimitConfigDto2) {
-        String id = rateLimitConfigDto2.getAppId();
-        RateLimitAppConfig rateLimitAppConfig = new RateLimitAppConfig(id, rateLimitConfigDto2.getAppRateLimitConfig());
-        rateLimitAppRepo.save(rateLimitAppConfig);
+        if (rateLimitConfigDto2!=null){
+            String appId = rateLimitConfigDto2.getAppId();
+            String serviceName = rateLimitConfigDto2.getServiceName();
+            RateLimitAppConfig rateLimitAppConfig = new RateLimitAppConfig("rl~"+appId, rateLimitConfigDto2.getAppRateLimitConfig());
+            rateLimitAppRepo.save(rateLimitAppConfig);
 
-        id = rateLimitConfigDto2.getAppId() + "+" + rateLimitConfigDto2.getServiceName();
-        RateLimitServiceConfig rateLimitServiceConfig = new RateLimitServiceConfig(id, rateLimitConfigDto2.getServiceRateLimitConfig());
-
-        rateLimitServiceRepo.save(rateLimitServiceConfig);
-        return "config created";
-//        if(rateLimitConfigDto2.getSourceIpRateLimitConfig()!=null){
-//            RateLimitIpConfig rateLimitIpConfig = new RateLimitIpConfig();
-//            rateLimitIpConfig.setSourceIp(rateLimitConfigDto2.getSourceIp());
-//            rateLimitIpConfig.setRateLimitEntity(rateLimitConfigDto2.getSourceIpRateLimitConfig());
-//            rateLimitByIpRepository.save(rateLimitIpConfig);
-//            log.info("---------- config created for ip ----------");
-//            return "config created for ip";
-//
-//        } else{
-//            log.info("-------- config not created as ip not found --------");
-//            return "config not created as ip not found";
-//        }
-//    }
+            RateLimitServiceConfig rateLimitServiceConfig = new RateLimitServiceConfig("rl~" + appId + "~" + serviceName, rateLimitConfigDto2.getServiceRateLimitConfig());
+            rateLimitServiceRepo.save(rateLimitServiceConfig);
+            return "config created";
+        }else{
+            log.info("-------- config not created --------");
+            return "config not created";
+        }
     }
+
 }

@@ -27,19 +27,16 @@ public class RateLimitService {
 
     public boolean allowRequest(String appId, String serviceName) {
 
-        BucketState bucketStateForApp;
-        BucketState bucketStateForService;
-
         // checks in redis if config is present
-        Optional<RateLimitAppConfig> rateLimitAppConfig = rateLimitAppRepo.findById(appId);
-        Optional<RateLimitServiceConfig> rateLimitServiceConfig = rateLimitServiceRepo.findById(appId + "+" + serviceName);
+        Optional<RateLimitAppConfig> rateLimitAppConfig = rateLimitAppRepo.findById("rl~" + appId);
+        Optional<RateLimitServiceConfig> rateLimitServiceConfig = rateLimitServiceRepo.findById("rl~" + appId + "~" + serviceName);
         BucketConfig bucketConfigForApp;
         BucketConfig bucketConfigForService;
 
 
         if (rateLimitAppConfig.isPresent() && rateLimitAppConfig.get().getBucketConfig() != null) {
                 bucketConfigForApp = rateLimitAppConfig.get().getBucketConfig();
-                bucketConfigForApp = getOrCreateBucket(appId, bucketConfigForApp);
+                bucketConfigForApp = getOrCreateBucket("rl~" + appId, bucketConfigForApp);
 
                 if (!consumeTokensForApp(bucketConfigForApp, rateLimitAppConfig.get())) {
                     return false;
@@ -51,7 +48,7 @@ public class RateLimitService {
 
         if(rateLimitServiceConfig.isPresent() && rateLimitServiceConfig.get().getBucketConfig() != null){
             bucketConfigForService = rateLimitServiceConfig.get().getBucketConfig();
-            bucketConfigForService = getOrCreateBucket(appId + "+" + serviceName, bucketConfigForService);
+            bucketConfigForService = getOrCreateBucket("rl~" + appId + "~" + serviceName, bucketConfigForService);
 
             if (!consumeTokensForService(bucketConfigForService,rateLimitServiceConfig.get())) {
                 return false;
@@ -72,7 +69,7 @@ public class RateLimitService {
         if(bucketConfig.getBucketState()!=null)
             return bucketConfig;
         else{
-            return createAndSetBucket(id,bucketConfig);
+            return createAndSetBucket(bucketConfig);
         }
     }
 
@@ -93,7 +90,7 @@ public class RateLimitService {
             bucketConfig.getBucketState().setAvailableTokens(--availableTokens);
             rateLimitAppConfig.setBucketConfig(bucketConfig);
             rateLimitAppRepo.save(rateLimitAppConfig);
-            log.info("Tokens left are "+ availableTokens);
+            log.info("Tokens left for app are --------- "+ availableTokens);
             return true;
         } else {
             log.info("No tokens left");
@@ -116,7 +113,7 @@ public class RateLimitService {
             bucketConfig.getBucketState().setAvailableTokens(--availableTokens);
             rateLimitServiceConfig.setBucketConfig(bucketConfig);
             rateLimitServiceRepo.save(rateLimitServiceConfig);
-            log.info("Tokens left are "+ availableTokens);
+            log.info("Tokens left for service are --------------------- "+ availableTokens);
             return true;
         } else {
             log.info("No tokens left");
@@ -125,7 +122,7 @@ public class RateLimitService {
     }
 
 
-    BucketConfig createAndSetBucket(String id, BucketConfig bucketConfig){
+    BucketConfig createAndSetBucket(BucketConfig bucketConfig){
         BucketState newState = createBucketState(bucketConfig);
         bucketConfig.setBucketState(newState);
         return bucketConfig;
