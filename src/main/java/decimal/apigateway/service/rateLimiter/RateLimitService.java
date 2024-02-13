@@ -26,8 +26,8 @@ public class RateLimitService {
     @Autowired
     RateLimitAppRepo rateLimitAppRepo;
 
-    @Autowired
-    Helper helper;
+
+    Helper helper = new Helper();
 
 
 
@@ -116,7 +116,7 @@ public class RateLimitService {
         LocalDateTime endTime = lastRefill.plus(duration);
         if(currentTime.isAfter(endTime)) {
             //refill and update last refill time
-            bucketConfig.getBucketState().setAvailableTokens(bucketConfig.getTime());
+            bucketConfig.getBucketState().setAvailableTokens(bucketConfig.getNoOfAllowedHits());
             bucketConfig.getBucketState().setLastRefillTime(LocalDateTime.now());
             rateLimitServiceConfig.setBucketConfig(bucketConfig);
             rateLimitServiceRepo.save(rateLimitServiceConfig);
