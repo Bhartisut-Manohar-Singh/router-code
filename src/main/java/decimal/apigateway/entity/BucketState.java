@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,6 +14,6 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 public class BucketState {
     long availableTokens;
-    Timestamp lastRefillTime;
+    LocalDateTime lastRefillTime;
 
 }

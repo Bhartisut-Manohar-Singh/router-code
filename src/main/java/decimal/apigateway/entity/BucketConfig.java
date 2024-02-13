@@ -13,11 +13,8 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 public class BucketConfig {
     long time;
-    TimeUnit unit;
+    String unit;
     long noOfAllowedHits;
     String rateLimitLevel;
     BucketState bucketState;
-
-
-
 }

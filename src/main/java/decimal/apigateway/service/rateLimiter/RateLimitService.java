@@ -2,6 +2,7 @@ package decimal.apigateway.service.rateLimiter;
 
 import decimal.apigateway.entity.*;
 import decimal.apigateway.entity.BucketState;
+import decimal.apigateway.helper.Helper;
 import decimal.apigateway.repository.RateLimitAppRepo;
 import decimal.apigateway.repository.RateLimitServiceRepo;
 import lombok.extern.java.Log;
@@ -10,7 +11,9 @@ import org.springframework.stereotype.Service;
 
 
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +25,9 @@ public class RateLimitService {
 
     @Autowired
     RateLimitAppRepo rateLimitAppRepo;
+
+    @Autowired
+    Helper helper;
 
 
 
@@ -76,12 +82,16 @@ public class RateLimitService {
 
 
     boolean consumeTokensForApp(BucketConfig bucketConfig,RateLimitAppConfig rateLimitAppConfig){
-        TimeUnit unit = bucketConfig.getUnit();
-        long timeInMilliseconds = unit.toMillis(bucketConfig.getTime());
-        if(bucketConfig.getBucketState().getLastRefillTime().getTime()+timeInMilliseconds> System.currentTimeMillis()) {
+        Duration duration = helper.findDuration(bucketConfig.getTime(),bucketConfig.getUnit());
+        LocalDateTime lastRefill = bucketConfig.getBucketState().getLastRefillTime();
+
+        LocalDateTime currentTime = LocalDateTime.now();
+        LocalDateTime endTime = lastRefill.plus(duration);
+
+        if(currentTime.isAfter(endTime)) {
             //refill and update last refill time
-            bucketConfig.getBucketState().setAvailableTokens(bucketConfig.getTime());
-            bucketConfig.getBucketState().setLastRefillTime(Timestamp.valueOf(LocalDateTime.now()));
+            bucketConfig.getBucketState().setAvailableTokens(bucketConfig.getNoOfAllowedHits());
+            bucketConfig.getBucketState().setLastRefillTime(LocalDateTime.now());
             rateLimitAppConfig.setBucketConfig(bucketConfig);
             rateLimitAppRepo.save(rateLimitAppConfig);
         }
@@ -99,12 +109,15 @@ public class RateLimitService {
     }
 
     boolean consumeTokensForService(BucketConfig bucketConfig,RateLimitServiceConfig rateLimitServiceConfig){
-        TimeUnit unit = bucketConfig.getUnit();
-        long timeInMilliseconds = unit.toMillis(bucketConfig.getTime());
-        if(bucketConfig.getBucketState().getLastRefillTime().getTime()+timeInMilliseconds> System.currentTimeMillis()) {
+        Duration duration = helper.findDuration(bucketConfig.getTime(),bucketConfig.getUnit());
+        LocalDateTime lastRefill = bucketConfig.getBucketState().getLastRefillTime();
+
+        LocalDateTime currentTime = LocalDateTime.now();
+        LocalDateTime endTime = lastRefill.plus(duration);
+        if(currentTime.isAfter(endTime)) {
             //refill and update last refill time
             bucketConfig.getBucketState().setAvailableTokens(bucketConfig.getTime());
-            bucketConfig.getBucketState().setLastRefillTime(Timestamp.valueOf(LocalDateTime.now()));
+            bucketConfig.getBucketState().setLastRefillTime(LocalDateTime.now());
             rateLimitServiceConfig.setBucketConfig(bucketConfig);
             rateLimitServiceRepo.save(rateLimitServiceConfig);
         }
@@ -130,7 +143,7 @@ public class RateLimitService {
 
 
     BucketState createBucketState(BucketConfig bucketConfig) {
-        BucketState createdState = new BucketState(bucketConfig.getNoOfAllowedHits(),null);
+        BucketState createdState = new BucketState(bucketConfig.getNoOfAllowedHits(),LocalDateTime.now());
         return createdState;
     }
 
