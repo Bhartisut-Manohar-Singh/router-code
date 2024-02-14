@@ -51,9 +51,7 @@ public class RateLimiterAspect2 {
 
         String appId = clientId.split(Constant.TILD_SPLITTER)[1];
 
-
-
-        Boolean isRateLimitAppSuccessful = rateLimitService.allowRequest(appId,serviceName);
+        rateLimitService.allowRequest(appId,serviceName);
 
 
 

@@ -2,11 +2,14 @@ package decimal.apigateway.service.rateLimiter;
 
 import decimal.apigateway.entity.*;
 import decimal.apigateway.entity.BucketState;
+import decimal.apigateway.exception.RateLimitException;
 import decimal.apigateway.helper.Helper;
 import decimal.apigateway.repository.RateLimitAppRepo;
 import decimal.apigateway.repository.RateLimitServiceRepo;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
@@ -30,7 +33,7 @@ public class RateLimitService {
 
 
 
-    public boolean allowRequest(String appId, String serviceName) {
+    public Boolean allowRequest(String appId, String serviceName) {
 
         // checks in redis if config is present
         Optional<RateLimitAppConfig> rateLimitAppConfig = rateLimitAppRepo.findById("rl~" + appId);
@@ -44,11 +47,11 @@ public class RateLimitService {
                 bucketConfigForApp = getOrCreateBucket("rl~" + appId, bucketConfigForApp);
 
                 if (!consumeTokensForApp(bucketConfigForApp, rateLimitAppConfig.get())) {
-                    return false;
+                    throw new RateLimitException("No tokens left for the app. Please try again later.",HttpStatus.TOO_MANY_REQUESTS);
                 }
 
             }else{
-                return false;
+                throw new RateLimitException(" No Configuration present in redis for this app. ", HttpStatus.NOT_FOUND);
             }
 
         if(rateLimitServiceConfig.isPresent() && rateLimitServiceConfig.get().getBucketConfig() != null){
@@ -56,11 +59,11 @@ public class RateLimitService {
             bucketConfigForService = getOrCreateBucket("rl~" + appId + "~" + serviceName, bucketConfigForService);
 
             if (!consumeTokensForService(bucketConfigForService,rateLimitServiceConfig.get())) {
-                return false;
+                throw new RateLimitException("No tokens left for the service. Please try again later.", HttpStatus.TOO_MANY_REQUESTS);
             }
 
         }else{
-            return false;}
+            throw new RateLimitException(" No Configuration present in redis for this service. ", HttpStatus.NOT_FOUND);}
             // Both app and service checks passed
             return true;
         }
@@ -68,7 +71,7 @@ public class RateLimitService {
 
 
         BucketConfig getOrCreateBucket(String id, BucketConfig bucketConfig){
-        //if bucket is present, return bucket or else, create bucket
+        //if bucket is present, return bucket or else, create bucket state
         if(bucketConfig.getBucketState()!=null)
             return bucketConfig;
         else{
@@ -83,8 +86,7 @@ public class RateLimitService {
         long lastRefill = bucketConfig.getBucketState().getLastRefillTime();
         LocalDateTime convertedLastRefill = LocalDateTime.ofInstant(
                 Instant.ofEpochMilli(lastRefill),
-                ZoneId.systemDefault()
-        );
+                ZoneId.systemDefault());
 
         LocalDateTime currentTime = LocalDateTime.now();
         LocalDateTime endTime = convertedLastRefill.plus(duration);
