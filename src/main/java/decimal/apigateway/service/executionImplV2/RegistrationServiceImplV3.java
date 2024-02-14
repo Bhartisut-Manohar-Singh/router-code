@@ -71,8 +71,18 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
     @Override
     public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException, RouterException {
         try {
+            httpHeaders.put("servicename", "REGISTERAPP");
+
+            auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders);
 
             log.info("Executing Step 1 to validate register request....."+httpHeaders.toString());
+
+            if (httpHeaders.get(CLIENT_SECRET) == null || httpHeaders.get(CLIENT_SECRET).isEmpty()) {
+                throw new RouterException(RouterResponseCode.INVALID_CLIENT_SECRET, (Exception) null, ROUTER_ERROR_TYPE_VALIDATION, CLIENT_SECRET_ERROR);
+            }
+            if (httpHeaders.get(Constant.ORG_ID)==null || httpHeaders.get(Constant.APP_ID)==null ){
+                throw new RouterException(RouterResponseCode.ORGID_APPID_ERROR, (Exception) null, ROUTER_ERROR_TYPE_VALIDATION, INVALID_ORG_APP);
+            }
 
             String clientId = httpHeaders.get(Constant.ORG_ID) + Constant.TILD_SPLITTER + httpHeaders.get(Constant.APP_ID);
             httpHeaders.put(Constant.CLIENT_ID, clientId);
@@ -80,9 +90,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
             httpHeaders.put(Headers.servicename.name(), "REGISTERAPP");
 
-            if (httpHeaders.get(CLIENT_SECRET) == null || httpHeaders.get(CLIENT_SECRET).isEmpty()) {
-                throw new RouterException(RouterResponseCode.INVALID_CLIENT_SECRET, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, CLIENT_SECRET_ERROR);
-            }
+
 
             ObjectNode jsonNodes;
 
