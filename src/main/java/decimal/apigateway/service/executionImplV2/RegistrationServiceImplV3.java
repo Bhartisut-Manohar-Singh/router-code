@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.ResponseOperations;
+import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
@@ -79,6 +80,10 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
             httpHeaders.put(Headers.servicename.name(), "REGISTERAPP");
 
+            if (httpHeaders.get(CLIENT_SECRET) == null || httpHeaders.get(CLIENT_SECRET).isEmpty()){
+                throw new RouterException(RouterResponseCode.INVALID_CLIENT_SECRET, CLIENT_SECRET_ERROR, "Client secret not found", new ResponseOutput(FAILURE_STATUS,CLIENT_SECRET_ERROR),CLIENT_SECRET_ERROR,CLIENT_SECRET_ERROR);
+            }
+
             ObjectNode jsonNodes;
 
             jsonNodes = objectMapper.convertValue(requestValidatorV2.validatePublicRegistrationRequest(request, httpHeaders), ObjectNode.class);
@@ -110,10 +115,10 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
             node.put("Authorization", "Bearer " + jwtToken);
 
-            //throw new IOException("failed message");
             return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
         } catch (RouterException routerException) {
-            log.info("error Hint ---------" + routerException.getErrorHint());
+            log.info("error Hint ---------" + routerException.getErrorMessage());
+            log.info(" router ex "+ routerException.getResponse());
             throw routerException;
         }catch (IOException exception){
             throw exception;
