@@ -72,7 +72,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
     public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException, RouterException {
         try {
 
-            log.info("Executing Step 1 to validate register request....." + httpHeaders.toString());
+            log.info("Executing Step 1 to validate register request....."+httpHeaders.toString());
 
             String clientId = httpHeaders.get(Constant.ORG_ID) + Constant.TILD_SPLITTER + httpHeaders.get(Constant.APP_ID);
             httpHeaders.put(Constant.CLIENT_ID, clientId);
@@ -118,9 +118,9 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
             return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
         } catch (RouterException routerException) {
             log.info("error Hint ---------" + routerException.getErrorMessage());
-            log.info(" router ex " + routerException.getResponse());
+            log.info(" router ex "+ routerException.getResponse());
             throw routerException;
-        } catch (IOException exception) {
+        }catch (IOException exception){
             throw exception;
         }
     }
@@ -148,7 +148,7 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
         log.info("decoded token = " + decodedToken);
 
         List<String> token = RouterOperations.getStringArray(decodedToken, Constant.COLON);
-        log.info("---------------token -----------" + token + "-token size-" + token.size());
+        log.info("---------------token -----------" + token+ "-token size-" + token.size());
         //token format - loginId:clientsecret
         if (token.size() != 2) {
             throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
