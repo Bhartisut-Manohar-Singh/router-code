@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.entity.*;
 import decimal.apigateway.entity.BucketState;
 import decimal.apigateway.exception.RouterException;
-import decimal.apigateway.helper.Helper;
 import decimal.apigateway.repository.RateLimitRepo;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +42,6 @@ public class RateLimitService {
                 throw new RouterException(INVALID_REQUEST_500," No Configuration present in redis for this app. ",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_500\",\"message\" :\" No Configuration present in redis for this app. \"}"));
             }
 
-        //check
         if (rateLimitServiceConfig.isEmpty())
             return true;
 
@@ -77,15 +75,8 @@ public class RateLimitService {
 
 
     boolean consumeTokens(RateLimitConfig rateLimitConfig){
-//        Duration duration = helper.findDuration(rateLimitConfig.getBucketConfig().getTime(),rateLimitConfig.getBucketConfig().getUnit());
-
         long nextRefill = rateLimitConfig.getBucketState().getNextRefillTime();
-//        LocalDateTime convertedNextRefill = LocalDateTime.ofInstant(
-//                Instant.ofEpochMilli(nextRefill),
-//                ZoneId.systemDefault());
         long currentTime = System.currentTimeMillis();
-
-//        LocalDateTime endTime = convertedLastRefill.plus(duration);
 
         if(currentTime>nextRefill) {
             //refill and update last refill time
@@ -107,13 +98,12 @@ public class RateLimitService {
     }
 
     private long findNextRefill(RateLimitConfig rateLimitConfig) {
+
         long time = rateLimitConfig.getBucketConfig().getTime();
         String unitString = rateLimitConfig.getBucketConfig().getUnit();
         TimeUnit unit = TimeUnit.valueOf(unitString.toUpperCase());
-        //remove this
+
         long currentTime = System.currentTimeMillis();
-        log.info("--------------- initial time -----------"+currentTime);
-        log.info("------------next refill---"+currentTime + unit.toMillis(time));
         return currentTime + unit.toMillis(time);
     }
 }
