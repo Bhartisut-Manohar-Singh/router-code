@@ -178,6 +178,9 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
+
+        publicJwtTokenValidator.validate(request,httpHeaders);
+
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
         JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
         Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"),HashMap.class);
