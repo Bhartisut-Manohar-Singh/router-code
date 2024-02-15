@@ -1,5 +1,6 @@
 package decimal.apigateway.service.rateLimiter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.entity.*;
 import decimal.apigateway.entity.BucketState;
 import decimal.apigateway.exception.RouterException;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -20,11 +22,11 @@ import static decimal.apigateway.commons.Constant.*;
 public class RateLimitService {
     @Autowired
     RateLimitRepo rateLimitRepo;
-    Helper helper = new Helper();
+    ObjectMapper objectMapper = new ObjectMapper();
 
 
 
-    public Boolean allowRequest(String appId, String serviceName) throws RouterException {
+    public Boolean allowRequest(String appId, String serviceName) throws RouterException, IOException {
 
         // checks in redis if config is present
         Optional<RateLimitConfig> rateLimitAppConfig = rateLimitRepo.findById(appId);
@@ -34,11 +36,11 @@ public class RateLimitService {
                 getOrCreateBucketState(rateLimitAppConfig.get());
 
                 if (!consumeTokens(rateLimitAppConfig.get())) {
-                    throw new RouterException(TOO_MANY_REQUESTS_429, "No tokens left for the app. Please try again later.", null);
+                    throw new RouterException(TOO_MANY_REQUESTS_429,"No tokens left for this app. Please try again later.",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"TOO_MANY_REQUESTS_429\",\"message\" :\"No tokens left for this app. Please try again later.\"}"));
                 }
 
             }else{
-                throw new RouterException(INVALID_REQUEST_500, " No Configuration present in redis for this app. ", null);
+                throw new RouterException(INVALID_REQUEST_500," No Configuration present in redis for this app. ",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_500\",\"message\" :\" No Configuration present in redis for this app. \"}"));
             }
 
         //check
@@ -49,11 +51,12 @@ public class RateLimitService {
             getOrCreateBucketState(rateLimitServiceConfig.get());
 
             if (!consumeTokens(rateLimitServiceConfig.get())) {
-                throw new RouterException(TOO_MANY_REQUESTS_429, "No tokens left for the service. Please try again later.", null);
+                throw new RouterException(TOO_MANY_REQUESTS_429,"No tokens left for this service. Please try again later.",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"TOO_MANY_REQUESTS_429\",\"message\" :\"No tokens left for this service. Please try again later.\"}"));
             }
 
         }else{
-            throw new RouterException(INVALID_REQUEST_500, " No Configuration present in redis for this service. ", null);}
+            throw new RouterException(INVALID_REQUEST_500," No Configuration present in redis for this service. ",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_500\",\"message\" :\" No Configuration present in redis for this service. \"}"));
+        }
             // Both app and service checks passed
             return true;
         }
@@ -107,7 +110,11 @@ public class RateLimitService {
         long time = rateLimitConfig.getBucketConfig().getTime();
         String unitString = rateLimitConfig.getBucketConfig().getUnit();
         TimeUnit unit = TimeUnit.valueOf(unitString.toUpperCase());
-        return System.currentTimeMillis() + unit.toMillis(time);
+        //remove this
+        long currentTime = System.currentTimeMillis();
+        log.info("--------------- initial time -----------"+currentTime);
+        log.info("------------next refill---"+currentTime + unit.toMillis(time));
+        return currentTime + unit.toMillis(time);
     }
 }
 
