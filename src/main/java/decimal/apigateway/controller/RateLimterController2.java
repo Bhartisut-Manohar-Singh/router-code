@@ -15,10 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Log
 public class RateLimterController2 {
     @Autowired
-    RateLimitRepo rateLimitAppRepo;
-
-    @Autowired
-    RateLimitServiceRepo rateLimitServiceRepo;
+    RateLimitRepo rateLimitRepo;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -29,11 +26,12 @@ public class RateLimterController2 {
         if (rateLimitConfigDto2!=null){
             String appId = rateLimitConfigDto2.getAppId();
             String serviceName = rateLimitConfigDto2.getServiceName();
-            RateLimitAppConfig rateLimitAppConfig = new RateLimitAppConfig(appId, rateLimitConfigDto2.getAppRateLimitConfig());
-            rateLimitAppRepo.save(rateLimitAppConfig);
 
-            RateLimitServiceConfig rateLimitServiceConfig = new RateLimitServiceConfig(appId + "+" + serviceName, rateLimitConfigDto2.getServiceRateLimitConfig());
-            rateLimitServiceRepo.save(rateLimitServiceConfig);
+            RateLimitConfig rateLimitAppConfig = new RateLimitConfig(appId,rateLimitConfigDto2.getAppBucketConfig(),null);
+            rateLimitRepo.save(rateLimitAppConfig);
+
+            RateLimitConfig rateLimitServiceConfig = new RateLimitConfig(appId+"+"+serviceName,rateLimitConfigDto2.getServiceBucketConfig(),null);
+            rateLimitRepo.save(rateLimitServiceConfig);
             return "config created";
         }else{
             log.info("-------- config not created --------");

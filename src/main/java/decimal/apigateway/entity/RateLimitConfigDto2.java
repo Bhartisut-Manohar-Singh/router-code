@@ -9,7 +9,6 @@ public class RateLimitConfigDto2 {
     String orgId;
     String appId;
     String serviceName;
-    boolean isRateLimiterEnabled;
-    BucketConfig appRateLimitConfig;
-    BucketConfig serviceRateLimitConfig;
+    BucketConfig appBucketConfig;
+    BucketConfig serviceBucketConfig;
 }

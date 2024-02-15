@@ -23,6 +23,7 @@ public class Constant {
     public static final String JSON = "JSON";
 
     public static final String INVALID_REQUEST_500 = "INVALID_REQUEST_500";
+    public static final String TOO_MANY_REQUESTS_429 = "TOO_MANY_REQUESTS_429";
     public static final String IS_PAYLOAD_ENCRYPTED = "ispayloadencrypted";
 
     public static final String CLIENT_SECRET = "clientsecret";
