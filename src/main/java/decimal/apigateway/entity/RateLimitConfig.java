@@ -11,9 +11,10 @@ import org.springframework.data.redis.core.RedisHash;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@RedisHash("RATE_LIMITER_SERVICE")
-public class RateLimitServiceConfig {
+@RedisHash("RATE_LIMITER_CONFIG")
+public class RateLimitConfig{
     @Id
     String id;
     BucketConfig bucketConfig;
+    BucketState bucketState;
 }

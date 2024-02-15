@@ -1,10 +1,10 @@
 package decimal.apigateway.repository;
 
-import decimal.apigateway.entity.RateLimitAppConfig;
+import decimal.apigateway.entity.RateLimitConfig;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface RateLimitAppRepo extends CrudRepository<RateLimitAppConfig, String> {
+public interface RateLimitRepo extends CrudRepository<RateLimitConfig, String> {
 
 }

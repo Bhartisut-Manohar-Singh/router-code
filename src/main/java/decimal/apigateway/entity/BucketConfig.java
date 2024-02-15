@@ -16,5 +16,4 @@ public class BucketConfig {
     String unit;
     long noOfAllowedHits;
     String rateLimitLevel;
-    BucketState bucketState;
 }

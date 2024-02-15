@@ -4,12 +4,10 @@ import decimal.apigateway.entity.*;
 import decimal.apigateway.entity.BucketState;
 import decimal.apigateway.exception.RateLimitException;
 import decimal.apigateway.helper.Helper;
-import decimal.apigateway.repository.RateLimitAppRepo;
-import decimal.apigateway.repository.RateLimitServiceRepo;
+import decimal.apigateway.repository.RateLimitRepo;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
@@ -23,12 +21,7 @@ import java.util.Optional;
 @Log
 public class RateLimitService {
     @Autowired
-    RateLimitServiceRepo rateLimitServiceRepo;
-
-    @Autowired
-    RateLimitAppRepo rateLimitAppRepo;
-
-
+    RateLimitRepo rateLimitRepo;
     Helper helper = new Helper();
 
 
@@ -36,17 +29,15 @@ public class RateLimitService {
     public Boolean allowRequest(String appId, String serviceName) {
 
         // checks in redis if config is present
-        Optional<RateLimitAppConfig> rateLimitAppConfig = rateLimitAppRepo.findById("rl~" + appId);
-        Optional<RateLimitServiceConfig> rateLimitServiceConfig = rateLimitServiceRepo.findById("rl~" + appId + "~" + serviceName);
-        BucketConfig bucketConfigForApp;
-        BucketConfig bucketConfigForService;
+        Optional<RateLimitConfig> rateLimitAppConfig = rateLimitRepo.findById(appId);
+        Optional<RateLimitConfig> rateLimitServiceConfig = rateLimitRepo.findById(appId + "+" + serviceName);
 
 
-        if (rateLimitAppConfig.isPresent() && rateLimitAppConfig.get().getBucketConfig() != null) {
-                bucketConfigForApp = rateLimitAppConfig.get().getBucketConfig();
-                bucketConfigForApp = getOrCreateBucket("rl~" + appId, bucketConfigForApp);
+        if (rateLimitAppConfig.isPresent() && rateLimitAppConfig.get().getBucketConfig()!= null) {
+            //check if ratelimitconfig is updated
+                getOrCreateBucketState(rateLimitAppConfig.get());
 
-                if (!consumeTokensForApp(bucketConfigForApp, rateLimitAppConfig.get())) {
+                if (!consumeTokens(rateLimitAppConfig.get())) {
                     throw new RateLimitException("No tokens left for the app. Please try again later.",HttpStatus.TOO_MANY_REQUESTS);
                 }
 
@@ -55,10 +46,9 @@ public class RateLimitService {
             }
 
         if(rateLimitServiceConfig.isPresent() && rateLimitServiceConfig.get().getBucketConfig() != null){
-            bucketConfigForService = rateLimitServiceConfig.get().getBucketConfig();
-            bucketConfigForService = getOrCreateBucket("rl~" + appId + "~" + serviceName, bucketConfigForService);
+            getOrCreateBucketState(rateLimitServiceConfig.get());
 
-            if (!consumeTokensForService(bucketConfigForService,rateLimitServiceConfig.get())) {
+            if (!consumeTokens(rateLimitServiceConfig.get())) {
                 throw new RateLimitException("No tokens left for the service. Please try again later.", HttpStatus.TOO_MANY_REQUESTS);
             }
 
@@ -70,20 +60,20 @@ public class RateLimitService {
 
 
 
-        BucketConfig getOrCreateBucket(String id, BucketConfig bucketConfig){
-        //if bucket is present, return bucket or else, create bucket state
-        if(bucketConfig.getBucketState()!=null)
-            return bucketConfig;
-        else{
-            return createAndSetBucket(bucketConfig);
+        RateLimitConfig getOrCreateBucketState(RateLimitConfig rateLimitConfig){
+        //if bucket state is present, return bucket or else, create bucket state
+        if(rateLimitConfig.getBucketState()==null){
+            BucketState newState = new BucketState(rateLimitConfig.getBucketConfig().getNoOfAllowedHits(),System.currentTimeMillis());
+            rateLimitConfig.setBucketState(newState);
         }
+        return rateLimitConfig;
     }
 
 
 
-    boolean consumeTokensForApp(BucketConfig bucketConfig,RateLimitAppConfig rateLimitAppConfig){
-        Duration duration = helper.findDuration(bucketConfig.getTime(),bucketConfig.getUnit());
-        long lastRefill = bucketConfig.getBucketState().getLastRefillTime();
+    boolean consumeTokens(RateLimitConfig rateLimitConfig){
+        Duration duration = helper.findDuration(rateLimitConfig.getBucketConfig().getTime(),rateLimitConfig.getBucketConfig().getUnit());
+        long lastRefill = rateLimitConfig.getBucketState().getLastRefillTime();
         LocalDateTime convertedLastRefill = LocalDateTime.ofInstant(
                 Instant.ofEpochMilli(lastRefill),
                 ZoneId.systemDefault());
@@ -93,7 +83,7 @@ public class RateLimitService {
 
         if(currentTime.isAfter(endTime)) {
             //refill and update last refill time
-            bucketConfig.getBucketState().setAvailableTokens(bucketConfig.getNoOfAllowedHits());
+            rateLimitConfig.getBucketState().setAvailableTokens(bucketConfig.getNoOfAllowedHits());
             bucketConfig.getBucketState().setLastRefillTime(System.currentTimeMillis());
             rateLimitAppConfig.setBucketConfig(bucketConfig);
             rateLimitAppRepo.save(rateLimitAppConfig);
@@ -103,57 +93,13 @@ public class RateLimitService {
             bucketConfig.getBucketState().setAvailableTokens(--availableTokens);
             rateLimitAppConfig.setBucketConfig(bucketConfig);
             rateLimitAppRepo.save(rateLimitAppConfig);
-            log.info("1 token consumed. Tokens left for app are --------- "+ availableTokens);
+            log.info("1 token consumed.");
             return true;
         } else {
-            log.info("No tokens left for app ");
+            log.info("No tokens left ");
             return false;
         }
     }
-
-    boolean consumeTokensForService(BucketConfig bucketConfig,RateLimitServiceConfig rateLimitServiceConfig){
-        Duration duration = helper.findDuration(bucketConfig.getTime(),bucketConfig.getUnit());
-        long lastRefill = bucketConfig.getBucketState().getLastRefillTime();
-        LocalDateTime convertedLastRefill = LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(lastRefill),
-                ZoneId.systemDefault()
-        );
-
-        LocalDateTime currentTime = LocalDateTime.now();
-        LocalDateTime endTime = convertedLastRefill.plus(duration);
-        if(currentTime.isAfter(endTime)) {
-            //refill and update last refill time
-            bucketConfig.getBucketState().setAvailableTokens(bucketConfig.getNoOfAllowedHits());
-            bucketConfig.getBucketState().setLastRefillTime(System.currentTimeMillis());
-            rateLimitServiceConfig.setBucketConfig(bucketConfig);
-            rateLimitServiceRepo.save(rateLimitServiceConfig);
-        }
-        long availableTokens = bucketConfig.getBucketState().getAvailableTokens();
-        if (availableTokens > 0) {
-            bucketConfig.getBucketState().setAvailableTokens(--availableTokens);
-            rateLimitServiceConfig.setBucketConfig(bucketConfig);
-            rateLimitServiceRepo.save(rateLimitServiceConfig);
-            log.info("1 token consumed. Tokens left for service are --------------------- "+ availableTokens);
-            return true;
-        } else {
-            log.info("No tokens left for service");
-            return false;
-        }
-    }
-
-
-    BucketConfig createAndSetBucket(BucketConfig bucketConfig){
-        BucketState newState = createBucketState(bucketConfig);
-        bucketConfig.setBucketState(newState);
-        return bucketConfig;
-    }
-
-
-    BucketState createBucketState(BucketConfig bucketConfig) {
-        BucketState createdState = new BucketState(bucketConfig.getNoOfAllowedHits(),System.currentTimeMillis());
-        return createdState;
-    }
-
 
 }
 

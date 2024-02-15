@@ -2,8 +2,7 @@ package decimal.apigateway.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.entity.*;
-import decimal.apigateway.repository.RateLimitAppRepo;
-import decimal.apigateway.repository.RateLimitServiceRepo;
+import decimal.apigateway.repository.RateLimitRepo;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Log
 public class RateLimterController2 {
     @Autowired
-    RateLimitAppRepo rateLimitAppRepo;
+    RateLimitRepo rateLimitAppRepo;
 
     @Autowired
     RateLimitServiceRepo rateLimitServiceRepo;
@@ -30,10 +29,10 @@ public class RateLimterController2 {
         if (rateLimitConfigDto2!=null){
             String appId = rateLimitConfigDto2.getAppId();
             String serviceName = rateLimitConfigDto2.getServiceName();
-            RateLimitAppConfig rateLimitAppConfig = new RateLimitAppConfig("rl~"+appId, rateLimitConfigDto2.getAppRateLimitConfig());
+            RateLimitAppConfig rateLimitAppConfig = new RateLimitAppConfig(appId, rateLimitConfigDto2.getAppRateLimitConfig());
             rateLimitAppRepo.save(rateLimitAppConfig);
 
-            RateLimitServiceConfig rateLimitServiceConfig = new RateLimitServiceConfig("rl~" + appId + "~" + serviceName, rateLimitConfigDto2.getServiceRateLimitConfig());
+            RateLimitServiceConfig rateLimitServiceConfig = new RateLimitServiceConfig(appId + "+" + serviceName, rateLimitConfigDto2.getServiceRateLimitConfig());
             rateLimitServiceRepo.save(rateLimitServiceConfig);
             return "config created";
         }else{
