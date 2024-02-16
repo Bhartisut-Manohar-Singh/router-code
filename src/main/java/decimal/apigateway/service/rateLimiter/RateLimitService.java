@@ -1,6 +1,7 @@
 package decimal.apigateway.service.rateLimiter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.entity.*;
 import decimal.apigateway.entity.BucketState;
 import decimal.apigateway.exception.RouterException;
@@ -45,12 +46,12 @@ public class RateLimitService {
                 getOrCreateBucketState(rateLimitAppConfig.get());
 
                 if (!consumeTokens(rateLimitAppConfig.get())) {
-                    throw new RouterException(TOO_MANY_REQUESTS_429,"No tokens left for this app. Please try again later.",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"TOO_MANY_REQUESTS_429\",\"message\" :\"No tokens left for this app. Please try again later.\"}"));
+                    throw new RouterException(RouterResponseCode.TOO_MANY_REQUESTS_429, (Exception) null,FAILURE_STATUS, "No tokens left for this app. Please try again later.");
                 }
 
             }else{
-                throw new RouterException(INVALID_REQUEST_500," No Configuration present in redis for this app. ",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_500\",\"message\" :\" No Configuration present in redis for this app. \"}"));
-            }
+            throw new RouterException(INVALID_REQUEST_500, (Exception) null,FAILURE_STATUS, "No Configuration present in redis for this app.");
+         }
 
         if (rateLimitServiceConfig.isEmpty())
             return true;
@@ -59,11 +60,11 @@ public class RateLimitService {
             getOrCreateBucketState(rateLimitServiceConfig.get());
 
             if (!consumeTokens(rateLimitServiceConfig.get())) {
-                throw new RouterException(TOO_MANY_REQUESTS_429,"No tokens left for this service. Please try again later.",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"TOO_MANY_REQUESTS_429\",\"message\" :\"No tokens left for this service. Please try again later.\"}"));
+                throw new RouterException(RouterResponseCode.TOO_MANY_REQUESTS_429, (Exception) null,FAILURE_STATUS, "No tokens left for this service. Please try again later.");
             }
 
         }else{
-            throw new RouterException(INVALID_REQUEST_500," No Configuration present in redis for this service. ",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_500\",\"message\" :\" No Configuration present in redis for this service. \"}"));
+            throw new RouterException(INVALID_REQUEST_500, (Exception) null,FAILURE_STATUS, "No Configuration present in redis for this service.");
         }
             // Both app and service checks passed
             return true;
