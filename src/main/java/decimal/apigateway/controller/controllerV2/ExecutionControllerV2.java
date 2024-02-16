@@ -1,5 +1,6 @@
 package decimal.apigateway.controller.controllerV2;
 
+
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionServiceV2;
@@ -7,10 +8,10 @@ import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
+
 
 
 @RestController
@@ -22,6 +23,7 @@ public class ExecutionControllerV2 {
 
     @Autowired
     ExecutionServiceV2 executionServiceV2;
+
 
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
@@ -47,8 +49,11 @@ public class ExecutionControllerV2 {
         log.info("======================Gateway Execute V2 Called=============================");
         /*httpHeaders.put("sourceAppId", sourceAppId);
         httpHeaders.put("sourceOrgId", sourceOrgId);*/
-        httpHeaders.put("destinationAppId", destinationAppId);
-        httpHeaders.put("serviceName",serviceName);
+        /*
+        Because of network call previous header keys were in camel case.
+        */
+         httpHeaders.put("destinationappid", destinationAppId);
+        httpHeaders.put("servicename",serviceName);
 
         log.info("Headers for v2 execute-----");
         httpHeaders.forEach((k,v) -> log.info(k + "->" + v));
@@ -103,8 +108,8 @@ public class ExecutionControllerV2 {
         log.info("File Size= "+files.length);
         log.info("===============================Dynamic-router/DMS=============================");
         httpHeaders.forEach((key, value) -> System.out.println(key + " " + value));
-        return executionServiceV2.executeFileRequest(httpServletRequest,request,httpHeaders,serviceName,mediaDataObjects,files);
 
+        return executionServiceV2.executeFileRequest(httpServletRequest,request,httpHeaders,serviceName,mediaDataObjects,files);
     }
 
 }
