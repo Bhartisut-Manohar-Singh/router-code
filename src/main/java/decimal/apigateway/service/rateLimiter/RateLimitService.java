@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -88,10 +91,10 @@ public class RateLimitService {
         if (availableTokens > 0) {
             rateLimitConfig.getBucketState().setAvailableTokens(--availableTokens);
             rateLimitRepo.save(rateLimitConfig);
-            log.info("1 token consumed.");
+            log.info("-------------1 token consumed. available tokens are ------------" + availableTokens);
             return true;
         } else {
-            log.info("No tokens left ");
+            log.info("------------No tokens left -----------");
             return false;
         }
 
