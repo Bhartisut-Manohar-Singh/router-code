@@ -5,15 +5,15 @@ import decimal.apigateway.entity.*;
 import decimal.apigateway.entity.BucketState;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.repository.RateLimitRepo;
+import decimal.apigateway.service.LogsWriter;
+import decimal.logs.model.AuditPayload;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
 import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -24,11 +24,18 @@ import static decimal.apigateway.commons.Constant.*;
 public class RateLimitService {
     @Autowired
     RateLimitRepo rateLimitRepo;
+    @Autowired
+    AuditPayload auditPayload;
+    @Autowired
+    LogsWriter logsWriter;
+
     ObjectMapper objectMapper = new ObjectMapper();
 
 
 
-    public Boolean allowRequest(String appId, String serviceName) throws RouterException, IOException {
+
+    public Boolean allowRequest(String appId, String serviceName, Map<String, String> httpHeaders) throws RouterException, IOException {
+        auditPayload = logsWriter.initializeLog("request", JSON, httpHeaders);
 
         // checks in redis if config is present
         Optional<RateLimitConfig> rateLimitAppConfig = rateLimitRepo.findById(appId);

@@ -51,7 +51,7 @@ public class RateLimiterAspect2 {
 
         String appId = clientId.split(Constant.TILD_SPLITTER)[1];
 
-        rateLimitService.allowRequest(appId,serviceName);
+        rateLimitService.allowRequest(appId,serviceName,httpHeaders);
 
 
 
