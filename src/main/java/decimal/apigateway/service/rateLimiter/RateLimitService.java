@@ -74,7 +74,8 @@ public class RateLimitService {
 
 
         private void getOrCreateBucketState(RateLimitConfig rateLimitConfig, String key){
-            valueOps.set(key,rateLimitConfig.getNoOfAllowedHits());
+//            valueOps.set(key,rateLimitConfig.getNoOfAllowedHits());
+            valueOps.set(key,10);
             String unitString = rateLimitConfig.getUnit();
             redisTemplate.expire(key, rateLimitConfig.getTime(), TimeUnit.valueOf(unitString.toUpperCase()));
 
