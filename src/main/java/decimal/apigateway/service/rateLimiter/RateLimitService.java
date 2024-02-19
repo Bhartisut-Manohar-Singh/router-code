@@ -8,6 +8,7 @@ import decimal.apigateway.service.LogsWriter;
 import decimal.logs.model.AuditPayload;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
@@ -33,8 +34,7 @@ public class RateLimitService {
 
     @Autowired
     RedisTemplate redisTemplate;
-
-    private ValueOperations<String,Integer> valueOps;
+    private ValueOperations valueOps;
 
     @PostConstruct
     private void init() {
@@ -74,8 +74,9 @@ public class RateLimitService {
 
 
         private void getOrCreateBucketState(RateLimitConfig rateLimitConfig, String key){
-//            valueOps.set(key,rateLimitConfig.getNoOfAllowedHits());
-            valueOps.set(key,10);
+//            valueOps.set(key,"hh");
+            log.info("-------created new config-------");
+            valueOps.increment(key,Long.parseLong(rateLimitConfig.getNoOfAllowedHits()));
             String unitString = rateLimitConfig.getUnit();
             redisTemplate.expire(key, rateLimitConfig.getTime(), TimeUnit.valueOf(unitString.toUpperCase()));
 
@@ -88,6 +89,7 @@ public class RateLimitService {
             getOrCreateBucketState(rateLimitConfig,key);
         }
         Long newCtr = valueOps.decrement(key);
+        log.info("--------- tokens left are -------"+newCtr);
         if(newCtr<0){
             log.info("--- no tokens left ---");
             return false;
