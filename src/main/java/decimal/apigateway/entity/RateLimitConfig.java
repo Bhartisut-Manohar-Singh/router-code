@@ -15,6 +15,9 @@ import org.springframework.data.redis.core.RedisHash;
 public class RateLimitConfig{
     @Id
     String id;
-    BucketConfig bucketConfig;
-    BucketState bucketState;
+    String orgId;
+    long time;
+    String unit;
+    long noOfAllowedHits;
+    String rateLimitLevel;
 }

@@ -1,18 +1,19 @@
 package decimal.apigateway.service.rateLimiter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.entity.*;
-import decimal.apigateway.entity.BucketState;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.repository.RateLimitRepo;
 import decimal.apigateway.service.LogsWriter;
 import decimal.logs.model.AuditPayload;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
@@ -30,9 +31,15 @@ public class RateLimitService {
     @Autowired
     LogsWriter logsWriter;
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    RedisTemplate redisTemplate;
 
+    private ValueOperations<String, String> valueOps;
 
+    @PostConstruct
+    private void init() {
+        valueOps = redisTemplate.opsForValue();
+    }
 
 
     public Boolean allowRequest(String appId, String serviceName, Map<String, String> httpHeaders) throws RouterException, IOException {
@@ -42,10 +49,9 @@ public class RateLimitService {
         Optional<RateLimitConfig> rateLimitAppConfig = rateLimitRepo.findById(appId);
         Optional<RateLimitConfig> rateLimitServiceConfig = rateLimitRepo.findById(appId + "+" + serviceName);
 
-        if (rateLimitAppConfig.isPresent() && rateLimitAppConfig.get().getBucketConfig()!= null) {
-                getOrCreateBucketState(rateLimitAppConfig.get());
+        if (rateLimitAppConfig.isPresent()) {
 
-                if (!consumeTokens(rateLimitAppConfig.get())) {
+                if (!consumeTokens(rateLimitAppConfig.get(),"rl~"+appId)) {
                     throw new RouterException(RouterResponseCode.TOO_MANY_REQUESTS_429, (Exception) null,FAILURE_STATUS, "No tokens left for this app. Please try again later.");
                 }
 
@@ -53,18 +59,13 @@ public class RateLimitService {
             throw new RouterException(INVALID_REQUEST_500, (Exception) null,FAILURE_STATUS, "No Configuration present in redis for this app.");
          }
 
-        if (rateLimitServiceConfig.isEmpty())
+        if (rateLimitServiceConfig.isEmpty()) {
             return true;
-
-        if(rateLimitServiceConfig.isPresent() && rateLimitServiceConfig.get().getBucketConfig() != null){
-            getOrCreateBucketState(rateLimitServiceConfig.get());
-
-            if (!consumeTokens(rateLimitServiceConfig.get())) {
+        }else{
+            if (!consumeTokens(rateLimitServiceConfig.get(),"rl~"+appId+"+"+serviceName)) {
                 throw new RouterException(RouterResponseCode.TOO_MANY_REQUESTS_429, (Exception) null,FAILURE_STATUS, "No tokens left for this service. Please try again later.");
             }
 
-        }else{
-            throw new RouterException(INVALID_REQUEST_500, (Exception) null,FAILURE_STATUS, "No Configuration present in redis for this service.");
         }
             // Both app and service checks passed
             return true;
@@ -72,50 +73,27 @@ public class RateLimitService {
 
 
 
-        RateLimitConfig getOrCreateBucketState(RateLimitConfig rateLimitConfig){
-        //if bucket state is present, return bucket or else, create bucket state
-        if(rateLimitConfig.getBucketState()==null){
-            long nextRefillTime = findNextRefill(rateLimitConfig);
-            BucketState newState = new BucketState(rateLimitConfig.getBucketConfig().getNoOfAllowedHits(),nextRefillTime);
+        private void getOrCreateBucketState(RateLimitConfig rateLimitConfig, String key){
+            valueOps.set(key,String.valueOf(rateLimitConfig.getNoOfAllowedHits()));
+            String unitString = rateLimitConfig.getUnit();
+            redisTemplate.expire(key, rateLimitConfig.getTime(), TimeUnit.valueOf(unitString.toUpperCase()));
 
-            rateLimitConfig.setBucketState(newState);
-        }
-        return rateLimitConfig;
     }
 
 
 
-    boolean consumeTokens(RateLimitConfig rateLimitConfig){
-        long nextRefill = rateLimitConfig.getBucketState().getNextRefillTime();
-        long currentTime = System.currentTimeMillis();
-
-        if(currentTime>nextRefill) {
-            //refill and update last refill time
-            rateLimitConfig.getBucketState().setAvailableTokens(rateLimitConfig.getBucketConfig().getNoOfAllowedHits());
-            nextRefill = findNextRefill(rateLimitConfig);
-            rateLimitConfig.getBucketState().setNextRefillTime(nextRefill);
+    boolean consumeTokens(RateLimitConfig rateLimitConfig, String key){
+        if(!redisTemplate.hasKey(key)){
+            getOrCreateBucketState(rateLimitConfig,key);
         }
-        long availableTokens = rateLimitConfig.getBucketState().getAvailableTokens();
-        if (availableTokens > 0) {
-            rateLimitConfig.getBucketState().setAvailableTokens(--availableTokens);
-            rateLimitRepo.save(rateLimitConfig);
-            log.info("-------------1 token consumed. available tokens are ------------" + availableTokens);
-            return true;
-        } else {
-            log.info("------------No tokens left -----------");
+        Long newCtr = valueOps.decrement(key);
+        if(newCtr<0){
+            log.info("--- no tokens left ---");
             return false;
+        }else {
+            return true;
         }
-
     }
 
-    private long findNextRefill(RateLimitConfig rateLimitConfig) {
-
-        long time = rateLimitConfig.getBucketConfig().getTime();
-        String unitString = rateLimitConfig.getBucketConfig().getUnit();
-        TimeUnit unit = TimeUnit.valueOf(unitString.toUpperCase());
-
-        long currentTime = System.currentTimeMillis();
-        return currentTime + unit.toMillis(time);
-    }
 }
 

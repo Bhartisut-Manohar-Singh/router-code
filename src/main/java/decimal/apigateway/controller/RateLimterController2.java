@@ -27,10 +27,10 @@ public class RateLimterController2 {
             String appId = rateLimitConfigDto2.getAppId();
             String serviceName = rateLimitConfigDto2.getServiceName();
 
-            RateLimitConfig rateLimitAppConfig = new RateLimitConfig(appId,rateLimitConfigDto2.getAppBucketConfig(),null);
+            RateLimitConfig rateLimitAppConfig = new RateLimitConfig(appId,null,rateLimitConfigDto2.getAppBucketConfig().getTime(),rateLimitConfigDto2.getAppBucketConfig().getUnit(),rateLimitConfigDto2.getAppBucketConfig().getNoOfAllowedHits(),rateLimitConfigDto2.getAppBucketConfig().getRateLimitLevel());
             rateLimitRepo.save(rateLimitAppConfig);
 
-            RateLimitConfig rateLimitServiceConfig = new RateLimitConfig(appId+"+"+serviceName,rateLimitConfigDto2.getServiceBucketConfig(),null);
+            RateLimitConfig rateLimitServiceConfig = new RateLimitConfig(appId+"+"+serviceName,null,rateLimitConfigDto2.getServiceBucketConfig().getTime(),rateLimitConfigDto2.getServiceBucketConfig().getUnit(),rateLimitConfigDto2.getServiceBucketConfig().getNoOfAllowedHits(),rateLimitConfigDto2.getServiceBucketConfig().getRateLimitLevel());
             rateLimitRepo.save(rateLimitServiceConfig);
             return "config created";
         }else{
