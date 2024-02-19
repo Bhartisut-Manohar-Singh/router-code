@@ -18,6 +18,6 @@ public class RateLimitConfig{
     String orgId;
     long time;
     String unit;
-    long noOfAllowedHits;
+    int noOfAllowedHits;
     String rateLimitLevel;
 }

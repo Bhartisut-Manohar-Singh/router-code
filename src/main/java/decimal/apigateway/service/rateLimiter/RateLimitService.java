@@ -34,7 +34,7 @@ public class RateLimitService {
     @Autowired
     RedisTemplate redisTemplate;
 
-    private ValueOperations<String,Long> valueOps;
+    private ValueOperations<String,Integer> valueOps;
 
     @PostConstruct
     private void init() {

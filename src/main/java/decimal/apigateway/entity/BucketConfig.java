@@ -14,6 +14,6 @@ import java.util.concurrent.TimeUnit;
 public class BucketConfig {
     long time;
     String unit;
-    long noOfAllowedHits;
+    int noOfAllowedHits;
     String rateLimitLevel;
 }
