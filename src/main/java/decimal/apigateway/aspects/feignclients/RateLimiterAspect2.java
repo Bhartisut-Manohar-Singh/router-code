@@ -1,6 +1,10 @@
 package decimal.apigateway.aspects.feignclients;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
+import decimal.apigateway.domain.ApplicationDefRedisConfig;
+import decimal.apigateway.model.ApplicationDef;
+import decimal.apigateway.repository.ApplicationDefRedisConfigRepo;
 import decimal.apigateway.service.rateLimiter.RateLimitService;
 import lombok.extern.java.Log;
 import org.aspectj.lang.JoinPoint;
@@ -12,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 @Component
 @Aspect
@@ -20,6 +25,12 @@ public class RateLimiterAspect2 {
 
     @Autowired
     RateLimitService rateLimitService;
+
+    @Autowired
+    ApplicationDefRedisConfigRepo applicationDefRepo;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
 
     @Pointcut(
@@ -51,10 +62,11 @@ public class RateLimiterAspect2 {
 
         String appId = clientId.split(Constant.TILD_SPLITTER)[1];
 
-        rateLimitService.allowRequest(appId,serviceName,httpHeaders);
-
-
-
+        Optional<ApplicationDefRedisConfig> applicationDefConfig = applicationDefRepo.findByOrgIdAndAppId(orgid, appId);
+        ApplicationDef applicationDef =  objectMapper.readValue(applicationDefConfig.get().getApiData(), ApplicationDef.class);
+        if(applicationDef.getIsRateLimitingRequired().equalsIgnoreCase("Y")){
+            rateLimitService.allowRequest(appId,serviceName,httpHeaders);
+        }
 
     }
 }
