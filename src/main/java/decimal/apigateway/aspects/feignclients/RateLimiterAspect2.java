@@ -33,9 +33,13 @@ public class RateLimiterAspect2 {
     ObjectMapper objectMapper;
 
 
-    @Pointcut(
-            "within(decimal.apigateway.controller..*)"
-                    + "&& execution(public * * (..)) && args(requestBody, httpHeaders,..)")
+//    @Pointcut(
+//            "within(decimal.apigateway.controller..*)"
+//                    + "&& execution(public * * (..)) && args(requestBody, httpHeaders,..)")
+    @Pointcut("((within(decimal.apigateway.controller.controllerV2.ExecutionControllerV2) && "
+        + "(execution(public * executePlainRequest(..)) || execution(public * executeRequest(..)))) "
+        + "|| (within(decimal.apigateway.controller.V3.RegistrationControllerV3) && execution(public * executePlainRequest(..)))) "
+        + "&& args(requestBody, httpHeaders,..)")
     public void rateLimiters(String requestBody, Map<String, String> httpHeaders) {
     }
 
@@ -61,6 +65,8 @@ public class RateLimiterAspect2 {
         }
 
         String appId = clientId.split(Constant.TILD_SPLITTER)[1];
+        //remove
+        log.info("---------into rate limiting aspect -----------------");
 
         Optional<ApplicationDefRedisConfig> applicationDefConfig = applicationDefRepo.findByOrgIdAndAppId(orgid, appId);
         ApplicationDef applicationDef =  objectMapper.readValue(applicationDefConfig.get().getApiData(), ApplicationDef.class);

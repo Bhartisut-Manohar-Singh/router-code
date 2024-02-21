@@ -127,11 +127,11 @@
             <artifactId>json-path</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>decimal</groupId>
-            <artifactId>rate-limiter</artifactId>
-            <version>4.1.6.SNAP</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>decimal</groupId>-->
+<!--            <artifactId>rate-limiter</artifactId>-->
+<!--            <version>4.1.6.SNAP</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -148,6 +148,7 @@
 <!--            <artifactId>resilience4j-ratelimiter</artifactId>-->
 <!--            <version>1.5.0</version>-->
 <!--        </dependency>-->
+
     </dependencies>
 
 
