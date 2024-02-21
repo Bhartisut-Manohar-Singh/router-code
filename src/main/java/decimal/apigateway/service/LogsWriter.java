@@ -58,7 +58,6 @@ public class LogsWriter {
         auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().toEpochMilli() - auditPayload.getRequestTimestamp().toEpochMilli());
 
         AuditPayload auditPayloadFinal =new AuditPayload(auditPayload.getRequestTimestamp(),auditPayload.getResponseTimestamp(),auditPayload.getTimeTaken(),auditPayload.getRequest(),auditPayload.getResponse(),auditPayload.getStatus(),auditPayload.getRequestIdentifier(),auditPayload.isLogRequestAndResponse());
-        log.info(" ==== auditPayloadFinal ==== " + new Gson().toJson(auditPayloadFinal));
         logsConnector.audit(auditPayloadFinal);
     }
 

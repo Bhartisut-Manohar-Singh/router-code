@@ -40,7 +40,7 @@ public class RegistrationControllerV3 {
      * @throws IOException
      */
     @PostMapping("register")
-    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException, RouterException {
+    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
         log.info("-------register call v3-------------");
         return registrationServiceV3.register(request, httpHeaders, response);
     }

@@ -33,6 +33,7 @@ public class RouterResponseCode {
   public static final String ROUTER_CLIENT_SECRET_MISSING = "ROUTER_CLIENT_SECRET_MISSING";
   public static final String ROUTER_REQUEST_ID_MISSING = "ROUTER_REQUEST_ID_MISSING";
   public static final String ROUTER_ENVIRONMENT_PROPERTY_MISSING = "ROUTER_ENVIRONMENT_PROPERTY_MISSING";
+  public static final String TOO_MANY_REQUESTS_429 = "TOO_MANY_REQUESTS_429";
 
 
 
