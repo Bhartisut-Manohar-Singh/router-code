@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@RedisHash("RATE_LIMITER_CONFIG")
+@RedisHash("RATE_LIMIT_CONFIG")
 public class RateLimitConfig{
     @Id
     String id;
