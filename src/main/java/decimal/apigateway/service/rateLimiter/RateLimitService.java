@@ -8,7 +8,6 @@ import decimal.apigateway.service.LogsWriter;
 import decimal.logs.model.AuditPayload;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+
 
 import static decimal.apigateway.commons.Constant.*;
 
@@ -33,8 +32,9 @@ public class RateLimitService {
     LogsWriter logsWriter;
 
     @Autowired
-    RedisTemplate redisTemplate;
-    private ValueOperations valueOps;
+    private RedisTemplate<String, Long> redisTemplate;
+
+    private ValueOperations<String, Long> valueOps;
 
     @PostConstruct
     private void init() {
@@ -47,10 +47,10 @@ public class RateLimitService {
 
         // checks in redis if config is present
         Optional<RateLimitConfig> rateLimitAppConfig = rateLimitRepo.findById(appId);
-        Optional<RateLimitConfig> rateLimitServiceConfig = rateLimitRepo.findById(appId + "+" + serviceName);
+        Optional<RateLimitConfig> rateLimitServiceConfig = rateLimitRepo.findById(appId + "~" + serviceName);
 
         if (rateLimitAppConfig.isPresent()) {
-
+            log.info("------- going to consume for app ---------");
                 if (!consumeTokens(rateLimitAppConfig.get(),"rl~"+appId)) {
                     throw new RouterException(RouterResponseCode.TOO_MANY_REQUESTS_429, (Exception) null,FAILURE_STATUS, "No tokens left for this app. Please try again later.");
                 }
@@ -62,7 +62,8 @@ public class RateLimitService {
         if (rateLimitServiceConfig.isEmpty()) {
             return true;
         }else{
-            if (!consumeTokens(rateLimitServiceConfig.get(),"rl~"+appId+"+"+serviceName)) {
+            log.info("------- going to consume for service ---------");
+            if (!consumeTokens(rateLimitServiceConfig.get(),"rl~"+appId+"~"+serviceName)) {
                 throw new RouterException(RouterResponseCode.TOO_MANY_REQUESTS_429, (Exception) null,FAILURE_STATUS, "No tokens left for this service. Please try again later.");
             }
 
@@ -74,11 +75,9 @@ public class RateLimitService {
 
 
         private void getOrCreateBucketState(RateLimitConfig rateLimitConfig, String key){
-            valueOps.set(key,"hh");
+            valueOps.set(key,rateLimitConfig.getMaxAllowedHits());
             log.info("-------created new config-------");
-            valueOps.increment(key,Long.parseLong(rateLimitConfig.getNoOfAllowedHits()));
-            String unitString = rateLimitConfig.getUnit();
-            redisTemplate.expire(key, rateLimitConfig.getTime(), TimeUnit.valueOf(unitString.toUpperCase()));
+            redisTemplate.expire(key, rateLimitConfig.getDuration(),rateLimitConfig.getDurationUnit());
 
     }
 
@@ -96,6 +95,8 @@ public class RateLimitService {
         }else {
             return true;
         }
+
+
     }
 
 }

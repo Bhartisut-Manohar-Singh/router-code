@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
+import java.util.concurrent.TimeUnit;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,8 +18,10 @@ public class RateLimitConfig{
     @Id
     String id;
     String orgId;
-    long time;
-    String unit;
-    String noOfAllowedHits;
-    String rateLimitLevel;
+    String appId;
+    String apiName;
+    long duration;
+    TimeUnit durationUnit;
+    long maxAllowedHits;
+    String level;
 }
