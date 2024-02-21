@@ -74,7 +74,7 @@ public class RateLimitService {
 
 
         private void getOrCreateBucketState(RateLimitConfig rateLimitConfig, String key){
-//            valueOps.set(key,"hh");
+            valueOps.set(key,"hh");
             log.info("-------created new config-------");
             valueOps.increment(key,Long.parseLong(rateLimitConfig.getNoOfAllowedHits()));
             String unitString = rateLimitConfig.getUnit();
