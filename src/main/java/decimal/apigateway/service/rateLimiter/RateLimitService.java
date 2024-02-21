@@ -2,6 +2,7 @@ package decimal.apigateway.service.rateLimiter;
 
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.entity.*;
+import decimal.apigateway.exception.RequestNotPermitted;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.repository.RateLimitRepo;
 import decimal.apigateway.service.LogsWriter;
@@ -52,7 +53,7 @@ public class RateLimitService {
         if (rateLimitAppConfig.isPresent()) {
             log.info("------- going to consume for app ---------");
                 if (!consumeTokens(rateLimitAppConfig.get(),"rl~"+appId)) {
-                    throw new RouterException(RouterResponseCode.TOO_MANY_REQUESTS_429, (Exception) null,FAILURE_STATUS, "No tokens left for this app. Please try again later.");
+                    throw new RequestNotPermitted("No tokens left for this app. Please try again later.");
                 }
 
             }else{
@@ -64,7 +65,7 @@ public class RateLimitService {
         }else{
             log.info("------- going to consume for service ---------");
             if (!consumeTokens(rateLimitServiceConfig.get(),"rl~"+appId+"~"+serviceName)) {
-                throw new RouterException(RouterResponseCode.TOO_MANY_REQUESTS_429, (Exception) null,FAILURE_STATUS, "No tokens left for this service. Please try again later.");
+                throw new RequestNotPermitted("No tokens left for this service. Please try again later.");
             }
 
         }
@@ -88,7 +89,7 @@ public class RateLimitService {
             getOrCreateBucketState(rateLimitConfig,key);
         }
         Long newCtr = valueOps.decrement(key);
-        log.info("--------- tokens left are -------"+newCtr);
+        log.info("--------- tokens left are ------- : "+newCtr);
         if(newCtr<0){
             log.info("--- no tokens left ---");
             return false;
