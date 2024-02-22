@@ -49,9 +49,6 @@ public class RateLimitService {
 
         // checks in redis if rate limiting config is present
         Optional<RateLimitConfig> rateLimitAppConfig = rateLimitRepo.findById(appId);
-        //remove this log
-        ObjectMapper objectMapper = new ObjectMapper();
-        log.info(objectMapper.writeValueAsString(rateLimitAppConfig));
 
         if (rateLimitAppConfig.isPresent()) {
             log.info("------- going to consume token for app ---------");
@@ -77,6 +74,7 @@ public class RateLimitService {
     boolean consumeTokens(RateLimitConfig rateLimitConfig, String key){
         Long newCtr = valueOps.decrement(key);
         if(newCtr==null){
+            log.info("---------------newctr is null---------");
             newCtr= rateLimitConfig.getMaxAllowedHits()-1;
             valueOps.set(key,newCtr,rateLimitConfig.getDuration(),rateLimitConfig.getDurationUnit());
         }
