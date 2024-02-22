@@ -73,6 +73,7 @@ public class RateLimitService {
 
 
     boolean consumeTokens(RateLimitConfig rateLimitConfig, String key){
+        log.info("------ inside consume tokens---------");
         if(!redisTemplate.hasKey(key)){
             valueOps.set(key,rateLimitConfig.getMaxAllowedHits(),rateLimitConfig.getDuration(),rateLimitConfig.getDurationUnit());
             log.info("-------created new config-------");
