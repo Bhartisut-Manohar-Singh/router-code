@@ -62,12 +62,12 @@ public class RateLimiterAspect{
 
         String appId = clientId.split(Constant.TILD_SPLITTER)[1];
 
-        //uncomment this
-//        Optional<ApplicationDefRedisConfig> applicationDefConfig = applicationDefRepo.findByOrgIdAndAppId(orgid, appId);
-//        ApplicationDef applicationDef =  objectMapper.readValue(applicationDefConfig.get().getApiData(), ApplicationDef.class);
-//        if(applicationDef.getIsRateLimitingRequired().equalsIgnoreCase("Y")){
+        Optional<ApplicationDefRedisConfig> applicationDefConfig = applicationDefRepo.findByOrgIdAndAppId(orgid, appId);
+        ApplicationDef applicationDef =  objectMapper.readValue(applicationDefConfig.get().getApiData(), ApplicationDef.class);
+        String isRateLimitingRequired = applicationDef.getIsRateLimitingRequired();
+        if(isRateLimitingRequired != null && isRateLimitingRequired.equalsIgnoreCase("Y")){
             rateLimitService.allowRequest(appId,serviceName,httpHeaders);
-//        }
+        }
 
     }
 }
