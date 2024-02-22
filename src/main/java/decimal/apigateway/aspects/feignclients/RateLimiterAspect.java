@@ -2,7 +2,9 @@ package decimal.apigateway.aspects.feignclients;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
+import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.domain.ApplicationDefRedisConfig;
+import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.ApplicationDef;
 import decimal.apigateway.repository.ApplicationDefRedisConfigRepo;
 import decimal.apigateway.service.rateLimiter.RateLimitService;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
+import static decimal.apigateway.commons.Constant.FAILURE_STATUS;
 
 @Component
 @Aspect
@@ -62,7 +66,12 @@ public class RateLimiterAspect{
 
         String appId = clientId.split(Constant.TILD_SPLITTER)[1];
 
+
+
         Optional<ApplicationDefRedisConfig> applicationDefConfig = applicationDefRepo.findByOrgIdAndAppId(orgid, appId);
+        if (applicationDefConfig.isEmpty())
+            throw new RouterException(RouterResponseCode.APPLICATION_DEF_NOT_FOUND, (Exception) null,FAILURE_STATUS, "Application def not found for given orgId and appId");
+
         ApplicationDef applicationDef =  objectMapper.readValue(applicationDefConfig.get().getApiData(), ApplicationDef.class);
         String isRateLimitingRequired = applicationDef.getIsRateLimitingRequired();
         if(isRateLimitingRequired != null && isRateLimitingRequired.equalsIgnoreCase("Y")){

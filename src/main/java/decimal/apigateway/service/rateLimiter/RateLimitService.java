@@ -46,28 +46,23 @@ public class RateLimitService {
     public Boolean allowRequest(String appId, String serviceName, Map<String, String> httpHeaders) throws RouterException, IOException {
         auditPayload = logsWriter.initializeLog("request", JSON, httpHeaders);
 
-        // checks in redis if config is present
+        // checks in redis if rate limiting config is present
         Optional<RateLimitConfig> rateLimitAppConfig = rateLimitRepo.findById(appId);
         Optional<RateLimitConfig> rateLimitServiceConfig = rateLimitRepo.findById(appId + "~" + serviceName);
 
         if (rateLimitAppConfig.isPresent()) {
-            log.info("------- going to consume for app ---------");
+            log.info("------- going to consume token for app ---------");
                 if (!consumeTokens(rateLimitAppConfig.get(),"rl~"+appId)) {
                     throw new RequestNotPermitted("No tokens left for this app. Please try again later.");
                 }
 
-            }else{
-            throw new RouterException(INVALID_REQUEST_500, (Exception) null,FAILURE_STATUS, "No Configuration present in redis for this app.");
-         }
+            }
 
-        if (rateLimitServiceConfig.isEmpty()) {
-            return true;
-        }else{
-            log.info("------- going to consume for service ---------");
+        if(rateLimitServiceConfig.isPresent()){
+            log.info("------- going to consume token for service ---------");
             if (!consumeTokens(rateLimitServiceConfig.get(),"rl~"+appId+"~"+serviceName)) {
                 throw new RequestNotPermitted("No tokens left for this service. Please try again later.");
             }
-
         }
             // Both app and service checks passed
             return true;
