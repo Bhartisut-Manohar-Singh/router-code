@@ -72,7 +72,9 @@ public class RateLimitService {
 
 
     boolean consumeTokens(RateLimitConfig rateLimitConfig, String key){
+//        log.info("----------- value at key is "+valueOps.get(key));
         Long newCtr = valueOps.decrement(key);
+        log.info("----- value of newcts is" + newCtr);
         if(newCtr==null){
             log.info("---------------newctr is null---------");
             newCtr= rateLimitConfig.getMaxAllowedHits()-1;
