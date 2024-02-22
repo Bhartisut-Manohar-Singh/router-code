@@ -45,7 +45,6 @@ public class RateLimiterAspect{
 
     @Before("rateLimiters(requestBody, httpHeaders)")
     public void rateLimiterAdvice(JoinPoint proceedingJoinPoint, String requestBody, Map<String, String> httpHeaders) throws Throwable {
-        log.info("Executing rate limiter. 2   ....");
 
         String serviceName = httpHeaders.get("servicename");
         String clientId = httpHeaders.get("clientid");
@@ -75,6 +74,7 @@ public class RateLimiterAspect{
         ApplicationDef applicationDef =  objectMapper.readValue(applicationDefConfig.get().getApiData(), ApplicationDef.class);
         String isRateLimitingRequired = applicationDef.getIsRateLimitingRequired();
         if(isRateLimitingRequired != null && isRateLimitingRequired.equalsIgnoreCase("Y")){
+            log.info("----------Executing rate limiter.....");
             rateLimitService.allowRequest(appId,serviceName,httpHeaders);
         }
 
