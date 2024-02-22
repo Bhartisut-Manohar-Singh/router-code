@@ -48,7 +48,6 @@ public class RateLimitService {
 
         // checks in redis if rate limiting config is present
         Optional<RateLimitConfig> rateLimitAppConfig = rateLimitRepo.findById(appId);
-        Optional<RateLimitConfig> rateLimitServiceConfig = rateLimitRepo.findById(appId + "~" + serviceName);
 
         if (rateLimitAppConfig.isPresent()) {
             log.info("------- going to consume token for app ---------");
@@ -57,6 +56,8 @@ public class RateLimitService {
                 }
 
             }
+
+        Optional<RateLimitConfig> rateLimitServiceConfig = rateLimitRepo.findById(appId + "~" + serviceName);
 
         if(rateLimitServiceConfig.isPresent()){
             log.info("------- going to consume token for service ---------");
@@ -69,21 +70,12 @@ public class RateLimitService {
         }
 
 
-
-        private void getOrCreateBucketState(RateLimitConfig rateLimitConfig, String key){
-            valueOps.set(key,rateLimitConfig.getMaxAllowedHits());
-            log.info("-------created new config-------");
-            redisTemplate.expire(key, rateLimitConfig.getDuration(),rateLimitConfig.getDurationUnit());
-
-    }
-
-
-
     boolean consumeTokens(RateLimitConfig rateLimitConfig, String key){
-        if(!redisTemplate.hasKey(key)){
-            getOrCreateBucketState(rateLimitConfig,key);
-        }
         Long newCtr = valueOps.decrement(key);
+        if(newCtr==null){
+            newCtr= rateLimitConfig.getMaxAllowedHits()-1;
+            valueOps.set(key,newCtr,rateLimitConfig.getDuration(),rateLimitConfig.getDurationUnit());
+        }
         log.info("--------- tokens left are ------- : "+newCtr);
         if(newCtr<0){
             log.info("--- no tokens left ---");
