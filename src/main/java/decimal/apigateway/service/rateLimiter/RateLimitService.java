@@ -1,5 +1,6 @@
 package decimal.apigateway.service.rateLimiter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.entity.*;
 import decimal.apigateway.exception.RequestNotPermitted;
@@ -48,6 +49,9 @@ public class RateLimitService {
 
         // checks in redis if rate limiting config is present
         Optional<RateLimitConfig> rateLimitAppConfig = rateLimitRepo.findById(appId);
+        //remove this log
+        ObjectMapper objectMapper = new ObjectMapper();
+        log.info(objectMapper.writeValueAsString(rateLimitAppConfig));
 
         if (rateLimitAppConfig.isPresent()) {
             log.info("------- going to consume token for app ---------");
