@@ -71,15 +71,14 @@ public class RateLimitService {
         }
 
 
+
     boolean consumeTokens(RateLimitConfig rateLimitConfig, String key){
-//        log.info("----------- value at key is "+valueOps.get(key));
-        Long newCtr = valueOps.decrement(key);
-        log.info("----- value of newcts is" + newCtr);
-        if(newCtr==null){
-            log.info("---------------newctr is null---------");
-            newCtr= rateLimitConfig.getMaxAllowedHits()-1;
-            valueOps.set(key,newCtr,rateLimitConfig.getDuration(),rateLimitConfig.getDurationUnit());
+        if(!redisTemplate.hasKey(key)){
+            valueOps.set(key,rateLimitConfig.getMaxAllowedHits(),rateLimitConfig.getDuration(),rateLimitConfig.getDurationUnit());
+            log.info("-------created new config-------");
         }
+
+        Long newCtr = valueOps.decrement(key);
         log.info("--------- tokens left are ------- : "+newCtr);
         if(newCtr<0){
             log.info("--- no tokens left ---");
