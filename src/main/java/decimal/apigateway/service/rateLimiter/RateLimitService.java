@@ -78,7 +78,8 @@ public class RateLimitService {
 //            valueOps.set(key,rateLimitConfig.getMaxAllowedHits(),rateLimitConfig.getDuration(),rateLimitConfig.getDurationUnit());
 //            log.info("-------created new config-------"+rateLimitConfig.getMaxAllowedHits()+"-------------"+rateLimitConfig.getDuration()+"-------------"+rateLimitConfig.getDurationUnit());
 //        }
-        valueOps.setIfAbsent(key,rateLimitConfig.getMaxAllowedHits(),rateLimitConfig.getDuration(),rateLimitConfig.getDurationUnit());
+        Boolean bool = valueOps.setIfAbsent(key,rateLimitConfig.getMaxAllowedHits(),rateLimitConfig.getDuration(),rateLimitConfig.getDurationUnit());
+        log.info("-------- returned value after setting the key --------"+bool);
 
         Long newCtr = valueOps.decrement(key);
         log.info("--------- tokens left are ------- : "+newCtr);
