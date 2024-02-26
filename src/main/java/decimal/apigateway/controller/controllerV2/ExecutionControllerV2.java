@@ -1,11 +1,14 @@
 package decimal.apigateway.controller.controllerV2;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionServiceV2;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
@@ -24,11 +27,16 @@ public class ExecutionControllerV2 {
     @Autowired
     ExecutionServiceV2 executionServiceV2;
 
+    @Autowired
+    ObjectMapper mapper;
+
 
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         log.info("==============================Gateway Processor=============================");
-        return executionServiceV2.executePlainRequest(request, httpHeaders);
+        Object o = executionServiceV2.executePlainRequest(request, httpHeaders);
+        Map map = mapper.convertValue(o, Map.class);
+        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));
     }
 
     @PostMapping("execute/{sourceOrgId}/{sourceAppId}/{serviceName}/{version}")
@@ -40,7 +48,9 @@ public class ExecutionControllerV2 {
         httpHeaders.put("version", version);
 
         log.info("==========================Execute=============================");
-        return executionServiceV2.executePlainRequest(request, httpHeaders);
+        Object o = executionServiceV2.executePlainRequest(request, httpHeaders);
+        Map map = mapper.convertValue(o, Map.class);
+        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));
     }
 
     @PostMapping("gateway/{destinationAppId}/{serviceName}")
@@ -59,8 +69,9 @@ public class ExecutionControllerV2 {
         httpHeaders.forEach((k,v) -> log.info(k + "->" + v));
 
 
-        return executionServiceV2.executeRequest(destinationAppId,serviceName, request, httpHeaders);
-
+        Object o = executionServiceV2.executeRequest(destinationAppId, serviceName, request, httpHeaders);
+        Map map = mapper.convertValue(o, Map.class);
+        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));
     }
 
     @PostMapping(value = "dynamic-router/{serviceName}/**")

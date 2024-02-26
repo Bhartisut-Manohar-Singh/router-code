@@ -154,8 +154,14 @@ public class ExecutionServiceImpl implements ExecutionService {
         Object responseBody = responseEntity.getBody();
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
+        String statusCode= "";
+
         if (responseHeaders != null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
+
+
+        if (responseHeaders != null && responseHeaders.containsKey("statuscode"))
+            statusCode=responseHeaders.get("statuscode").get(0);
 
         log.info(" ===== response Body from esb ===== " + new Gson().toJson(responseBody));
         List<String> businessKeySet = getBusinessKey(responseBody);
@@ -170,11 +176,13 @@ public class ExecutionServiceImpl implements ExecutionService {
             MicroserviceResponse encryptedResponse = securityService.encryptResponseWithoutSession(responseEntity, headers);
             Map<String, String> finalResponseMap = new HashMap<>();
             finalResponseMap.put("response", encryptedResponse.getMessage());
-
+            finalResponseMap.put("statuscode", statusCode);
             return finalResponseMap;
         }
-
-        return responseBody;
+        Map<String, Object> map= new HashMap<>();
+        map.put("response", responseBody);
+        map.put("statuscode", statusCode);
+        return map;
     }
 
     private static Map<String, String> setHeaders(Map<String, String> httpHeaders, Map<String, String> headers, String logsRequired, String serviceLog, String logPurgeDays) {

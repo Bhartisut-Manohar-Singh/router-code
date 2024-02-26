@@ -1,10 +1,13 @@
 package decimal.apigateway.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,10 +24,16 @@ public class ExecutionController
     @Autowired
     ExecutionService executionService;
 
+    @Autowired
+    ObjectMapper mapper;
+
+
     @PostMapping("gatewayProcessor")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         System.out.println("==============================Gateway Processor=============================");
-        return executionService.executePlainRequest(request, httpHeaders);
+        Object o = executionService.executePlainRequest(request, httpHeaders);
+        Map map = mapper.convertValue(o, Map.class);
+        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));
     }
     @PostMapping("execute/{orgId}/{appId}/{serviceName}/{version}")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String orgId,
@@ -35,13 +44,17 @@ public class ExecutionController
         httpHeaders.put("version", version);
 
         log.info("==========================Execute=============================");
-        return executionService.executePlainRequest(request, httpHeaders);
+        Object o = executionService.executePlainRequest(request, httpHeaders);
+        Map map = mapper.convertValue(o, Map.class);
+        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));
     }
 
     @PostMapping("gateway")
     public Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         log.info("======================Gateway=============================");
-        return executionService.executeRequest(request, httpHeaders);
+        Object o = executionService.executeRequest(request, httpHeaders);
+        Map map = mapper.convertValue(o, Map.class);
+        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));
     }
 
     @PostMapping(value = "dynamic-router/{serviceName}/**")

@@ -129,8 +129,14 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         ResponseEntity<Object> responseEntity = esbClient.executeRequestV2(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
         HttpHeaders responseHeaders = responseEntity.getHeaders();
 
+        String statusCode="";
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
+
+        if (responseHeaders!=null && responseHeaders.containsKey("statuscode")){
+//            auditPayload.setStatus(responseHeaders.get("statuscode").get(0));
+            statusCode= responseHeaders.get("statuscode").get(0);
+        }
 
         List<String> businessKeySet = getBusinessKey(responseEntity.getBody());
         String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys);
@@ -152,7 +158,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
-
+        finalResponseMap.put("statuscode",statusCode);
         return finalResponseMap;
 
     }
@@ -213,12 +219,18 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
 
         ResponseEntity<Object> responseEntity= esbClient.executePlainRequest(request,httpHeaders);
-
+        String statusCode="";
         Object responseBody = responseEntity.getBody();
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
+
+        if(responseHeaders!=null && responseHeaders.containsKey("statuscode"))
+        {
+            statusCode= responseHeaders.get("statuscode").get(0);
+//            auditPayload.setStatus(statusCode);
+        }
 
         List<String> businessKeySet = getBusinessKey(responseBody);
         auditPayload.getResponse().setResponse(JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys));
@@ -233,11 +245,13 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
             MicroserviceResponse encryptedResponse = securityService.encryptResponseWithoutSession(responseEntity, httpHeaders);
             Map<String, String> finalResponseMap = new HashMap<>();
             finalResponseMap.put("response", encryptedResponse.getMessage());
-
+            finalResponseMap.put("statuscode", statusCode);
             return finalResponseMap;
         }
-
-        return responseBody;
+        Map<String, Object> finalResponse= new HashMap<>();
+        finalResponse.put("response", responseBody);
+        finalResponse.put("statuscode", statusCode);
+        return finalResponse;
     }
 
     @Override
