@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.ResponseOperations;
+import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
@@ -70,21 +71,28 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
     @Override
     public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException, RouterException {
         try {
+            httpHeaders.put("servicename", "REGISTERAPP");
+
+            auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders);
 
             log.info("Executing Step 1 to validate register request....."+httpHeaders.toString());
+
+            if (httpHeaders.get(CLIENT_SECRET) == null || httpHeaders.get(CLIENT_SECRET).isEmpty()) {
+                throw new RouterException(RouterResponseCode.INVALID_CLIENT_SECRET, (Exception) null, ROUTER_ERROR_TYPE_VALIDATION, CLIENT_SECRET_ERROR);
+            }
+            if (httpHeaders.get(Constant.ORG_ID)==null || httpHeaders.get(Constant.APP_ID)==null ){
+                throw new RouterException(RouterResponseCode.ORGID_APPID_ERROR, (Exception) null, ROUTER_ERROR_TYPE_VALIDATION, INVALID_ORG_APP);
+            }
 
             String clientId = httpHeaders.get(Constant.ORG_ID) + Constant.TILD_SPLITTER + httpHeaders.get(Constant.APP_ID);
             httpHeaders.put(Constant.CLIENT_ID, clientId);
             log.info("------------client id------------" + clientId);
-            List<String> tokenDetails = fetchTokenDetails(httpHeaders);
-            httpHeaders.put(Constant.LOGIN_ID, tokenDetails.get(0));
-            httpHeaders.put(Constant.CLIENT_SECRET, tokenDetails.get(1));
             httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
             httpHeaders.put(Headers.servicename.name(), "REGISTERAPP");
 
 
-            ObjectNode jsonNodes;
 
+            ObjectNode jsonNodes;
 
             jsonNodes = objectMapper.convertValue(requestValidatorV2.validatePublicRegistrationRequest(request, httpHeaders), ObjectNode.class);
 
@@ -94,7 +102,6 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
             log.info("Executing Step 2 to Generate token.....");
 
-            //ResponseEntity<Object> responseEntity = authenticationClient.publicRegister(request, httpHeaders);
             ResponseEntity<Object> responseEntity = authenticationService.publicRegister(request, httpHeaders);
 
             log.info("Response from Step 1....." + objectMapper.writeValueAsString(responseEntity));
@@ -116,10 +123,9 @@ public class RegistrationServiceImplV3 implements RegistrationServiceV3 {
 
             node.put("Authorization", "Bearer " + jwtToken);
 
-            //throw new IOException("failed message");
             return new ResponseOutput(SUCCESS_STATUS, JWT_TOKEN_SUCCESS);
         } catch (RouterException routerException) {
-            log.info("error Hint ---------" + routerException.getErrorHint());
+            log.info("error Hint ---------" + routerException.getErrorMessage());
             throw routerException;
         }catch (IOException exception){
             throw exception;

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.domain.MessageMasterConfig;
 import decimal.apigateway.exception.PublicTokenCreationException;
+import decimal.apigateway.exception.RequestNotPermitted;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.model.ResponseOutput;
@@ -17,7 +18,6 @@ import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.ErrorPayload;
 import decimal.logs.model.SystemError;
-import decimal.ratelimiter.exception.RequestNotPermitted;
 import lombok.extern.java.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -222,6 +222,8 @@ public class ExceptionController {
 
         return new ResponseEntity<>(ex.getMessage(), null, HttpStatus.TOO_MANY_REQUESTS);
     }
+
+
 
     @ExceptionHandler(value = PublicTokenCreationException.class)
     public ResponseEntity<Object> handlePublicJwtCreationException(PublicTokenCreationException ex) {

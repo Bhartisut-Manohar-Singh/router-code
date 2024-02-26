@@ -29,4 +29,6 @@ public class ApplicationDef implements Serializable {
     private String status;
     private String isSSOEnabled;
     private String allowedOrgApp;
+    private String isRateLimitingRequired;
+
 }
