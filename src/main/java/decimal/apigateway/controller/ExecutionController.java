@@ -33,7 +33,9 @@ public class ExecutionController
         System.out.println("==============================Gateway Processor=============================");
         Object o = executionService.executePlainRequest(request, httpHeaders);
         Map map = mapper.convertValue(o, Map.class);
-        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));
+//        Object statuscode = map.get("statuscode");
+//        Integer.valueOf((String) statuscode);
+        return new ResponseEntity<>(map.get("response"),HttpStatus.valueOf(Integer.valueOf((String) map.get("statuscode"))));
     }
     @PostMapping("execute/{orgId}/{appId}/{serviceName}/{version}")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String orgId,
