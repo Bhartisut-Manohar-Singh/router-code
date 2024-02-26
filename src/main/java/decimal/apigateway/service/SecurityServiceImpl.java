@@ -14,6 +14,7 @@ import decimal.logs.model.Request;
 import decimal.logs.model.Response;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -45,10 +46,12 @@ public class SecurityServiceImpl implements SecurityService {
     @Autowired
     LogsWriter logsWriter;
 
+    @Value("${isSecurityLogsEnabled:N}")
+    String securityLogsEnabled;
+
 
     @Override
     public Object validateRegistration(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
-
 
             return securityValidator.validateRegistration(request, httpHeaders).getResponse();
 
@@ -56,21 +59,26 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     public MicroserviceResponse validateExecutionRequestV2(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
-            log.info("validateExecutionRequestV2 httpheaders------------ "+httpHeaders);
-            log.info(httpHeaders.get("sourceAppId"));
-            log.info(httpHeaders.get("sourceOrgId"));
-            auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
+        auditPayload = null;
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
+            auditPayload = auditPayload();
+            auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(request);
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
+        }
+
             MicroserviceResponse microserviceResponse = (MicroserviceResponse) validationServiceV2.validateExecutionRequest(request, httpHeaders).getBody();
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
+        }
             return microserviceResponse;
 
 
@@ -79,18 +87,28 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     public MicroserviceResponse decryptRequest(JsonNode node, Map<String, String> httpHeaders) throws RouterException {
-            auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(node.toString(), JSON,httpHeaders, "security-service", auditPayload);
+
+        auditPayload = null;
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
+            auditPayload = auditPayload();
+            auditPayload = logsWriter.initializeLog(node.toString(), JSON, httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(node.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
+        }
+
             MicroserviceResponse microserviceResponse = encryptionDecryptionService.decryptRequest(node.asText(), httpHeaders);
+
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
+        }
             log.info("MicroserviceResponse  " + microserviceResponse);
             return microserviceResponse;
 
@@ -100,18 +118,26 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public MicroserviceResponse decryptRequestWithoutSession(String request, Map<String, String> httpHeaders) throws RouterException {
 
-            auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
+
+        auditPayload = null;
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
+            auditPayload = auditPayload();
+            auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(request.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
+        }
             MicroserviceResponse microserviceResponse = encryptionDecryptionService.decryptRequestWithoutSession(request, httpHeaders);
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
+        }
             return microserviceResponse;
 
     }
@@ -119,36 +145,54 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public MicroserviceResponse encryptResponseWithoutSession(ResponseEntity<Object> responseEntity, Map<String, String> httpHeaders) throws RouterException {
 
-            auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(responseEntity.toString(), JSON,httpHeaders, "security-service", auditPayload);
+
+        auditPayload = null;
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
+            auditPayload = auditPayload();
+            auditPayload = logsWriter.initializeLog(responseEntity.toString(), JSON, httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(responseEntity.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
+        }
             MicroserviceResponse microserviceResponse = encryptionDecryptionService.encryptResponseWithoutSession(responseEntity.getBody().toString(), httpHeaders);
+
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
+        }
             return microserviceResponse;
     }
 
     @Override
     public MicroserviceResponse generateResponseHash(String finalResponse, Map<String, String> httpHeaders) throws RouterException {
 
-            auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(finalResponse, JSON,httpHeaders, "security-service", auditPayload);
+
+        auditPayload = null;
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
+            auditPayload = auditPayload();
+            auditPayload = logsWriter.initializeLog(finalResponse, JSON, httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(finalResponse.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
+        }
             MicroserviceResponse microserviceResponse = encryptionDecryptionService.generateResponseHash(finalResponse, httpHeaders);
+
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
+        }
             return microserviceResponse;
 
     }
@@ -156,21 +200,27 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public MicroserviceResponse validate(String request, Map<String, String> httpHeaders, String name) throws RouterException, IOException {
 
-            log.info("request----" + request);
-            log.info("httpHeaders------" + httpHeaders + "    name-----------" + name);
-            auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
+
+        auditPayload = null;
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
+            auditPayload = auditPayload();
+            auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(request.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
+        }
             MicroserviceResponse microserviceResponse = validatorFactory.getValidator(name).validate(request, httpHeaders);
-            log.info("response from session Management " + microserviceResponse);
+
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
+        }
             return microserviceResponse;
 
     }
@@ -178,18 +228,25 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-            auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
+        auditPayload = null;
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
+            auditPayload = auditPayload();
+            auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(request.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
+        }
             MicroserviceResponse microserviceResponse = securityValidator.validateAuthenticationRequest(request, httpHeaders);
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
+        }
             return microserviceResponse;
 
     }
@@ -197,18 +254,25 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public MicroserviceResponse generateAuthResponseHash(String finalResponse, Map<String, String> httpHeaders) throws RouterException {
 
-            auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(finalResponse, JSON,httpHeaders, "security-service", auditPayload);
+        auditPayload = null;
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
+            auditPayload = auditPayload();
+            auditPayload = logsWriter.initializeLog(finalResponse, JSON, httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(finalResponse.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
+        }
             MicroserviceResponse microserviceResponse = encryptionDecryptionService.generateAuthResponseHash(finalResponse, httpHeaders);
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
+        }
             return microserviceResponse;
 
     }
@@ -216,12 +280,15 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
 
+        auditPayload = null;
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(request);
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
             logsWriter.updateLog(auditPayload);
+        }
             ResponseEntity response = securityValidator.validatePlainRequest(request, httpHeaders, serviceName);
             log.info("====== inside validatePlainRequest =======" + new Gson().toJson(response.getBody()));
             return new MicroserviceResponse(response.getStatusCode().toString(), "", response.getBody());
@@ -231,18 +298,25 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public MicroserviceResponse validateExecutionRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-            auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
+        auditPayload = null;
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
+            auditPayload = auditPayload();
+            auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(request.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
+        }
             MicroserviceResponse response = securityValidator.validateExecutionRequest(request, httpHeaders);
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload.setStatus(response.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(response.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", response.getStatus());
             logsWriter.updateLog(auditPayload);
+        }
             return response;
     }
 
@@ -256,18 +330,26 @@ public class SecurityServiceImpl implements SecurityService {
 
     public MicroserviceResponse validateAuthenticationV2(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-            auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders, "security-service", auditPayload);
+        auditPayload = null;
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
+            auditPayload = auditPayload();
+            auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(request.toString());
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
+        }
+
             MicroserviceResponse response = securityValidator.validateAuthenticationRequestV2(request, httpHeaders);
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload.setStatus(response.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(response.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", response.getStatus());
             logsWriter.updateLog(auditPayload);
+        }
             return response;
 
     }
