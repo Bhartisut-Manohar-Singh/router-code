@@ -69,9 +69,9 @@ public class ExecutionControllerV2 {
         httpHeaders.forEach((k,v) -> log.info(k + "->" + v));
 
 
-        Object o = executionServiceV2.executeRequest(destinationAppId, serviceName, request, httpHeaders);
-        Map map = mapper.convertValue(o, Map.class);
-        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));
+        return executionServiceV2.executeRequest(destinationAppId, serviceName, request, httpHeaders);
+       /* Map map = mapper.convertValue(o, Map.class);
+        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));*/
     }
 
     @PostMapping(value = "dynamic-router/{serviceName}/**")

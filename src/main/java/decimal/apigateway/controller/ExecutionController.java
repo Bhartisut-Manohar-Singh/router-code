@@ -44,17 +44,17 @@ public class ExecutionController
         httpHeaders.put("version", version);
 
         log.info("==========================Execute=============================");
-        Object o = executionService.executePlainRequest(request, httpHeaders);
-        Map map = mapper.convertValue(o, Map.class);
-        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));
+        return executionService.executePlainRequest(request, httpHeaders);
+   /*     Map map = mapper.convertValue(o, Map.class);
+        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));*/
     }
 
     @PostMapping("gateway")
     public Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         log.info("======================Gateway=============================");
-        Object o = executionService.executeRequest(request, httpHeaders);
-        Map map = mapper.convertValue(o, Map.class);
-        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));
+        return executionService.executeRequest(request, httpHeaders);
+    /*    Map map = mapper.convertValue(o, Map.class);
+        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));*/
     }
 
     @PostMapping(value = "dynamic-router/{serviceName}/**")
