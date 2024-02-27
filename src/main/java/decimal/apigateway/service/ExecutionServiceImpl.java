@@ -8,6 +8,7 @@ import decimal.apigateway.commons.Constant;
 
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.model.EsbOutput;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
 import decimal.apigateway.service.security.SecurityServiceEnc;
@@ -161,7 +162,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 
 
         if (responseHeaders != null && responseHeaders.containsKey("statuscode"))
+        {
             statusCode=responseHeaders.get("statuscode").get(0);
+        }
 
         log.info(" ===== response Body from esb ===== " + new Gson().toJson(responseBody));
         List<String> businessKeySet = getBusinessKey(responseBody);
@@ -176,13 +179,22 @@ public class ExecutionServiceImpl implements ExecutionService {
             MicroserviceResponse encryptedResponse = securityService.encryptResponseWithoutSession(responseEntity, headers);
             Map<String, String> finalResponseMap = new HashMap<>();
             finalResponseMap.put("response", encryptedResponse.getMessage());
-            finalResponseMap.put("statuscode", statusCode);
-            return finalResponseMap;
+
+            EsbOutput output= new EsbOutput();
+            output.setResponse(finalResponseMap);
+
+            if (!statusCode.isEmpty() && statusCode.chars().allMatch(Character::isDigit) )
+                output.setStatusCode(statusCode);
+
+            return output;
         }
-        Map<String, Object> map= new HashMap<>();
-        map.put("response", responseBody);
-        map.put("statuscode", statusCode);
-        return map;
+        EsbOutput output= new EsbOutput();
+        output.setResponse(responseBody);
+
+        if (!statusCode.isEmpty() && statusCode.chars().allMatch(Character::isDigit) )
+            output.setStatusCode(statusCode);
+
+        return output;
     }
 
     private static Map<String, String> setHeaders(Map<String, String> httpHeaders, Map<String, String> headers, String logsRequired, String serviceLog, String logPurgeDays) {

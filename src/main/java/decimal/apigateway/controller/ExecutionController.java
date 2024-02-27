@@ -3,6 +3,7 @@ package decimal.apigateway.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.model.EsbOutput;
 import decimal.apigateway.service.ExecutionService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +33,9 @@ public class ExecutionController
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         System.out.println("==============================Gateway Processor=============================");
         Object o = executionService.executePlainRequest(request, httpHeaders);
-        Map map = mapper.convertValue(o, Map.class);
-//        Object statuscode = map.get("statuscode");
-//        Integer.valueOf((String) statuscode);
-        return new ResponseEntity<>(map.get("response"),HttpStatus.valueOf(Integer.valueOf((String) map.get("statuscode"))));
+        EsbOutput output = mapper.convertValue(o, EsbOutput.class);
+
+        return new ResponseEntity<>(output.getResponse(), HttpStatus.valueOf(output.getStatusCode()));
     }
     @PostMapping("execute/{orgId}/{appId}/{serviceName}/{version}")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String orgId,
