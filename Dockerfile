@@ -1,4 +1,4 @@
-FROM openjdk:11
+FROM openjdk:17
 LABEL maintainer="devops@decimal.co.in"
       
 EXPOSE 80 
