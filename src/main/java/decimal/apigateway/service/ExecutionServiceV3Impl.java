@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.model.EsbOutput;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.validator.PublicJwtTokenValidator;
 import decimal.apigateway.service.validator.RequestValidatorV1;
@@ -31,6 +32,7 @@ import java.util.*;
 
 import static decimal.apigateway.commons.Constant.*;
 import static decimal.apigateway.service.ExecutionServiceImpl.getBusinessKey;
+import static decimal.apigateway.service.ExecutionServiceImpl.setStatusCodeIfPresent;
 
 @Service
 @Log
@@ -147,9 +149,13 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
 
          Object responseBody = responseEntity.getBody();
 
+         String statusCode="";
         HttpHeaders responseHeaders = responseEntity.getHeaders();
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
+
+        if(responseHeaders!=null && responseHeaders.containsKey("statuscode"))
+            statusCode=responseHeaders.get("statuscode").get(0);
 
         log.info(" ===== response Body from esb ===== " + new Gson().toJson(responseBody));
         List<String> businessKeySet = getBusinessKey(responseBody);
@@ -165,11 +171,16 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
                     httpHeaders);
             Map<String, String> finalResponseMap = new HashMap<>();
             finalResponseMap.put("response", encryptedResponse.getMessage());
-
-            return finalResponseMap;
+            EsbOutput esbOutput= new EsbOutput();
+            esbOutput.setResponse(finalResponseMap);
+            setStatusCodeIfPresent(statusCode,esbOutput);
+            return esbOutput;
         }
 
-        return responseBody;
+        EsbOutput esbOutput= new EsbOutput();
+        esbOutput.setResponse(responseBody);
+        setStatusCodeIfPresent(statusCode,esbOutput);
+        return esbOutput;
     }
 
     @Override

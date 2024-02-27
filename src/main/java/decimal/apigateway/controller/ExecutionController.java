@@ -54,17 +54,28 @@ public class ExecutionController
         httpHeaders.put("version", version);
 
         log.info("==========================Execute=============================");
-        return executionService.executePlainRequest(request, httpHeaders);
-   /*     Map map = mapper.convertValue(o, Map.class);
-        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));*/
+        Object o = executionService.executePlainRequest(request, httpHeaders);
+        EsbOutput output = mapper.convertValue(o, EsbOutput.class);
+
+        if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
+            return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
+        }
+        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
+        return new ResponseEntity<>(output.getResponse(), httpStatus);
+
     }
 
     @PostMapping("gateway")
     public Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         log.info("======================Gateway=============================");
-        return executionService.executeRequest(request, httpHeaders);
-    /*    Map map = mapper.convertValue(o, Map.class);
-        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));*/
+        Object o = executionService.executeRequest(request, httpHeaders);
+        EsbOutput output = mapper.convertValue(o, EsbOutput.class);
+
+        if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
+            return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
+        }
+        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
+        return new ResponseEntity<>(output.getResponse(), httpStatus);
     }
 
     @PostMapping(value = "dynamic-router/{serviceName}/**")
@@ -117,7 +128,7 @@ public class ExecutionController
     }
 
 
-    private HttpStatus getHttpStatus(String code) {
+    public static HttpStatus getHttpStatus(String code) {
         for (HttpStatus httpStatus : HttpStatus.values()) {
             if (httpStatus.value() == Integer.valueOf(code)) {
                 return httpStatus;

@@ -4,6 +4,7 @@ package decimal.apigateway.controller.controllerV2;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.model.EsbOutput;
 import decimal.apigateway.service.ExecutionServiceV2;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
 
+import static decimal.apigateway.controller.ExecutionController.getHttpStatus;
 
 
 @RestController
@@ -35,8 +37,13 @@ public class ExecutionControllerV2 {
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
         log.info("==============================Gateway Processor=============================");
         Object o = executionServiceV2.executePlainRequest(request, httpHeaders);
-        Map map = mapper.convertValue(o, Map.class);
-        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));
+        EsbOutput output = mapper.convertValue(o, EsbOutput.class);
+
+        if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
+            return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
+        }
+        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
+        return new ResponseEntity<>(output.getResponse(), httpStatus);
     }
 
     @PostMapping("execute/{sourceOrgId}/{sourceAppId}/{serviceName}/{version}")
@@ -49,8 +56,13 @@ public class ExecutionControllerV2 {
 
         log.info("==========================Execute=============================");
         Object o = executionServiceV2.executePlainRequest(request, httpHeaders);
-        Map map = mapper.convertValue(o, Map.class);
-        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));
+        EsbOutput output = mapper.convertValue(o, EsbOutput.class);
+
+        if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
+            return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
+        }
+        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
+        return new ResponseEntity<>(output.getResponse(), httpStatus);
     }
 
     @PostMapping("gateway/{destinationAppId}/{serviceName}")
@@ -69,9 +81,14 @@ public class ExecutionControllerV2 {
         httpHeaders.forEach((k,v) -> log.info(k + "->" + v));
 
 
-        return executionServiceV2.executeRequest(destinationAppId, serviceName, request, httpHeaders);
-       /* Map map = mapper.convertValue(o, Map.class);
-        return new ResponseEntity<>(map.get("response"), HttpStatus.valueOf(map.get("statuscode").toString()));*/
+        Object o = executionServiceV2.executeRequest(destinationAppId, serviceName, request, httpHeaders);
+        EsbOutput output = mapper.convertValue(o, EsbOutput.class);
+
+        if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
+            return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
+        }
+        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
+        return new ResponseEntity<>(output.getResponse(), httpStatus);
     }
 
     @PostMapping(value = "dynamic-router/{serviceName}/**")

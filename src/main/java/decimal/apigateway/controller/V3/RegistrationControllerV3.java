@@ -1,11 +1,15 @@
 package decimal.apigateway.controller.V3;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.model.EsbOutput;
 import decimal.apigateway.service.ExecutionServiceV3;
 import decimal.apigateway.service.RegistrationServiceV3;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -14,6 +18,7 @@ import java.util.Map;
 
 import static decimal.apigateway.commons.Constant.INVALID_REQUEST_500;
 import static decimal.apigateway.commons.Constant.MULTIPART;
+import static decimal.apigateway.controller.ExecutionController.getHttpStatus;
 
 @RestController
 @RequestMapping("engine/v3/")
@@ -25,10 +30,13 @@ public class RegistrationControllerV3 {
 
     private final ExecutionServiceV3 executionService;
 
+    private final ObjectMapper mapper;
+
     @Autowired
-    public RegistrationControllerV3(RegistrationServiceV3 registrationServiceV3, ExecutionServiceV3 executionService) {
+    public RegistrationControllerV3(RegistrationServiceV3 registrationServiceV3, ExecutionServiceV3 executionService, ObjectMapper mapper) {
         this.registrationServiceV3 = registrationServiceV3;
         this.executionService = executionService;
+        this.mapper = mapper;
     }
 
     /**
@@ -56,7 +64,15 @@ public class RegistrationControllerV3 {
         }
         if (responseType !=null && MULTIPART.equalsIgnoreCase(responseType))
             return executionService.executeMultiPart(request,httpHeaders);
-        return executionService.executePlainRequest(request, httpHeaders);
+
+        Object o = executionService.executePlainRequest(request, httpHeaders);
+        EsbOutput output = mapper.convertValue(o, EsbOutput.class);
+
+        if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
+            return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
+        }
+        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
+        return new ResponseEntity<>(output.getResponse(), httpStatus);
     }
 
 }

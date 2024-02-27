@@ -8,6 +8,7 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.domain.ApiAuthorizationConfig;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.model.EsbOutput;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.repository.SecApiAuthorizationConfigRepo;
 import decimal.apigateway.service.ExecutionServiceV2;
@@ -43,6 +44,7 @@ import java.util.*;
 
 import static decimal.apigateway.commons.Constant.*;
 import static decimal.apigateway.service.ExecutionServiceImpl.getBusinessKey;
+import static decimal.apigateway.service.ExecutionServiceImpl.setStatusCodeIfPresent;
 
 @Service
 @Log
@@ -134,7 +136,6 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
             auditPayload.setStatus(responseHeaders.get("status").get(0));
 
         if (responseHeaders!=null && responseHeaders.containsKey("statuscode")){
-//            auditPayload.setStatus(responseHeaders.get("statuscode").get(0));
             statusCode= responseHeaders.get("statuscode").get(0);
         }
 
@@ -158,8 +159,11 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
-        finalResponseMap.put("statuscode",statusCode);
-        return finalResponseMap;
+
+        EsbOutput esbOutput= new EsbOutput();
+        esbOutput.setResponse(finalResponseMap);
+        setStatusCodeIfPresent(statusCode,esbOutput);
+        return esbOutput;
 
     }
 
@@ -229,7 +233,6 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         if(responseHeaders!=null && responseHeaders.containsKey("statuscode"))
         {
             statusCode= responseHeaders.get("statuscode").get(0);
-//            auditPayload.setStatus(statusCode);
         }
 
         List<String> businessKeySet = getBusinessKey(responseBody);
@@ -245,13 +248,17 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
             MicroserviceResponse encryptedResponse = securityService.encryptResponseWithoutSession(responseEntity, httpHeaders);
             Map<String, String> finalResponseMap = new HashMap<>();
             finalResponseMap.put("response", encryptedResponse.getMessage());
-            finalResponseMap.put("statuscode", statusCode);
-            return finalResponseMap;
+
+            EsbOutput esbOutput= new EsbOutput();
+            esbOutput.setResponse(finalResponseMap);
+            setStatusCodeIfPresent(statusCode,esbOutput);
+            return esbOutput;
         }
-        Map<String, Object> finalResponse= new HashMap<>();
-        finalResponse.put("response", responseBody);
-        finalResponse.put("statuscode", statusCode);
-        return finalResponse;
+
+        EsbOutput esbOutput= new EsbOutput();
+        esbOutput.setResponse(responseBody);
+        setStatusCodeIfPresent(statusCode,esbOutput);
+        return esbOutput;
     }
 
     @Override
