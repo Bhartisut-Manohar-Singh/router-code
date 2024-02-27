@@ -2,6 +2,7 @@ package decimal.apigateway.configuration;
 
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.util.Timeout;
@@ -43,14 +44,15 @@ public class RestTemplateConfig {
         //For Setting TimeOut
         RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(Timeout.of(Duration.ofMillis(readTimeout))).build();
 
-        HttpClient httpClient = HttpClientBuilder.create()
+        CloseableHttpClient closeableHttpClient = HttpClientBuilder.create()
                 .setConnectionManager(connectionManager)
                 .setDefaultRequestConfig(requestConfig)
                 .build();
+
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
         //requestFactory.setReadTimeout(readTimeout); This has been replaced by RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(Timeout.of(Duration.ofMillis(readTimeout))).build();
         requestFactory.setConnectTimeout(connectionTimeout);
-        requestFactory.setHttpClient(httpClient);
+        requestFactory.setHttpClient(closeableHttpClient);
         template.setRequestFactory(requestFactory);
         return template;
     }
