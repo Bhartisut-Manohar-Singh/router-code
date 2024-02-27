@@ -74,6 +74,7 @@ public class RateLimitService {
             return true;
 
         } catch (RequestNotPermitted e) {
+            log.info("----------------- inside catch block of requestNotPermitted------------------");
             auditPayload.getResponse().setResponse(new Gson().toJson("Too many requests. Please try again later."));
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.TOO_MANY_REQUESTS.value()));
             auditPayload.getResponse().setTimestamp(Instant.now());
