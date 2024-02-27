@@ -39,8 +39,12 @@ public class ExecutionController
         if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
             return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
         }
-        return new ResponseEntity<>(output.getResponse(), HttpStatus.valueOf(output.getStatusCode()));
+        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
+        return new ResponseEntity<>(output.getResponse(), httpStatus);
     }
+
+
+
     @PostMapping("execute/{orgId}/{appId}/{serviceName}/{version}")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String orgId,
                                       @PathVariable String appId, @PathVariable String serviceName, @PathVariable String version) throws RouterException, IOException {
@@ -112,6 +116,15 @@ public class ExecutionController
 
     }
 
+
+    private HttpStatus getHttpStatus(String code) {
+        for (HttpStatus httpStatus : HttpStatus.values()) {
+            if (httpStatus.value() == Integer.valueOf(code)) {
+                return httpStatus;
+            }
+        }
+        throw new IllegalArgumentException("No matching HttpStatus for code: " + code);
+    }
 
 
 
