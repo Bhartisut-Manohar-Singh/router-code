@@ -3,7 +3,7 @@ package decimal.apigateway.service;
 import decimal.apigateway.exception.RouterException;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
 

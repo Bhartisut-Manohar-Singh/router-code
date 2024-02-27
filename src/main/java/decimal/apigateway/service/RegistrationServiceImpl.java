@@ -7,9 +7,9 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.ResponseOperations;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
-import decimal.apigateway.service.clients.AuthenticationClient;
-import decimal.apigateway.service.clients.SecurityClient;
-import decimal.apigateway.service.validator.RequestValidator;
+import decimal.apigateway.service.security.EncryptionDecryptionServiceImpl;
+import decimal.apigateway.service.security.SecurityServiceEnc;
+import decimal.apigateway.service.validator.RequestValidatorV1;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
@@ -22,19 +22,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
 
 import static decimal.apigateway.commons.Constant.JSON;
 
 @Service
+@CrossOrigin
 @Log
 public class RegistrationServiceImpl implements RegistrationService {
-
-    private SecurityClient securityClient;
-
-    private AuthenticationClient authenticationClient;
 
     private ObjectMapper objectMapper;
 
@@ -42,7 +39,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     ResponseOperations responseOperations;
 
     @Autowired
-    RequestValidator requestValidator;
+    RequestValidatorV1 requestValidator;
 
     @Autowired
     AuditTraceFilter auditTraceFilter;
@@ -51,15 +48,25 @@ public class RegistrationServiceImpl implements RegistrationService {
     LogsWriter logsWriter;
 
     @Autowired
+    SecurityServiceEnc securityServiceEnc;
+
+    @Autowired
     AuditPayload auditPayload;
 
     @Value("${isHttpTracingEnabled}")
     boolean isHttpTracingEnabled;
 
     @Autowired
-    public RegistrationServiceImpl(SecurityClient securityClient, AuthenticationClient authenticationClient, ObjectMapper objectMapper) {
-        this.securityClient = securityClient;
-        this.authenticationClient = authenticationClient;
+    EncryptionDecryptionServiceImpl encryptionDecryptionService;
+
+    @Autowired
+    SecurityService securityService;
+
+    AuthenticationService authenticationService;
+
+    @Autowired
+    public RegistrationServiceImpl(AuthenticationService authenticationService, ObjectMapper objectMapper) {
+        this.authenticationService = authenticationService;
         this.objectMapper = objectMapper;
     }
 
@@ -82,7 +89,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         httpHeaders.put("executionsource","API-GATEWAY");
 
         log.info(" === calling authenticationClient === ");
-        ResponseEntity<Object> responseEntity = authenticationClient.register(request, httpHeaders);
+        ResponseEntity<Object> responseEntity = authenticationService.register(request, httpHeaders);
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
@@ -110,7 +117,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 objectMapper.writeValueAsString(responseMap)).toString();
 
         log.info(" === calling securityClient === ");
-        MicroserviceResponse responseHash = securityClient.generateResponseHash(finalResponse, httpHeaders);
+        MicroserviceResponse responseHash = securityService.generateResponseHash(finalResponse, httpHeaders);
 
         response.addHeader("hash", responseHash.getMessage());
         node.put("hash", responseHash.getMessage());
@@ -120,6 +127,13 @@ public class RegistrationServiceImpl implements RegistrationService {
         logsWriter.updateLog(auditPayload);
         log.info(" ==== exiting register with response === " + finalResponse);
         return finalResponse;
+    }
+
+    private MicroserviceResponse callSecurityServiceForResponseHash(String request, Map<String, String> httpHeaders) throws RouterException {
+
+            MicroserviceResponse microserviceResponse = encryptionDecryptionService.generateResponseHash(request, httpHeaders);
+            return new MicroserviceResponse(microserviceResponse);
+
     }
 
     @Override
@@ -169,7 +183,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         httpHeaders.put("executionsource","API-GATEWAY");
 
-        ResponseEntity<Object> responseEntity = authenticationClient.authenticate(plainRequest, httpHeaders);
+        ResponseEntity<Object> responseEntity = authenticationService.authenticate(plainRequest, httpHeaders);
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
@@ -187,7 +201,7 @@ public class RegistrationServiceImpl implements RegistrationService {
          String maskedResponse = JsonMasker.maskMessage(finalResponse.toString(), maskKeys);
          auditPayload.getResponse().setResponse(maskedResponse);
 
-        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(finalResponse, httpHeaders);
+         MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(finalResponse.toString(), httpHeaders);
 
         if (!encryptedResponse.getStatus().equalsIgnoreCase(Constant.SUCCESS_STATUS)) {
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
@@ -205,7 +219,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
 
-        MicroserviceResponse authResponseHash = securityClient.generateAuthResponseHash(finalResponse.toString(), httpHeaders);
+        MicroserviceResponse authResponseHash = securityService.generateAuthResponseHash(finalResponse.toString(), httpHeaders);
         response.addHeader("hash", authResponseHash.getMessage());
 
         node.put("hash", authResponseHash.getMessage());
@@ -215,6 +229,14 @@ public class RegistrationServiceImpl implements RegistrationService {
         logsWriter.updateLog(auditPayload);
 
         return finalResponseMap;
+    }
+
+
+
+    private MicroserviceResponse callSecurityClientForEncryptResponse(String finalResponse, Map<String, String> httpHeaders) throws RouterException {
+
+            MicroserviceResponse microserviceResponse = encryptionDecryptionService.encryptResponse(finalResponse, httpHeaders);
+            return new MicroserviceResponse(microserviceResponse);
     }
 
     @Override
@@ -233,7 +255,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
 
         httpHeaders.put("executionsource","API-GATEWAY");
-        ResponseEntity<Object> responseEntity = authenticationClient.logout(httpHeaders);
+        ResponseEntity<Object> responseEntity = authenticationService.logout(httpHeaders);
+        log.info("response entity --------------"+responseEntity);
         MicroserviceResponse microserviceResponse = objectMapper.convertValue(responseEntity.getBody(),MicroserviceResponse.class);
         return new ResponseEntity(microserviceResponse,responseEntity.getHeaders(),HttpStatus.OK);
     }
@@ -241,7 +264,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public Object forceLogout(String request, Map<String, String> httpHeaders, HttpServletResponse response) {
         httpHeaders.put("executionsource","API-GATEWAY");
-        ResponseEntity<Object> responseEntity = authenticationClient.forceLogout(httpHeaders);
+        ResponseEntity<Object> responseEntity = authenticationService.forceLogout(httpHeaders);
         MicroserviceResponse microserviceResponse = objectMapper.convertValue(responseEntity.getBody(),MicroserviceResponse.class);
         return new ResponseEntity(microserviceResponse,responseEntity.getHeaders(),HttpStatus.OK);
     }

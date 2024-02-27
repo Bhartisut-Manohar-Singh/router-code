@@ -1,16 +1,14 @@
 package decimal.apigateway.controller.V3;
 
 
-import decimal.apigateway.exception.PublicTokenCreationException;
 import decimal.apigateway.exception.RouterException;
-import decimal.apigateway.service.ExecutionService;
 import decimal.apigateway.service.ExecutionServiceV3;
 import decimal.apigateway.service.RegistrationServiceV3;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
@@ -42,7 +40,8 @@ public class RegistrationControllerV3 {
      * @throws IOException
      */
     @PostMapping("register")
-    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException, PublicTokenCreationException {
+    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException, RouterException {
+        log.info("-------register call v3-------------");
         return registrationServiceV3.register(request, httpHeaders, response);
     }
 
@@ -51,13 +50,12 @@ public class RegistrationControllerV3 {
         log.info("==============================Public Gateway Processor=============================");
         String authorizationToken = httpHeaders.get("authorization");
         String responseType = httpHeaders.get("response-type");
-
+        log.info("--------authorization token----------" + authorizationToken);
         if (authorizationToken == null || !authorizationToken.startsWith("Bearer")) {
             throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
         if (responseType !=null && MULTIPART.equalsIgnoreCase(responseType))
             return executionService.executeMultiPart(request,httpHeaders);
-
         return executionService.executePlainRequest(request, httpHeaders);
     }
 

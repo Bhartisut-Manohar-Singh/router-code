@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.util.Map;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,22 +17,15 @@ public class MicroserviceResponse {
     String status;
     String message;
     Object response;
-
     Map<String, String> customData;
 
-    public MicroserviceResponse(String status, String message, Object response) {
+    public MicroserviceResponse(String status, String message, Object response){
         this.status = status;
         this.message = message;
         this.response = response;
     }
 
-    @Override
-    public String toString() {
-        return "MicroserviceResponse{" +
-                "status='" + status + '\'' +
-                ", message='" + message + '\'' +
-                ", response=" + response +
-                ", customData=" + customData +
-                '}';
+    public MicroserviceResponse(MicroserviceResponse microserviceResponse) {
     }
+
 }
