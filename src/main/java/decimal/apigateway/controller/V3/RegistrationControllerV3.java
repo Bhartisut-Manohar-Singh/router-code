@@ -2,10 +2,13 @@ package decimal.apigateway.controller.V3;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.EsbOutput;
+import decimal.apigateway.model.ServiceDef;
 import decimal.apigateway.service.ExecutionServiceV3;
 import decimal.apigateway.service.RegistrationServiceV3;
+import decimal.apigateway.service.validator.ServiceValidator;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,11 +34,14 @@ public class RegistrationControllerV3 {
 
     private final ObjectMapper mapper;
 
+    private final ServiceValidator serviceValidator;
+
     @Autowired
-    public RegistrationControllerV3(RegistrationServiceV3 registrationServiceV3, ExecutionServiceV3 executionService, ObjectMapper mapper) {
+    public RegistrationControllerV3(RegistrationServiceV3 registrationServiceV3, ExecutionServiceV3 executionService, ObjectMapper mapper,ServiceValidator serviceValidator) {
         this.registrationServiceV3 = registrationServiceV3;
         this.executionService = executionService;
         this.mapper = mapper;
+        this.serviceValidator=serviceValidator;
     }
 
     /**
@@ -61,8 +67,11 @@ public class RegistrationControllerV3 {
         if (authorizationToken == null || !authorizationToken.startsWith("Bearer")) {
             throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
-        if (responseType !=null && MULTIPART.equalsIgnoreCase(responseType))
-            return executionService.executeMultiPart(request,httpHeaders);
+
+        ServiceDef serviceDef = serviceValidator.getService(httpHeaders.get(Headers.orgid.name()),httpHeaders.get(Headers.appid.name()),httpHeaders.get(Headers.servicename.name()),"0");
+        if (serviceDef !=null && MULTIPART.equalsIgnoreCase(serviceDef.getResponseType())) {
+            return executionService.executeMultiPart(request, httpHeaders);
+        }
 
         Object o = executionService.executePlainRequest(request, httpHeaders);
         EsbOutput output = mapper.convertValue(o, EsbOutput.class);

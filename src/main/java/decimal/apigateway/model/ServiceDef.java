@@ -18,6 +18,8 @@ public class ServiceDef {
     private String name;
     private String status;
     private String isStopOnError;
+    private String responseType;
+
     private String isAuditEnabled;
     private String isPayloadEncrypted = "N";
     private String isDigitallySigned = "N";
