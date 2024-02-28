@@ -78,6 +78,8 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
 
         log.info("==== inside executePlainRequest ==== ");
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
+        //remove this
+        auditTraceFilter.setIsServicesLogsEnabled(true);
 
         String clientId = httpHeaders.get(Constant.ORG_ID) + Constant.TILD_SPLITTER + httpHeaders.get(Constant.APP_ID);
         httpHeaders.put(Constant.CLIENT_ID, clientId);
@@ -157,8 +159,6 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
         auditPayload.getResponse().setTimestamp(Instant.now());
-        //remove this
-        auditTraceFilter.setIsServicesLogsEnabled(true);
 
         logsWriter.updateLog(auditPayload);
 
