@@ -12,7 +12,9 @@ import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
 
 
 import javax.annotation.PostConstruct;
@@ -53,7 +55,8 @@ public class RateLimitService {
         if (rateLimitAppConfig.isPresent()) {
             log.info("------- going to consume token for app ---------");
                 if (!consumeTokens(rateLimitAppConfig.get(),"RL~"+appId)) {
-                    throw new RequestNotPermitted("No tokens left for this app. Please try again later.");
+//                    throw new RequestNotPermitted("No tokens left for this app. Please try again later.");
+                    throw new HttpServerErrorException(HttpStatus.TOO_MANY_REQUESTS);
                 }
 
             }
