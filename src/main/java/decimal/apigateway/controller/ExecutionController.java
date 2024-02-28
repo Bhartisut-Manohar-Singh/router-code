@@ -39,8 +39,9 @@ public class ExecutionController
         if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
             return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
         }
-        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
-        return new ResponseEntity<>(output.getResponse(), httpStatus);
+//        HttpStatus httpStatus1 = HttpStatus.valueOf(Integer.valueOf(output.getStatusCode()));
+//        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
+        return new ResponseEntity<>(output.getResponse(),  HttpStatus.valueOf(Integer.valueOf(output.getStatusCode())));
     }
 
 
@@ -129,7 +130,9 @@ public class ExecutionController
 
 
     public static HttpStatus getHttpStatus(String code) {
+
         for (HttpStatus httpStatus : HttpStatus.values()) {
+
             if (httpStatus.value() == Integer.valueOf(code)) {
                 return httpStatus;
             }
