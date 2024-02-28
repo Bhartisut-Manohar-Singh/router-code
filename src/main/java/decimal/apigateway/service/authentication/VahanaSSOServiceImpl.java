@@ -64,6 +64,9 @@ public class VahanaSSOServiceImpl implements VahanaSSOService{
 
     private Boolean validateGenerateTokenRequest(SSOTokenModel ssoTokenModel, Map<String, String> httpHeaders) throws RouterException, IOException {
         Boolean status=true;
+        String client= httpHeaders.get("clientid");
+        if (StringUtil.isNullOrEmpty(client))
+            throw new RouterException("301","clientId not present",null);
         List<String> clientId = AuthRouterOperations.getStringArray(httpHeaders.get(Constant.CLIENT_ID), "~");
 
         String orgId = clientId.get(0);
