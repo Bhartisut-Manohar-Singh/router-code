@@ -18,6 +18,7 @@ import decimal.logs.connector.LogsConnector;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.ErrorPayload;
+import decimal.logs.model.Response;
 import decimal.logs.model.SystemError;
 import lombok.extern.java.Log;
 import org.slf4j.Logger;
@@ -223,8 +224,10 @@ public class ExceptionController {
 
         log.info("-------- inside if condition for audit payload ++--------------");
         RateLimitError rateLimitError = new RateLimitError("Too many requests",FAILURE_STATUS,HttpStatus.TOO_MANY_REQUESTS);
+//        Response response = new Response();
+//        response.setResponse(mapper.writeValueAsString(rateLimitError));
 
-        auditPayload.getResponse().setResponse(mapper.writeValueAsString(rateLimitError));
+        auditPayload.getResponse().setResponse(rateLimitError);
         auditPayload.getResponse().setStatus(FAILURE_STATUS);
         auditPayload.getResponse().setTimestamp(Instant.now());
         auditPayload.setStatus(FAILURE_STATUS);
