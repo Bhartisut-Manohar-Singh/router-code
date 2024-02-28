@@ -56,7 +56,7 @@ public class RateLimitService {
             log.info("------- going to consume token for app ---------");
                 if (!consumeTokens(rateLimitAppConfig.get(),"RL~"+appId)) {
 //                    throw new RequestNotPermitted("No tokens left for this app. Please try again later.");
-                    throw new HttpServerErrorException(HttpStatus.TOO_MANY_REQUESTS);
+                    throw new RouterException("jgjk","jkjk",null);
                 }
 
             }

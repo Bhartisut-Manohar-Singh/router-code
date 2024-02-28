@@ -66,7 +66,7 @@ public class RateLimiterAspect{
         String appId = clientId.split(Constant.TILD_SPLITTER)[1];
 
 
-//
+
         Optional<ApplicationDefRedisConfig> applicationDefConfig = applicationDefRepo.findByOrgIdAndAppId(orgid, appId);
         if (applicationDefConfig.isEmpty())
             throw new RouterException(RouterResponseCode.APPLICATION_DEF_NOT_FOUND, (Exception) null,FAILURE_STATUS, "Application def not found for given orgId and appId");
