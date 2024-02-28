@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.domain.MessageMasterConfig;
 import decimal.apigateway.exception.PublicTokenCreationException;
+import decimal.apigateway.exception.RateLimitError;
 import decimal.apigateway.exception.RequestNotPermitted;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
@@ -220,14 +221,14 @@ public class ExceptionController {
     public ResponseEntity<Object> handleRouterException(RequestNotPermitted ex) throws JsonProcessingException {
         log.info("Inside request not permission exception handler - " + ex.getMessage());
 
-        if (auditPayload != null && auditPayload.getResponse() != null) {
-            log.info("-------- inside if condition for audit payload ++--------------");
-            auditPayload.getResponse().setResponse(mapper.writeValueAsString(ex));
-            auditPayload.getResponse().setStatus(FAILURE_STATUS);
-            auditPayload.getResponse().setTimestamp(Instant.now());
-            auditPayload.setStatus(FAILURE_STATUS);
-            logsWriter.updateLog(auditPayload);
-        }
+        log.info("-------- inside if condition for audit payload ++--------------");
+        RateLimitError rateLimitError = new RateLimitError("Too many requests",FAILURE_STATUS,HttpStatus.TOO_MANY_REQUESTS);
+
+        auditPayload.getResponse().setResponse(mapper.writeValueAsString(rateLimitError));
+        auditPayload.getResponse().setStatus(FAILURE_STATUS);
+        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.setStatus(FAILURE_STATUS);
+        logsWriter.updateLog(auditPayload);
 
         return new ResponseEntity<>(ex.getMessage(), null, HttpStatus.TOO_MANY_REQUESTS);
     }
