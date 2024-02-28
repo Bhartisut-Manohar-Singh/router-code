@@ -223,7 +223,7 @@ public class ExceptionController {
         log.info("Inside request not permission exception handler - " + ex.getMessage());
 
         log.info("-------- inside if condition for audit payload ++--------------");
-        RateLimitError rateLimitError = new RateLimitError("Too many requests",FAILURE_STATUS,HttpStatus.TOO_MANY_REQUESTS);
+        RateLimitError rateLimitError = new RateLimitError("Too many requests",FAILURE_STATUS,HttpStatus.TOO_MANY_REQUESTS.value());
 
 
         auditPayload.getResponse().setResponse(mapper.writeValueAsString(rateLimitError));

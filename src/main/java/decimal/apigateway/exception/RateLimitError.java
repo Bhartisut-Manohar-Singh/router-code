@@ -13,5 +13,5 @@ import org.springframework.http.HttpStatus;
 public class RateLimitError {
     String message;
     String status;
-    HttpStatus statusCode;
+    int statusCode;
 }
