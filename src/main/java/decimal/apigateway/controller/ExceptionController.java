@@ -224,10 +224,12 @@ public class ExceptionController {
 
         log.info("-------- inside if condition for audit payload ++--------------");
         RateLimitError rateLimitError = new RateLimitError("Too many requests",FAILURE_STATUS,HttpStatus.TOO_MANY_REQUESTS);
-//        Response response = new Response();
-//        response.setResponse(mapper.writeValueAsString(rateLimitError));
 
-        auditPayload.getResponse().setResponse(rateLimitError);
+        Response response = new Response();
+        response.setResponse(rateLimitError);
+        auditPayload.setResponse(response);
+
+//        auditPayload.getResponse().setResponse(mapper.writeValueAsString(rateLimitError));
         auditPayload.getResponse().setStatus(FAILURE_STATUS);
         auditPayload.getResponse().setTimestamp(Instant.now());
         auditPayload.setStatus(FAILURE_STATUS);
