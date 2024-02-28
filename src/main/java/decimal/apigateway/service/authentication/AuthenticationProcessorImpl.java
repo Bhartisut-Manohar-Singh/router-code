@@ -366,4 +366,80 @@ public class AuthenticationProcessorImpl implements AuthenticationProcessor {
         return microserviceResponse;
     }
 
+    @Override
+    public MicroserviceResponse authenticateV4(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
+
+        log.info("Start executing request for authentication");
+
+        System.out.println("------------------Start executing request for authentication--------------------- ");
+
+        String requestId = httpHeaders.get(Headers.requestid.name());
+        String loginType = httpHeaders.get(Headers.auth_scheme.name());
+
+        log.info("requestId--------------"+requestId +"loginType---------------"+loginType);
+
+        Object authenticationResponse = null;
+        try {
+            authenticationResponse = userAuthentication.authenticateV4(request, httpHeaders,loginType);
+        }catch (Exception e){
+            System.out.println("====Exception In Authenticate Call====" + e.getMessage());
+            throw e;
+        }
+
+        //Source Set
+        multipleSession.validateMultipleSession(httpHeaders);
+
+        Map<String, Object> rsaKeys = keysGenerator.getTokenAndRsaKeys(httpHeaders);
+
+        authenticationSessionService.createUserSession(httpHeaders, rsaKeys);
+
+        List<String> clientId = AuthRouterOperations.getStringArray(httpHeaders.get(CLIENT_ID), "~");
+
+        String orgId = clientId.get(0);
+        String appId = clientId.get(1);
+
+        ApplicationDef byOrgIdAndAppId = applicationDefConfig.findByOrgIdAndAppId(orgId, appId);
+
+        String token = "Bearer "  + rsaKeys.get("jwtToken");
+
+        if (byOrgIdAndAppId.getIsUserInactiveSessionRequired() != null && byOrgIdAndAppId.getIsUserInactiveSessionRequired().equalsIgnoreCase("Y")) {
+            authenticationSessionService.storeInactiveSessionDetails(httpHeaders.get("username"), requestId, byOrgIdAndAppId.getUserInactiveSessionExpiryTime());
+        }
+
+        log.info("Returning authentication response to client " );
+
+        Map<String, Object> authResponse = new HashMap<>();
+        authResponse.put("auth", authenticationResponse);
+        authResponse.put("jwtToken", token);
+
+        rsaKeys.remove("private-modules");
+        rsaKeys.remove("private-exponent");
+
+        authResponse.put("rsa", new Gson().toJson(rsaKeys));
+
+        MicroserviceResponse response = new MicroserviceResponse();
+        response.setStatus(SUCCESS_STATUS);
+        response.setMessage("Authentication has been done successfully");
+        response.setResponse(authResponse);
+
+
+        if ("Y".equalsIgnoreCase(isAnalyticsRequired)){
+            EventRequest eventRequest=eventRequestUtil.setLoginLogoutDetails(objectMapper.readValue(request, ObjectNode.class), httpHeaders, LOGIN_SUCCESS_EVENT_NAME);
+
+            eventRequest.setEventRemarks(loginType);
+            if(SSO.equalsIgnoreCase(loginType)){
+                Map<String,Object> eventData=new HashMap<>();
+                eventData.put(REQUEST,objectMapper.readValue(request, JsonNode.class));
+                eventData.put(RESPONSE,response);
+                eventRequest.setEventData(eventData);
+            }
+
+            log.info("-----------------------------recieved event request--------------------------");
+
+            logsConnector.raiseEvent(eventRequest,raiseEventTopic);
+        }
+
+        return response;
+    }
+
 }
