@@ -3,10 +3,7 @@ package decimal.apigateway.controller.V3;
 
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionServiceV3;
-import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.RegistrationServiceV3;
-import decimal.logs.filters.AuditTraceFilter;
-import decimal.logs.model.AuditPayload;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
-import static decimal.apigateway.commons.Constant.*;
-
+import static decimal.apigateway.commons.Constant.INVALID_REQUEST_500;
+import static decimal.apigateway.commons.Constant.MULTIPART;
 
 @RestController
 @RequestMapping("engine/v3/")
@@ -27,13 +24,6 @@ public class RegistrationControllerV3 {
     private final RegistrationServiceV3 registrationServiceV3;
 
     private final ExecutionServiceV3 executionService;
-    @Autowired
-    AuditPayload auditPayload;
-
-    @Autowired
-    LogsWriter logsWriter;
-    @Autowired
-    AuditTraceFilter auditTraceFilter;
 
     @Autowired
     public RegistrationControllerV3(RegistrationServiceV3 registrationServiceV3, ExecutionServiceV3 executionService) {
@@ -66,8 +56,6 @@ public class RegistrationControllerV3 {
         }
         if (responseType !=null && MULTIPART.equalsIgnoreCase(responseType))
             return executionService.executeMultiPart(request,httpHeaders);
-        auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
-        auditTraceFilter.setIsServicesLogsEnabled(true);
         return executionService.executePlainRequest(request, httpHeaders);
     }
 
