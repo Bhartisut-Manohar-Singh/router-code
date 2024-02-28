@@ -221,7 +221,7 @@ public class ExceptionController {
         log.info("Inside request not permission exception handler - " + ex.getMessage());
 
         if (auditPayload != null && auditPayload.getResponse() != null) {
-            log.info("-------- inside if condition for audit payload --------------");
+            log.info("-------- inside if condition for audit payload ++--------------");
             auditPayload.getResponse().setResponse(ex);
             auditPayload.getResponse().setStatus(FAILURE_STATUS);
             auditPayload.getResponse().setTimestamp(Instant.now());
