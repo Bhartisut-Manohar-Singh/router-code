@@ -39,9 +39,8 @@ public class ExecutionController
         if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
             return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
         }
-//        HttpStatus httpStatus1 = HttpStatus.valueOf(Integer.valueOf(output.getStatusCode()));
-//        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
-        return new ResponseEntity<>(output.getResponse(),  HttpStatus.valueOf(Integer.valueOf(output.getStatusCode())));
+
+        return new ResponseEntity<>(output.getResponse(), HttpStatus.valueOf(Integer.parseInt(output.getStatusCode())));
     }
 
 
@@ -61,9 +60,8 @@ public class ExecutionController
         if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
             return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
         }
-        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
-        return new ResponseEntity<>(output.getResponse(), httpStatus);
 
+        return new ResponseEntity<>(output.getResponse(), HttpStatus.valueOf(Integer.parseInt(output.getStatusCode())));
     }
 
     @PostMapping("gateway")
@@ -75,8 +73,7 @@ public class ExecutionController
         if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
             return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
         }
-        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
-        return new ResponseEntity<>(output.getResponse(), httpStatus);
+        return new ResponseEntity<>(output.getResponse(), HttpStatus.valueOf(Integer.parseInt(output.getStatusCode())));
     }
 
     @PostMapping(value = "dynamic-router/{serviceName}/**")
@@ -127,20 +124,5 @@ public class ExecutionController
         return executionService.executeFileRequest(httpServletRequest,request,httpHeaders,serviceName,mediaDataObjects,files);
 
     }
-
-
-    public static HttpStatus getHttpStatus(String code) {
-
-        for (HttpStatus httpStatus : HttpStatus.values()) {
-
-            if (httpStatus.value() == Integer.valueOf(code)) {
-                return httpStatus;
-            }
-        }
-        throw new IllegalArgumentException("No matching HttpStatus for code: " + code);
-    }
-
-
-
 
 }

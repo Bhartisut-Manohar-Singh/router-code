@@ -18,7 +18,6 @@ import java.util.Map;
 
 import static decimal.apigateway.commons.Constant.INVALID_REQUEST_500;
 import static decimal.apigateway.commons.Constant.MULTIPART;
-import static decimal.apigateway.controller.ExecutionController.getHttpStatus;
 
 @RestController
 @RequestMapping("engine/v3/")
@@ -71,8 +70,7 @@ public class RegistrationControllerV3 {
         if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
             return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
         }
-        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
-        return new ResponseEntity<>(output.getResponse(), httpStatus);
+        return new ResponseEntity<>(output.getResponse(), HttpStatus.valueOf(Integer.parseInt(output.getStatusCode())));
     }
 
 }

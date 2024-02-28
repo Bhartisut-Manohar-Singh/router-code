@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
 
-import static decimal.apigateway.controller.ExecutionController.getHttpStatus;
 
 
 @RestController
@@ -42,8 +41,7 @@ public class ExecutionControllerV2 {
         if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
             return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
         }
-        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
-        return new ResponseEntity<>(output.getResponse(), httpStatus);
+        return new ResponseEntity<>(output.getResponse(), HttpStatus.valueOf(Integer.parseInt(output.getStatusCode())));
     }
 
     @PostMapping("execute/{sourceOrgId}/{sourceAppId}/{serviceName}/{version}")
@@ -61,8 +59,7 @@ public class ExecutionControllerV2 {
         if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
             return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
         }
-        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
-        return new ResponseEntity<>(output.getResponse(), httpStatus);
+        return new ResponseEntity<>(output.getResponse(), HttpStatus.valueOf(Integer.parseInt(output.getStatusCode())));
     }
 
     @PostMapping("gateway/{destinationAppId}/{serviceName}")
@@ -87,8 +84,7 @@ public class ExecutionControllerV2 {
         if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
             return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
         }
-        HttpStatus httpStatus = getHttpStatus(output.getStatusCode());
-        return new ResponseEntity<>(output.getResponse(), httpStatus);
+        return new ResponseEntity<>(output.getResponse(), HttpStatus.valueOf(Integer.parseInt(output.getStatusCode())));
     }
 
     @PostMapping(value = "dynamic-router/{serviceName}/**")
