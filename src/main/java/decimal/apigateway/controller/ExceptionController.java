@@ -226,6 +226,7 @@ public class ExceptionController {
             auditPayload.getResponse().setStatus(FAILURE_STATUS);
             auditPayload.getResponse().setTimestamp(Instant.now());
             auditPayload.setStatus(FAILURE_STATUS);
+            log.info("-------------"+ mapper.writeValueAsString(auditPayload));
             logsWriter.updateLog(auditPayload);
         }
 
