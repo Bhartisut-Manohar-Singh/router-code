@@ -216,12 +216,20 @@ public class ExceptionController {
         return new ResponseEntity<>(errorResponse, responseHeaders,HttpStatus.BAD_REQUEST);
     }*/
 
-//    @ExceptionHandler(value = RequestNotPermitted.class)
-//    public ResponseEntity<Object> handleRouterException(RequestNotPermitted ex) throws JsonProcessingException {
-//        log.info("Inside request not permission exception handler - " + ex.getMessage());
-//
-//        return new ResponseEntity<>(ex.getMessage(), null, HttpStatus.TOO_MANY_REQUESTS);
-//    }
+    @ExceptionHandler(value = RequestNotPermitted.class)
+    public ResponseEntity<Object> handleRouterException(RequestNotPermitted ex) throws JsonProcessingException {
+        log.info("Inside request not permission exception handler - " + ex.getMessage());
+
+        if (auditPayload != null && auditPayload.getResponse() != null) {
+            auditPayload.getResponse().setResponse(mapper.writeValueAsString(ex));
+            auditPayload.getResponse().setStatus(FAILURE_STATUS);
+            auditPayload.getResponse().setTimestamp(Instant.now());
+            auditPayload.setStatus(FAILURE_STATUS);
+            logsWriter.updateLog(auditPayload);
+        }
+
+        return new ResponseEntity<>(ex.getMessage(), null, HttpStatus.TOO_MANY_REQUESTS);
+    }
 
 
 
