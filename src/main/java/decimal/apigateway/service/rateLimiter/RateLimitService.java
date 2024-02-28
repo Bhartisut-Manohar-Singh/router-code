@@ -44,9 +44,6 @@ public class RateLimitService {
     private ObjectMapper mapper;
 
     @Autowired
-    AuditPayload auditPayload;
-
-    @Autowired
     LogsWriter logsWriter;
 
     @Autowired
