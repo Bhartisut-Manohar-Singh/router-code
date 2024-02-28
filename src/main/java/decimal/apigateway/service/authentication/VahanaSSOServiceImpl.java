@@ -66,7 +66,7 @@ public class VahanaSSOServiceImpl implements VahanaSSOService{
         Boolean status=true;
         String client= httpHeaders.get("clientid");
         if (StringUtil.isNullOrEmpty(client))
-            throw new RouterException("301","clientId not present",null);
+            throw new IOException("clientId not present");
         List<String> clientId = AuthRouterOperations.getStringArray(httpHeaders.get(Constant.CLIENT_ID), "~");
 
         String orgId = clientId.get(0);
