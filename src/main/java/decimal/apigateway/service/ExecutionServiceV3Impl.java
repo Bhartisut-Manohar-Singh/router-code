@@ -77,7 +77,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
         log.info("==== inside executePlainRequest ==== ");
-        auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
+
 
 
         String clientId = httpHeaders.get(Constant.ORG_ID) + Constant.TILD_SPLITTER + httpHeaders.get(Constant.APP_ID);
@@ -136,6 +136,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
             String[] keysToMaskArr = keysToMask.split(",");
             maskKeys = Arrays.asList(keysToMaskArr);
         }
+
         auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
         auditPayload.getRequest().setRequestBody(JsonMasker.maskMessage(request, maskKeys));
         auditPayload.getRequest().setHeaders(httpHeaders);
@@ -155,8 +156,10 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         List<String> businessKeySet = getBusinessKey(responseBody);
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(responseEntity.getBody()));
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
-        auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
+        auditPayload.getResponse().setStatus("200");
         auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.setStatus("200");
+
 
         logsWriter.updateLog(auditPayload);
 
@@ -219,6 +222,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
         auditPayload.getResponse().setTimestamp(Instant.now());
+
 
         logsWriter.updateLog(auditPayload);
 
