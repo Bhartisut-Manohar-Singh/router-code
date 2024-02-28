@@ -11,6 +11,8 @@ import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.rateLimiter.RateLimitService;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
+import decimal.logs.model.Request;
+import decimal.logs.model.Response;
 import lombok.extern.java.Log;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -91,6 +93,9 @@ public class RateLimiterAspect{
             auditTraceFilter.setIsServicesLogsEnabled(true);
             log.info("----------Executing rate limiter.....");
             rateLimitService.allowRequest(appId,serviceName,httpHeaders);
+            auditPayload = new AuditPayload();
+            auditPayload.setRequest(new Request());
+            auditPayload.setResponse(new Response());
         }
 
     }
