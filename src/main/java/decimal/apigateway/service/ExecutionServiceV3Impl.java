@@ -136,7 +136,6 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
             String[] keysToMaskArr = keysToMask.split(",");
             maskKeys = Arrays.asList(keysToMaskArr);
         }
-        log.info("----------ishttpenabled----------"+(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog)));
         auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
         auditPayload.getRequest().setRequestBody(JsonMasker.maskMessage(request, maskKeys));
         auditPayload.getRequest().setHeaders(httpHeaders);
@@ -154,7 +153,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
 
         log.info(" ===== response Body from esb ===== " + new Gson().toJson(responseBody));
         List<String> businessKeySet = getBusinessKey(responseBody);
-        auditPayload.getResponse().setResponse(new Gson().toJson(responseEntity.getBody()));
+        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(responseEntity.getBody()));
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
         auditPayload.getResponse().setTimestamp(Instant.now());
