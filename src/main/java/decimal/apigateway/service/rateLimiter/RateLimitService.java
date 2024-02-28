@@ -31,11 +31,6 @@ public class RateLimitService {
     @Autowired
     RateLimitRepo rateLimitRepo;
     @Autowired
-    AuditPayload auditPayload;
-    @Autowired
-    LogsWriter logsWriter;
-
-    @Autowired
     private RedisTemplate<String, Long> redisTemplate;
 
     private ValueOperations<String, Long> valueOps;
@@ -47,7 +42,6 @@ public class RateLimitService {
 
 
     public Boolean allowRequest(String appId, String serviceName, Map<String, String> httpHeaders) throws RouterException, IOException {
-        auditPayload = logsWriter.initializeLog("request", JSON, httpHeaders);
 
         // checks in redis if rate limiting config is present
         Optional<RateLimitConfig> rateLimitAppConfig = rateLimitRepo.findById(appId);
@@ -55,8 +49,7 @@ public class RateLimitService {
         if (rateLimitAppConfig.isPresent()) {
             log.info("------- going to consume token for app ---------");
                 if (!consumeTokens(rateLimitAppConfig.get(),"RL~"+appId)) {
-//                    throw new RequestNotPermitted("No tokens left for this app. Please try again later.");
-                    throw new RouterException("jgjk","jkjk",null);
+                 throw new RequestNotPermitted("No tokens left for this app. Please try again later.");
                 }
 
             }

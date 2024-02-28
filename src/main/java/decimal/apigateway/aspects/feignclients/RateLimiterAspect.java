@@ -7,7 +7,10 @@ import decimal.apigateway.domain.ApplicationDefRedisConfig;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.ApplicationDef;
 import decimal.apigateway.repository.ApplicationDefRedisConfigRepo;
+import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.rateLimiter.RateLimitService;
+import decimal.logs.filters.AuditTraceFilter;
+import decimal.logs.model.AuditPayload;
 import lombok.extern.java.Log;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -21,6 +24,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static decimal.apigateway.commons.Constant.FAILURE_STATUS;
+import static decimal.apigateway.commons.Constant.JSON;
 
 @Component
 @Aspect
@@ -31,10 +35,19 @@ public class RateLimiterAspect{
     RateLimitService rateLimitService;
 
     @Autowired
+    AuditPayload auditPayload;
+
+    @Autowired
+    LogsWriter logsWriter;
+
+    @Autowired
     ApplicationDefRedisConfigRepo applicationDefRepo;
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    AuditTraceFilter auditTraceFilter;
 
     @Pointcut("((within(decimal.apigateway.controller.controllerV2.ExecutionControllerV2) && "
             + "(execution(public * executePlainRequest(..)) || execution(public * executeRequest(..)))) "
@@ -74,6 +87,8 @@ public class RateLimiterAspect{
         ApplicationDef applicationDef =  objectMapper.readValue(applicationDefConfig.get().getApiData(), ApplicationDef.class);
         String isRateLimitingRequired = applicationDef.getIsRateLimitingRequired();
         if(isRateLimitingRequired != null && isRateLimitingRequired.equalsIgnoreCase("Y")){
+            auditPayload = logsWriter.initializeLog(requestBody, JSON, httpHeaders);
+            auditTraceFilter.setIsServicesLogsEnabled(true);
             log.info("----------Executing rate limiter.....");
             rateLimitService.allowRequest(appId,serviceName,httpHeaders);
         }
