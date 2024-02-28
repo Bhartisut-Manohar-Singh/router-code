@@ -66,7 +66,9 @@ public class LogsManagementConfiguration {
         List<String> registeredUrls = new ArrayList<>();
         registeredUrls.add("logout");
         registeredUrls.add("forceLogout");
-
+        registeredUrls.add("generate/SSOToken");
+        registeredUrls.add("validate/SSOToken");
+        registeredUrls.add("sso-login-details");
 
         return new AuditTraceFilter("api-gateway", isHttpTracingEnabled, registeredUrls);
     }
