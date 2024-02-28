@@ -78,8 +78,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
 
         log.info("==== inside executePlainRequest ==== ");
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
-        //remove this
-        auditTraceFilter.setIsServicesLogsEnabled(true);
+
 
         String clientId = httpHeaders.get(Constant.ORG_ID) + Constant.TILD_SPLITTER + httpHeaders.get(Constant.APP_ID);
         httpHeaders.put(Constant.CLIENT_ID, clientId);
@@ -137,7 +136,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
             String[] keysToMaskArr = keysToMask.split(",");
             maskKeys = Arrays.asList(keysToMaskArr);
         }
-
+        log.info("----------ishttpenabled----------"+(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog)));
         auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
         auditPayload.getRequest().setRequestBody(JsonMasker.maskMessage(request, maskKeys));
         auditPayload.getRequest().setHeaders(httpHeaders);
