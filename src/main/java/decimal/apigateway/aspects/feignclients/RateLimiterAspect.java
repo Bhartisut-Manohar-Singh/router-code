@@ -79,6 +79,7 @@ public class RateLimiterAspect{
 
         ApplicationDef applicationDef =  objectMapper.readValue(applicationDefConfig.get().getApiData(), ApplicationDef.class);
         String isRateLimitingRequired = applicationDef.getIsRateLimitingRequired();
+
         if(isRateLimitingRequired != null && isRateLimitingRequired.equalsIgnoreCase("Y")){
             log.info("----------Executing rate limiter.....");
             rateLimitService.allowRequest(appId,serviceName,httpHeaders);

@@ -161,13 +161,6 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
 //        auditPayload.getResponse().setMessage("test msg");
 
         logsWriter.updateLog(auditPayload);
-        log.info("----------- auditpayload response for update log for executionv3 -----------"+objectMapper.writeValueAsString(auditPayload.getResponse()));
-        log.info("----------- auditpayload request for update log for executionv3 -----------"+objectMapper.writeValueAsString(auditPayload.getRequest()));
-        log.info("----------- auditpayload requestIdentifier for update log for executionv3 -----------"+objectMapper.writeValueAsString(auditPayload.getRequestIdentifier()));
-
-        log.info("----------- auditTraceFilter for executionv3 -----------"+auditTraceFilter.requestIdentifier);
-
-
 
         if (("Y").equalsIgnoreCase(isPayloadEncrypted)) {
             MicroserviceResponse encryptedResponse = securityService.encryptResponseWithoutSession(responseEntity,
