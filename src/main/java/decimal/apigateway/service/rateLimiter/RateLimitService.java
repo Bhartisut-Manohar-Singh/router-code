@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 
 import static decimal.apigateway.commons.Constant.*;
@@ -78,7 +79,8 @@ public class RateLimitService {
 
         if (redisTemplate.getExpire(key)==-1){
             log.info("+++++++++++++++ expiry was not set ++++++++++++++++++=");
-            redisTemplate.expire(key,rateLimitConfig.getDuration(),rateLimitConfig.getDurationUnit());
+            long convertedMilis = rateLimitConfig.getDurationUnit().toMillis(rateLimitConfig.getDuration());
+            redisTemplate.expire(key,convertedMilis, TimeUnit.MILLISECONDS);
         }
 
         Long newCtr = valueOps.decrement(key);
