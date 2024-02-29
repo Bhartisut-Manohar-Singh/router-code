@@ -72,14 +72,14 @@ public class RateLimitService {
 
 
     boolean consumeTokens(RateLimitConfig rateLimitConfig, String key){
+        long convertedMilis = rateLimitConfig.getDurationUnit().toMillis(rateLimitConfig.getDuration());
         log.info("------ inside consume tokens---------");
 
-        Boolean bool = valueOps.setIfAbsent(key,rateLimitConfig.getMaxAllowedHits(),rateLimitConfig.getDuration(),rateLimitConfig.getDurationUnit());
+        Boolean bool = valueOps.setIfAbsent(key,rateLimitConfig.getMaxAllowedHits(),convertedMilis,TimeUnit.MILLISECONDS);
         log.info("-------- returned value after setting the key --------"+bool);
 
         if (redisTemplate.getExpire(key)==-1){
             log.info("+++++++++++++++ expiry was not set ++++++++++++++++++=");
-            long convertedMilis = rateLimitConfig.getDurationUnit().toMillis(rateLimitConfig.getDuration());
             redisTemplate.expire(key,convertedMilis, TimeUnit.MILLISECONDS);
         }
 
