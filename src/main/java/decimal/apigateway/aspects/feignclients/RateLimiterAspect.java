@@ -93,9 +93,6 @@ public class RateLimiterAspect{
             auditTraceFilter.setIsServicesLogsEnabled(true);
             log.info("----------Executing rate limiter.....");
             rateLimitService.allowRequest(appId,serviceName,httpHeaders);
-            auditPayload = new AuditPayload();
-            auditPayload.setRequest(new Request());
-            auditPayload.setResponse(new Response());
         }
 
     }
