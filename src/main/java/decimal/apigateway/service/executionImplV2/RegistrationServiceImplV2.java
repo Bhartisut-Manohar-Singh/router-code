@@ -8,10 +8,12 @@ import decimal.apigateway.commons.ResponseOperations;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
+import decimal.apigateway.service.AuthenticationService;
 import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.RegistrationServiceV2;
-import decimal.apigateway.service.clients.AuthenticationClient;
-import decimal.apigateway.service.clients.SecurityClient;
+import decimal.apigateway.service.SecurityService;
+
+import decimal.apigateway.service.security.SecurityServiceEnc;
 import decimal.apigateway.service.validator.RequestValidatorV2;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.masking.JsonMasker;
@@ -35,10 +37,6 @@ import static decimal.apigateway.commons.Constant.JSON;
 @Log
 public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
 
-    private SecurityClient securityClient;
-
-    private AuthenticationClient authenticationClient;
-
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -54,22 +52,29 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
     LogsWriter logsWriter;
 
     @Autowired
+    SecurityServiceEnc securityServiceEnc;
+
+    @Autowired
     AuditPayload auditPayload;
 
     @Value("${isHttpTracingEnabled}")
     boolean isHttpTracingEnabled;
 
+    SecurityService securityService;
+
+    AuthenticationService authenticationService;
+
     @Autowired
-    public RegistrationServiceImplV2(SecurityClient securityClient, AuthenticationClient authenticationClient, ObjectMapper objectMapper) {
-        this.securityClient = securityClient;
-        this.authenticationClient = authenticationClient;
+    public RegistrationServiceImplV2(SecurityService securityService, AuthenticationService authenticationService, ObjectMapper objectMapper) {
+        this.securityService = securityService;
+        this.authenticationService = authenticationService;
         this.objectMapper = objectMapper;
     }
 
     @Override
     public Object register(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
-        auditPayload = logsWriter.initializeLog(request,JSON, httpHeaders);
+        auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders);
 
         auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
 
@@ -81,15 +86,15 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
 
         auditPayload.getRequest().setRequestBody(request);
 
-        httpHeaders.put("executionsource","API-GATEWAY");
+        httpHeaders.put("executionsource", "API-GATEWAY");
 
-        ResponseEntity<Object> responseEntity = authenticationClient.register(request, httpHeaders);
+        ResponseEntity<Object> responseEntity = authenticationService.register(request, httpHeaders);
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
-        if(responseHeaders!=null && responseHeaders.containsKey("status"))
+        if (responseHeaders != null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
 
-        MicroserviceResponse registerResponse = objectMapper.convertValue(responseEntity.getBody(),MicroserviceResponse.class);
+        MicroserviceResponse registerResponse = objectMapper.convertValue(responseEntity.getBody(), MicroserviceResponse.class);
         Map<String, Object> rsaKeysMap = objectMapper.convertValue(registerResponse.getResponse(), new TypeReference<Map<String, Object>>() {
         });
 
@@ -110,21 +115,20 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
                 httpHeaders.get("servicename"),
                 objectMapper.writeValueAsString(responseMap)).toString();
 
-        MicroserviceResponse responseHash = securityClient.generateResponseHash(finalResponse, httpHeaders);
+        MicroserviceResponse responseHash = securityService.generateResponseHash(finalResponse, httpHeaders);
 
         response.addHeader("hash", responseHash.getMessage());
         node.put("hash", responseHash.getMessage());
 
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
-
         logsWriter.updateLog(auditPayload);
         return finalResponse;
     }
 
     @Override
-    public Object  authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response, String destinationAppId) throws IOException, RouterException {
+    public Object authenticate(String request, Map<String, String> httpHeaders, HttpServletResponse response, String destinationAppId) throws IOException, RouterException {
         log.info("Authenticate v2 called for  - " + request + " and dAppId - " + destinationAppId);
-        auditPayload = logsWriter.initializeLog(request,JSON, httpHeaders);
+        auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders);
 
         MicroserviceResponse microserviceResponse = requestValidatorV2.validateAuthenticationV2(request, httpHeaders);
 
@@ -135,20 +139,18 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
         Map<String, String> customData = microserviceResponse.getCustomData();
 
         String destinationOrgId = "";
-        if(customData != null)
-        {
+        if (customData != null) {
             String logsRequired = customData.get("appLogs");
             String serviceLog = customData.get("serviceLog");
-            String logPurgeDays =  customData.get("logpurgedays");
+            String logPurgeDays = customData.get("logpurgedays");
             auditTraceFilter.setPurgeDays(logPurgeDays);
             httpHeaders.put(Constant.KEYS_TO_MASK, customData.get(Constant.KEYS_TO_MASK));
             httpHeaders.put("logsrequired", logsRequired);
             httpHeaders.put("servicelogs", serviceLog);
-            httpHeaders.put("logpurgedays",logPurgeDays);
+            httpHeaders.put("logpurgedays", logPurgeDays);
             auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled && "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog));
             destinationOrgId = customData.getOrDefault("destinationOrgId", "");
-        }
-        else
+        } else
             auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
 
         String keysToMask = httpHeaders.get(Constant.KEYS_TO_MASK);
@@ -169,7 +171,7 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
 
         auditPayload.getRequestIdentifier().setLoginId(microserviceResponse.getMessage().split(Constant.TILD_SPLITTER)[2]);
 
-        httpHeaders.put("executionsource","API-GATEWAY");
+        httpHeaders.put("executionsource", "API-GATEWAY");
 
 
         log.info("Now updating org and app id headers to destination org - " + destinationOrgId + " and dAPP id - " + destinationAppId);
@@ -178,15 +180,15 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
         httpHeaders.put("destinationorgid", destinationOrgId);
 
         log.info("Calling authentication service.....");
-        ResponseEntity<Object> responseEntity = authenticationClient.authenticateV2(plainRequest, httpHeaders);
+        ResponseEntity<Object> responseEntity = authenticationService.authenticateV2(plainRequest, httpHeaders);
 
         log.info("Response returned by authentication service -- " + responseEntity);
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
-        if(responseHeaders!=null && responseHeaders.containsKey("status"))
+        if (responseHeaders != null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
 
-        MicroserviceResponse authenticateResponse = objectMapper.convertValue(responseEntity.getBody(),MicroserviceResponse.class);
+        MicroserviceResponse authenticateResponse = objectMapper.convertValue(responseEntity.getBody(), MicroserviceResponse.class);
 
         Map<String, Object> authResponse = objectMapper.convertValue(authenticateResponse.getResponse(), new TypeReference<Map<String, Object>>() {
         });
@@ -198,9 +200,7 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
         String maskedResponse = JsonMasker.maskMessage(finalResponse.toString(), maskKeys);
         auditPayload.getResponse().setResponse(maskedResponse);
 
-        log.info("Encrypting response...");
-
-        MicroserviceResponse encryptedResponse = securityClient.encryptResponse(finalResponse, httpHeaders);
+        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(finalResponse), httpHeaders);
 
         if (!encryptedResponse.getStatus().equalsIgnoreCase(Constant.SUCCESS_STATUS)) {
             return new ResponseEntity<>(authenticateResponse.getResponse(), HttpStatus.BAD_REQUEST);
@@ -212,13 +212,10 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
         response.addHeader("Authorization", authResponse.get("jwtToken").toString());
 
 
-
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
 
-        log.info("Encrypting response hash.....");
-
-        MicroserviceResponse authResponseHash = securityClient.generateAuthResponseHash(finalResponse.toString(), httpHeaders);
+        MicroserviceResponse authResponseHash = securityService.generateResponseHash(finalResponse.toString(), httpHeaders);
 
         response.addHeader("hash", authResponseHash.getMessage());
 
@@ -236,11 +233,11 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
     }
 
     @Override
-    public Object forceLogout(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws RouterException {
-        httpHeaders.put("executionsource","API-GATEWAY");
-        ResponseEntity<Object> responseEntity = authenticationClient.forceLogout(httpHeaders);
-        MicroserviceResponse microserviceResponse = objectMapper.convertValue(responseEntity.getBody(),MicroserviceResponse.class);
-        return new ResponseEntity(microserviceResponse,responseEntity.getHeaders(),HttpStatus.OK);
+    public Object forceLogout(String request, Map<String, String> httpHeaders, HttpServletResponse response) {
+        httpHeaders.put("executionsource", "API-GATEWAY");
+        ResponseEntity<Object> responseEntity = authenticationService.forceLogout(httpHeaders);
+        MicroserviceResponse microserviceResponse = objectMapper.convertValue(responseEntity.getBody(), MicroserviceResponse.class);
+        return new ResponseEntity(microserviceResponse, responseEntity.getHeaders(), HttpStatus.OK);
     }
 
     @Override
@@ -252,15 +249,13 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
 
             auditTraceFilter.requestIdentifier.setLoginId(microserviceResponse.getResponse().toString().split(Constant.TILD_SPLITTER)[2]);
 
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             log.info("Security Failure!!!!!");
         }
 
-        httpHeaders.put("executionsource","API-GATEWAY");
-        ResponseEntity<Object> responseEntity = authenticationClient.logout(httpHeaders);
-        MicroserviceResponse microserviceResponse = objectMapper.convertValue(responseEntity.getBody(),MicroserviceResponse.class);
-        return new ResponseEntity(microserviceResponse,responseEntity.getHeaders(),HttpStatus.OK);
+        httpHeaders.put("executionsource", "API-GATEWAY");
+        ResponseEntity<Object> responseEntity = authenticationService.logout(httpHeaders);
+        MicroserviceResponse microserviceResponse = objectMapper.convertValue(responseEntity.getBody(), MicroserviceResponse.class);
+        return new ResponseEntity(microserviceResponse, responseEntity.getHeaders(), HttpStatus.BAD_REQUEST);
     }
 }

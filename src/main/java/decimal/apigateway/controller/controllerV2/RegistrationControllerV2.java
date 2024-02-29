@@ -4,7 +4,6 @@ package decimal.apigateway.controller.controllerV2;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
-import decimal.apigateway.service.RegistrationService;
 import decimal.apigateway.service.RegistrationServiceV2;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,20 +28,7 @@ public class RegistrationControllerV2 {
     }
 
     @PostMapping("register")
-    public Object executeService(@RequestBody String request,
-                                 @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
-
-
-//        String serviceName = Objects.isNull(svcName) || svcName.isEmpty() ? httpHeaders.get("servicename") : svcName;
-//        log.info("Service Name: " + serviceName);
-//
-//        log.info("====================Call for register=============================");
-//        if (serviceName.contains("AUTH") || serviceName.contains("auth")) {
-//            httpHeaders.put("destinationappid", destinationAppId);
-//            httpHeaders.put("servicename",serviceName);
-//
-//            return registrationServiceV2.authenticate(request, httpHeaders, response, destinationAppId);
-//        }
+    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
         String serviceName = httpHeaders.get("servicename");
         log.info("Service Name: " + serviceName);
@@ -56,12 +42,7 @@ public class RegistrationControllerV2 {
             MicroserviceResponse microserviceResponse = new MicroserviceResponse(status, message, "");
 
             throw new RouterException(Constant.ROUTER_SERVICE_NOT_FOUND,  Constant.ROUTER_ERROR_TYPE_VALIDATION,microserviceResponse);
-
         }
-
-        // return new ResponseEntity<>( Constant.ROUTER_SERVICE_NOT_FOUND
-//, HttpStatus.BAD_REQUEST);
-
     }
 
     @PostMapping("register/{destinationAppId}/{serviceName}")
