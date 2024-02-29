@@ -59,7 +59,6 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     public MicroserviceResponse validateExecutionRequestV2(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
-        auditPayload = null;
 
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();
@@ -87,8 +86,6 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     public MicroserviceResponse decryptRequest(JsonNode node, Map<String, String> httpHeaders) throws RouterException {
-
-        auditPayload = null;
 
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();
@@ -118,9 +115,6 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public MicroserviceResponse decryptRequestWithoutSession(String request, Map<String, String> httpHeaders) throws RouterException {
 
-
-        auditPayload = null;
-
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();
             auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders, "security-service", auditPayload);
@@ -145,9 +139,6 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public MicroserviceResponse encryptResponseWithoutSession(ResponseEntity<Object> responseEntity, Map<String, String> httpHeaders) throws RouterException {
 
-
-        auditPayload = null;
-
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();
             auditPayload = logsWriter.initializeLog(responseEntity.toString(), JSON, httpHeaders, "security-service", auditPayload);
@@ -171,9 +162,6 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     public MicroserviceResponse generateResponseHash(String finalResponse, Map<String, String> httpHeaders) throws RouterException {
-
-
-        auditPayload = null;
 
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();
@@ -200,9 +188,6 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public MicroserviceResponse validate(String request, Map<String, String> httpHeaders, String name) throws RouterException, IOException {
 
-
-        auditPayload = null;
-
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();
             auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders, "security-service", auditPayload);
@@ -228,8 +213,6 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        auditPayload = null;
-
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();
             auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders, "security-service", auditPayload);
@@ -253,8 +236,6 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     public MicroserviceResponse generateAuthResponseHash(String finalResponse, Map<String, String> httpHeaders) throws RouterException {
-
-        auditPayload = null;
 
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();
@@ -280,7 +261,6 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
 
-        auditPayload = null;
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = logsWriter.initializeLog(request, JSON, httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
@@ -297,8 +277,6 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     public MicroserviceResponse validateExecutionRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
-
-        auditPayload = null;
 
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();
@@ -329,8 +307,6 @@ public class SecurityServiceImpl implements SecurityService {
 
 
     public MicroserviceResponse validateAuthenticationV2(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
-
-        auditPayload = null;
 
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();

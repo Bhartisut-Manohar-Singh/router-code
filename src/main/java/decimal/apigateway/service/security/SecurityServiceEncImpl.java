@@ -37,9 +37,6 @@ public class SecurityServiceEncImpl implements SecurityServiceEnc {
 
     public MicroserviceResponse encryptResponse(String body, Map<String, String> httpHeaders) throws RouterException {
 
-
-        auditPayload = null;
-
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();
             auditPayload = logsWriter.initializeLog(body, JSON, httpHeaders, "security-service", auditPayload);
