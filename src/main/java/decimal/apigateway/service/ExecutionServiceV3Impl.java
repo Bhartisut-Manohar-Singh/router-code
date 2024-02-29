@@ -193,9 +193,10 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         publicJwtTokenValidator.validate(request,httpHeaders);
 
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
-        JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
-        Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"),HashMap.class);
 
+        JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
+        log.info("----- Response Node: " + objectMapper.writeValueAsString(responseNode));
+        Map<String,String> headers = objectMapper.convertValue(responseNode.get("response").get("headers"), new TypeReference<>(){});
         String logsRequired = headers.get("logsrequired");
         String serviceLog = headers.get("serviceLog");
         String keysToMask = headers.get("keys_to_mask");
