@@ -158,7 +158,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
         auditPayload.getResponse().setTimestamp(Instant.now());
-        auditPayload.getResponse().setMessage("test msg");
+//        auditPayload.getResponse().setMessage("test msg");
 
         logsWriter.updateLog(auditPayload);
         log.info("----------- auditpayload response for update log for executionv3 -----------"+objectMapper.writeValueAsString(auditPayload.getResponse()));
