@@ -2,6 +2,7 @@ package decimal.apigateway.controller.V3;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.EsbOutput;
@@ -22,9 +23,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
+import static decimal.apigateway.commons.Constant.INVALID_ORG_APP;
 import static decimal.apigateway.commons.Constant.INVALID_REQUEST_500;
 import static decimal.apigateway.commons.Constant.JSON;
 import static decimal.apigateway.commons.Constant.MULTIPART;
+import static decimal.apigateway.commons.Constant.ROUTER_ERROR_TYPE_VALIDATION;
 
 @RestController
 @RequestMapping("engine/v3/")
@@ -76,7 +79,7 @@ public class RegistrationControllerV3 {
         log.info("--------authorization token----------" + authorizationToken);
         if (authorizationToken == null || !authorizationToken.startsWith("Bearer")) {
             auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
-            throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
+            throw new RouterException(INVALID_REQUEST_500, (Exception) null, ROUTER_ERROR_TYPE_VALIDATION, "Invalid JWT token");
         }
 
         ServiceDef serviceDef = serviceValidator.getService(httpHeaders.get(Headers.orgid.name()),httpHeaders.get(Headers.appid.name()),httpHeaders.get(Headers.servicename.name()),"0");
