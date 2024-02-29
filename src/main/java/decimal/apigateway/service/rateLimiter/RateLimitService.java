@@ -73,7 +73,7 @@ public class RateLimitService {
 
     boolean consumeTokens(RateLimitConfig rateLimitConfig, String key){
         long convertedMilis = rateLimitConfig.getDurationUnit().toMillis(rateLimitConfig.getDuration());
-        log.info("------ inside consume tokens---------");
+        log.info("------ inside consume tokens---------"+convertedMilis);
 
         Boolean bool = valueOps.setIfAbsent(key,rateLimitConfig.getMaxAllowedHits(),convertedMilis,TimeUnit.MILLISECONDS);
         log.info("-------- returned value after setting the key --------"+bool);
