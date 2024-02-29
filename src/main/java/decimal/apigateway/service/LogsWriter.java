@@ -54,6 +54,20 @@ public class LogsWriter {
         return auditPayload;
     }
 
+    public AuditPayload initializeLog(String request,String requestType, Map<String, String> httpHeaders,Instant requestTimestamp)
+    {
+        auditPayload.setRequestTimestamp(requestTimestamp);
+
+        RequestIdentifier requestIdentifier = getRequestIdentifier(httpHeaders,requestType);
+
+        auditPayload.setRequestIdentifier(requestIdentifier);
+
+        auditPayload.getRequest().setHeaders(httpHeaders);
+
+        return auditPayload;
+    }
+
+
     public void updateLog(AuditPayload auditPayload) throws JsonProcessingException {
         auditPayload.setResponseTimestamp(Instant.now());
         auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().toEpochMilli() - auditPayload.getRequestTimestamp().toEpochMilli());

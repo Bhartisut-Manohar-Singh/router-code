@@ -19,6 +19,7 @@ import org.springframework.web.client.HttpServerErrorException;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
@@ -43,13 +44,14 @@ public class RateLimitService {
 
     public Boolean allowRequest(String appId, String serviceName, Map<String, String> httpHeaders) throws RouterException, IOException {
 
+        Instant requestTimestamp = Instant.now();
         // checks in redis if rate limiting config is present
         Optional<RateLimitConfig> rateLimitAppConfig = rateLimitRepo.findById(appId);
 
         if (rateLimitAppConfig.isPresent()) {
             log.info("------- going to consume token for app ---------");
                 if (!consumeTokens(rateLimitAppConfig.get(),"RL~"+appId)) {
-                 throw new RequestNotPermitted("No tokens left for this app. Please try again later.");
+                 throw new RequestNotPermitted("No tokens left for this app. Please try again later.",requestTimestamp,httpHeaders);
                 }
 
             }
@@ -59,7 +61,7 @@ public class RateLimitService {
         if(rateLimitServiceConfig.isPresent()){
             log.info("------- going to consume token for service ---------");
             if (!consumeTokens(rateLimitServiceConfig.get(),"RL~"+appId+"~"+serviceName)) {
-                throw new RequestNotPermitted("No tokens left for this service. Please try again later.");
+                throw new RequestNotPermitted("No tokens left for this service. Please try again later.",requestTimestamp,httpHeaders);
             }
         }
             // Both app and service checks passed

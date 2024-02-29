@@ -223,6 +223,8 @@ public class ExceptionController {
         log.info("Inside request not permission exception handler - " + ex.getMessage());
         RateLimitError rateLimitError = new RateLimitError("Too many requests",FAILURE_STATUS,HttpStatus.TOO_MANY_REQUESTS.value());
 
+        auditPayload = logsWriter.initializeLog("Request", JSON, ex.getHttpHeaders(),ex.getRequestTimestamp());
+        auditTraceFilter.setIsServicesLogsEnabled(true);
         auditPayload.getResponse().setResponse(mapper.writeValueAsString(rateLimitError));
         auditPayload.getResponse().setStatus(FAILURE_STATUS);
         auditPayload.getResponse().setTimestamp(Instant.now());
@@ -230,7 +232,7 @@ public class ExceptionController {
         logsWriter.updateLog(auditPayload);
         log.info("--------------- auditpayload for exception Request Not permitted -----------------"+objectMapper.writeValueAsString(auditPayload));
 
-        return new ResponseEntity<>(ex.getMessage(), null, HttpStatus.TOO_MANY_REQUESTS);
+        return new ResponseEntity<>(rateLimitError, null, HttpStatus.TOO_MANY_REQUESTS);
     }
 
 
