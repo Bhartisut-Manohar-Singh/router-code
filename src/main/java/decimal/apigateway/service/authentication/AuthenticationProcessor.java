@@ -25,4 +25,8 @@ public interface AuthenticationProcessor {
 
 
     MicroserviceResponse publicRegister(String request, Map<String, String> httpHeaders) throws IOException, RouterException;
+
+    MicroserviceResponse authenticateV4(String request, Map<String, String> httpHeaders) throws RouterException, IOException;
+
+
 }

@@ -155,9 +155,7 @@ public class Constant {
     public static final String RESPONSE="response";
 
     public static final String SSO="SSO";
-
-
-
+    public static final String AUTH_SSO = "auth_sso";
 
 
     public static final List<String> getSecuredKeys() {
