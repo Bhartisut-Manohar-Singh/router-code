@@ -35,7 +35,7 @@ public class RegistrationController {
         String serviceName = httpHeaders.get("servicename");
         String loginType = httpHeaders.getOrDefault("auth_method","*");
         log.info("Service Name: " + serviceName);
-        log.info("Login Type: "+ serviceName);
+        log.info("Login Type: "+ loginType);
 
         log.info("====================Call for register=============================");
         if (serviceName.contains("AUTH") || serviceName.contains("auth"))
