@@ -63,6 +63,15 @@ public class LogsWriter {
         logsConnector.audit(auditPayloadFinal);
     }
 
+    public void updateLogError(AuditPayload auditPayload, String str) throws JsonProcessingException {
+        auditPayload.setResponseTimestamp(Instant.now());
+        auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().toEpochMilli() - auditPayload.getRequestTimestamp().toEpochMilli());
+
+        AuditPayload auditPayloadFinal =new AuditPayload(auditPayload.getRequestTimestamp(),auditPayload.getResponseTimestamp(),auditPayload.getTimeTaken(),auditPayload.getRequest(),auditPayload.getResponse(),auditPayload.getStatus(),auditPayload.getRequestIdentifier(),auditPayload.isLogRequestAndResponse());
+        log.info("------------------- inside updateLog function--------------"+ objectMapper.writeValueAsString(auditPayloadFinal.getResponse()));
+        logsConnector.audit(auditPayloadFinal);
+    }
+
     private Predicate<String> isNotNullAndNotEmpty = (str) -> str != null && !str.isEmpty();
 
     private RequestIdentifier getRequestIdentifier(Map<String, String> requestHeaders,String requestType) {
