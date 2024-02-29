@@ -12,6 +12,10 @@ public class Constant {
 
 
     public static final String TILD_SPLITTER = "~";
+    public static final String RL_TILD = "RL~";
+    public static final String NO_TOKENS_LEFT_FOR_APP = "No tokens left for this app. Please try again later.";
+    public static final String NO_TOKENS_LEFT_FOR_SERVICE = "No tokens left for this service. Please try again later.";
+    public static final String TOO_MANY_REQUESTS = "Too many requests";
     public static final String ESB = "esb";
     public static final String MULTIPART_FILES= "files";
     public static final String MONITORING_MICRO_SERVICE = "VMONITORING-EXE";

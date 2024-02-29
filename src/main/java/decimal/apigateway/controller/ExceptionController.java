@@ -221,7 +221,7 @@ public class ExceptionController {
     @ExceptionHandler(value = RequestNotPermitted.class)
     public ResponseEntity<Object> handleRouterException(RequestNotPermitted ex) throws JsonProcessingException {
         log.info("Inside request not permission exception handler - " + ex.getMessage());
-        RateLimitError rateLimitError = new RateLimitError("Too many requests",FAILURE_STATUS,HttpStatus.TOO_MANY_REQUESTS.value());
+        RateLimitError rateLimitError = new RateLimitError(TOO_MANY_REQUESTS,FAILURE_STATUS,HttpStatus.TOO_MANY_REQUESTS.value());
 
         auditPayload = logsWriter.initializeLog("Request", JSON, ex.getHttpHeaders(),ex.getRequestTimestamp());
         auditTraceFilter.setIsServicesLogsEnabled(true);

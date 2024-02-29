@@ -50,19 +50,17 @@ public class RateLimitService {
         Optional<RateLimitConfig> rateLimitAppConfig = rateLimitRepo.findById(appId);
 
         if (rateLimitAppConfig.isPresent()) {
-            log.info("------- going to consume token for app ---------");
-                if (!consumeTokens(rateLimitAppConfig.get(),"RL~"+appId)) {
-                 throw new RequestNotPermitted("No tokens left for this app. Please try again later.",requestTimestamp,httpHeaders);
+                if (!consumeTokens(rateLimitAppConfig.get(),RL_TILD+appId)) {
+                 throw new RequestNotPermitted(NO_TOKENS_LEFT_FOR_APP,requestTimestamp,httpHeaders);
                 }
 
             }
 
-        Optional<RateLimitConfig> rateLimitServiceConfig = rateLimitRepo.findById(appId + "~" + serviceName);
+        Optional<RateLimitConfig> rateLimitServiceConfig = rateLimitRepo.findById(appId + TILD_SPLITTER + serviceName);
 
         if(rateLimitServiceConfig.isPresent()){
-            log.info("------- going to consume token for service ---------");
-            if (!consumeTokens(rateLimitServiceConfig.get(),"RL~"+appId+"~"+serviceName)) {
-                throw new RequestNotPermitted("No tokens left for this service. Please try again later.",requestTimestamp,httpHeaders);
+            if (!consumeTokens(rateLimitServiceConfig.get(),RL_TILD+appId+TILD_SPLITTER+serviceName)) {
+                throw new RequestNotPermitted(NO_TOKENS_LEFT_FOR_SERVICE,requestTimestamp,httpHeaders);
             }
         }
             // Both app and service checks passed
@@ -73,27 +71,17 @@ public class RateLimitService {
 
     boolean consumeTokens(RateLimitConfig rateLimitConfig, String key){
         long convertedMilis = rateLimitConfig.getDurationUnit().toMillis(rateLimitConfig.getDuration());
-        log.info("------ inside consume tokens---------"+convertedMilis);
 
-        Boolean bool = valueOps.setIfAbsent(key,rateLimitConfig.getMaxAllowedHits(),convertedMilis,TimeUnit.MILLISECONDS);
-        log.info("-------- returned value after setting the key --------"+bool);
+        valueOps.setIfAbsent(key,rateLimitConfig.getMaxAllowedHits(),convertedMilis,TimeUnit.MILLISECONDS);
 
         if (redisTemplate.getExpire(key)==-1){
             log.info("+++++++++++++++ expiry was not set ++++++++++++++++++=");
             redisTemplate.expire(key,convertedMilis, TimeUnit.MILLISECONDS);
         }
 
-        Long newCtr = valueOps.decrement(key);
-        log.info("--------- tokens left are ------- : "+newCtr);
-        if(newCtr<0){
-
-            log.info("--- no tokens left ---");
-            return false;
-        }else {
-            return true;
-        }
-
-
+        //Long newCtr = valueOps.decrement(key);
+        //return newCtr >= 0 ? true : false;
+        return valueOps.decrement(key) >= 0;
     }
 
 }
