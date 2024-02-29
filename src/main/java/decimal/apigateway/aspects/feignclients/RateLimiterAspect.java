@@ -90,7 +90,7 @@ public class RateLimiterAspect{
         String isRateLimitingRequired = applicationDef.getIsRateLimitingRequired();
         if(isRateLimitingRequired != null && isRateLimitingRequired.equalsIgnoreCase("Y")){
             auditPayload = logsWriter.initializeLog(requestBody, JSON, httpHeaders);
-            log.info("------------auditpayload in aspect class -----------"+ auditPayload);
+            log.info("------------auditpayload in aspect class -----------"+ objectMapper.writeValueAsString(auditPayload.getResponse()));
             auditTraceFilter.setIsServicesLogsEnabled(true);
             log.info("------------auditTraceFilter in aspect class -----------"+ auditTraceFilter);
             log.info("----------Executing rate limiter.....");

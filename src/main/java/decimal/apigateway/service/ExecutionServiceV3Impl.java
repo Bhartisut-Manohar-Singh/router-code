@@ -160,7 +160,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         auditPayload.getResponse().setTimestamp(Instant.now());
 
         logsWriter.updateLog(auditPayload);
-        log.info("----------- auditpayload for update log for executionv3 -----------"+auditPayload);
+        log.info("----------- auditpayload for update log for executionv3 -----------"+objectMapper.writeValueAsString(auditPayload.getResponse()));
         log.info("----------- auditTraceFilter for executionv3 -----------"+auditTraceFilter);
 
 
