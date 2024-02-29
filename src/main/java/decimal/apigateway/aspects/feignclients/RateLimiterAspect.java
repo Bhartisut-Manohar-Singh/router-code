@@ -7,12 +7,7 @@ import decimal.apigateway.domain.ApplicationDefRedisConfig;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.ApplicationDef;
 import decimal.apigateway.repository.ApplicationDefRedisConfigRepo;
-import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.rateLimiter.RateLimitService;
-import decimal.logs.filters.AuditTraceFilter;
-import decimal.logs.model.AuditPayload;
-import decimal.logs.model.Request;
-import decimal.logs.model.Response;
 import lombok.extern.java.Log;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -26,7 +21,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static decimal.apigateway.commons.Constant.FAILURE_STATUS;
-import static decimal.apigateway.commons.Constant.JSON;
 
 @Component
 @Aspect
@@ -42,10 +36,8 @@ public class RateLimiterAspect{
     @Autowired
     ObjectMapper objectMapper;
 
-    @Pointcut("((within(decimal.apigateway.controller.controllerV2.ExecutionControllerV2) && "
-            + "(execution(public * executePlainRequest(..)) || execution(public * executeRequest(..)))) "
-            + "|| (within(decimal.apigateway.controller.V3.RegistrationControllerV3) && execution(public * executePlainRequest(..)))) "
-            + "&& args(requestBody, httpHeaders,..)")
+
+    @Pointcut("((within(decimal.apigateway.controller.V3.RegistrationControllerV3) && execution(public * executePlainRequest(..)))) && args(requestBody, httpHeaders,..)")
     public void rateLimiters(String requestBody, Map<String, String> httpHeaders) {
     }
 

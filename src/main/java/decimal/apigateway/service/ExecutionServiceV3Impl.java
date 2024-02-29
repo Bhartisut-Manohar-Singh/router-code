@@ -78,7 +78,6 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
 
         log.info("==== inside executePlainRequest ==== ");
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
-        log.info("----------- auditpayload for initialize log for executionv3 -----------"+auditPayload);
 
         String clientId = httpHeaders.get(Constant.ORG_ID) + Constant.TILD_SPLITTER + httpHeaders.get(Constant.APP_ID);
         httpHeaders.put(Constant.CLIENT_ID, clientId);
