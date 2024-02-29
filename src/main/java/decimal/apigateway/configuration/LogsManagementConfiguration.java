@@ -69,7 +69,6 @@ public class LogsManagementConfiguration {
         registeredUrls.add("generate/SSOToken");
         registeredUrls.add("validate/SSOToken");
         registeredUrls.add("sso-login-details");
-
         return new AuditTraceFilter("api-gateway", isHttpTracingEnabled, registeredUrls);
     }
 
