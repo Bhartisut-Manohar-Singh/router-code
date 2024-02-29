@@ -1,5 +1,6 @@
 package decimal.apigateway.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import decimal.logs.connector.LogsConnector;
@@ -53,11 +54,12 @@ public class LogsWriter {
         return auditPayload;
     }
 
-    public void updateLog(AuditPayload auditPayload){
+    public void updateLog(AuditPayload auditPayload) throws JsonProcessingException {
         auditPayload.setResponseTimestamp(Instant.now());
         auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().toEpochMilli() - auditPayload.getRequestTimestamp().toEpochMilli());
 
         AuditPayload auditPayloadFinal =new AuditPayload(auditPayload.getRequestTimestamp(),auditPayload.getResponseTimestamp(),auditPayload.getTimeTaken(),auditPayload.getRequest(),auditPayload.getResponse(),auditPayload.getStatus(),auditPayload.getRequestIdentifier(),auditPayload.isLogRequestAndResponse());
+        log.info("------------------- inside updateLog function--------------"+objectMapper.writeValueAsString(auditPayloadFinal));
         logsConnector.audit(auditPayloadFinal);
     }
 

@@ -228,6 +228,7 @@ public class ExceptionController {
         auditPayload.getResponse().setTimestamp(Instant.now());
         auditPayload.setStatus(FAILURE_STATUS);
         logsWriter.updateLog(auditPayload);
+        log.info("--------------- auditpayload for exception Request Not permitted -----------------"+objectMapper.writeValueAsString(auditPayload));
 
         return new ResponseEntity<>(ex.getMessage(), null, HttpStatus.TOO_MANY_REQUESTS);
     }

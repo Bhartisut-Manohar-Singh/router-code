@@ -1,6 +1,7 @@
 
 package decimal.apigateway.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 import decimal.apigateway.exception.RouterException;
@@ -85,7 +86,7 @@ public class SecurityServiceImpl implements SecurityService {
 
 
     @Override
-    public MicroserviceResponse decryptRequest(JsonNode node, Map<String, String> httpHeaders) throws RouterException {
+    public MicroserviceResponse decryptRequest(JsonNode node, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
 
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();
@@ -113,7 +114,7 @@ public class SecurityServiceImpl implements SecurityService {
 
 
     @Override
-    public MicroserviceResponse decryptRequestWithoutSession(String request, Map<String, String> httpHeaders) throws RouterException {
+    public MicroserviceResponse decryptRequestWithoutSession(String request, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
 
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();
@@ -137,7 +138,7 @@ public class SecurityServiceImpl implements SecurityService {
     }
 
     @Override
-    public MicroserviceResponse encryptResponseWithoutSession(ResponseEntity<Object> responseEntity, Map<String, String> httpHeaders) throws RouterException {
+    public MicroserviceResponse encryptResponseWithoutSession(ResponseEntity<Object> responseEntity, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
 
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();
@@ -161,7 +162,7 @@ public class SecurityServiceImpl implements SecurityService {
     }
 
     @Override
-    public MicroserviceResponse generateResponseHash(String finalResponse, Map<String, String> httpHeaders) throws RouterException {
+    public MicroserviceResponse generateResponseHash(String finalResponse, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
 
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();
@@ -235,7 +236,7 @@ public class SecurityServiceImpl implements SecurityService {
     }
 
     @Override
-    public MicroserviceResponse generateAuthResponseHash(String finalResponse, Map<String, String> httpHeaders) throws RouterException {
+    public MicroserviceResponse generateAuthResponseHash(String finalResponse, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
 
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();
