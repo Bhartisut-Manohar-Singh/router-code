@@ -1,7 +1,9 @@
 
 package decimal.apigateway.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
@@ -49,6 +51,8 @@ public class SecurityServiceImpl implements SecurityService {
     @Value("${isSecurityLogsEnabled:N}")
     String securityLogsEnabled;
 
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Override
     public Object validateRegistration(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
@@ -156,7 +160,12 @@ public class SecurityServiceImpl implements SecurityService {
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
         }
-            MicroserviceResponse microserviceResponse = encryptionDecryptionService.encryptResponseWithoutSession(responseEntity.getBody().toString(), httpHeaders);
+        MicroserviceResponse microserviceResponse = null;
+        try {
+            microserviceResponse = encryptionDecryptionService.encryptResponseWithoutSession(objectMapper.writeValueAsString(responseEntity.getBody()), httpHeaders);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
 
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
