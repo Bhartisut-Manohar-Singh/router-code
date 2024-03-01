@@ -160,7 +160,7 @@ public class ResponseOperations {
       try {
         ObjectMapper mapper=new ObjectMapper();
         String objectData=mapper.writeValueAsString(singleRecordObject);
-        List<String> priKeysList=RouterOperations.getStringArray(recordPrimaryKeyKeyName,Constant.TILD_SPLITTER);
+        List<String> priKeysList= RouterOperationsV1.getStringArray(recordPrimaryKeyKeyName,Constant.TILD_SPLITTER);
         for(String priKey:priKeysList){
           value.append(JsonPath.read(objectData,priKey)+Constant.TILD_SPLITTER);
         }

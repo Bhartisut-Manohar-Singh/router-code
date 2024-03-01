@@ -1,9 +1,10 @@
 package decimal.apigateway.configuration;
 
+
+import decimal.logs.model.CustomPayload;
 import decimal.apigateway.enums.Headers;
-import decimal.logs.connector.LogsConnector;
-import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.filters.IdentifierFilter;
+import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
