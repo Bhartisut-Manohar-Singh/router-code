@@ -8,6 +8,7 @@ import decimal.logs.model.Request;
 import decimal.logs.model.Response;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
@@ -29,23 +30,32 @@ public class SecurityServiceEncImpl implements SecurityServiceEnc {
     @Autowired
     EncryptionDecryptionService encryptionDecryptionService;
 
+    @Value("${isSecurityLogsEnabled:N}")
+    String securityLogsEnabled;
+
 
 
     public MicroserviceResponse encryptResponse(String body, Map<String, String> httpHeaders) throws RouterException {
 
-            auditPayload=auditPayload();
-            auditPayload = logsWriter.initializeLog(body, JSON,httpHeaders, "security-service", auditPayload);
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
+            auditPayload = auditPayload();
+            auditPayload = logsWriter.initializeLog(body, JSON, httpHeaders, "security-service", auditPayload);
             auditPayload.getRequest().setHeaders(httpHeaders);
             auditPayload.getRequest().setRequestBody(body);
             auditPayload.getRequestIdentifier().setAppId(httpHeaders.get("appid"));
             auditPayload.getRequestIdentifier().setOrgId(httpHeaders.get("orgid"));
+        }
 
             MicroserviceResponse microserviceResponse = encryptionDecryptionService.encryptResponse(body, httpHeaders);
+
+
+        if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload.setStatus(microserviceResponse.getStatus());
             auditPayload.getResponse().setResponse(String.valueOf(microserviceResponse.getResponse()));
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
+        }
             return microserviceResponse;
 
     }

@@ -36,10 +36,8 @@ public class RateLimiterAspect{
     @Autowired
     ObjectMapper objectMapper;
 
-    @Pointcut("((within(decimal.apigateway.controller.controllerV2.ExecutionControllerV2) && "
-            + "(execution(public * executePlainRequest(..)) || execution(public * executeRequest(..)))) "
-            + "|| (within(decimal.apigateway.controller.V3.RegistrationControllerV3) && execution(public * executePlainRequest(..)))) "
-            + "&& args(requestBody, httpHeaders,..)")
+
+    @Pointcut("((within(decimal.apigateway.controller.V3.RegistrationControllerV3) && execution(public * executePlainRequest(..)))) && args(requestBody, httpHeaders,..)")
     public void rateLimiters(String requestBody, Map<String, String> httpHeaders) {
     }
 
@@ -73,6 +71,7 @@ public class RateLimiterAspect{
 
         ApplicationDef applicationDef =  objectMapper.readValue(applicationDefConfig.get().getApiData(), ApplicationDef.class);
         String isRateLimitingRequired = applicationDef.getIsRateLimitingRequired();
+
         if(isRateLimitingRequired != null && isRateLimitingRequired.equalsIgnoreCase("Y")){
             log.info("----------Executing rate limiter.....");
             rateLimitService.allowRequest(appId,serviceName,httpHeaders);

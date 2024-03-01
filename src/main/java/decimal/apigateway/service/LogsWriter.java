@@ -1,7 +1,6 @@
 package decimal.apigateway.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.constant.LogsIdentifier;
 import decimal.logs.model.AuditPayload;
@@ -52,6 +51,20 @@ public class LogsWriter {
 
         return auditPayload;
     }
+
+    public AuditPayload initializeLog(String request,String requestType, Map<String, String> httpHeaders,Instant requestTimestamp)
+    {
+        auditPayload.setRequestTimestamp(requestTimestamp);
+
+        RequestIdentifier requestIdentifier = getRequestIdentifier(httpHeaders,requestType);
+
+        auditPayload.setRequestIdentifier(requestIdentifier);
+
+        auditPayload.getRequest().setHeaders(httpHeaders);
+
+        return auditPayload;
+    }
+
 
     public void updateLog(AuditPayload auditPayload){
         auditPayload.setResponseTimestamp(Instant.now());
