@@ -272,7 +272,7 @@ public class AuthenticationProcessorImpl implements AuthenticationProcessor {
         map.put("errorHint", "User has been logout successfully");
         map.put("message","Session Killed Successfully");
         map.put("errorType", SUCCESS_STATUS);
-        RouterException routerException = new RouterException(map);
+        RouterException routerException = new RouterException(AuthRouterResponseCode.ROUTER_KILL_SESSION_SUCCESS, (Exception) null, "SUCCESS", "User has been logout successfully",map);
         logoutService.doLogout(httpHeaders);
         throw routerException;
     }
