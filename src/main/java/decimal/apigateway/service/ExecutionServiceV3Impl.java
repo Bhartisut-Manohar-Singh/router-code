@@ -8,6 +8,7 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
+import decimal.apigateway.service.validator.PublicJwtTokenValidator;
 import decimal.apigateway.service.validator.RequestValidatorV1;
 import decimal.apigateway.clients.EsbClientAuth;
 import decimal.logs.filters.AuditTraceFilter;
@@ -68,6 +69,9 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
     @Autowired
     SecurityService securityService;
 
+    @Autowired
+    PublicJwtTokenValidator publicJwtTokenValidator;
+
 
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
@@ -78,6 +82,8 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         String clientId = httpHeaders.get(Constant.ORG_ID) + Constant.TILD_SPLITTER + httpHeaders.get(Constant.APP_ID);
         httpHeaders.put(Constant.CLIENT_ID, clientId);
         httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
+
+        publicJwtTokenValidator.validate(request,httpHeaders);
 
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
 
@@ -172,6 +178,9 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
+
+        publicJwtTokenValidator.validate(request,httpHeaders);
+
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
         JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
         Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"),HashMap.class);

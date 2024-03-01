@@ -3,7 +3,10 @@ package decimal.apigateway.controller.V3;
 
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.service.ExecutionServiceV3;
+import decimal.apigateway.service.LogsWriter;
 import decimal.apigateway.service.RegistrationServiceV3;
+import decimal.logs.connector.LogsConnector;
+import decimal.logs.model.AuditPayload;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +16,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import static decimal.apigateway.commons.Constant.INVALID_REQUEST_500;
+import static decimal.apigateway.commons.Constant.JSON;
 import static decimal.apigateway.commons.Constant.MULTIPART;
 
 @RestController
@@ -24,6 +28,12 @@ public class RegistrationControllerV3 {
     private final RegistrationServiceV3 registrationServiceV3;
 
     private final ExecutionServiceV3 executionService;
+
+    @Autowired
+    LogsWriter logsWriter;
+
+    @Autowired
+    AuditPayload auditPayload;
 
     @Autowired
     public RegistrationControllerV3(RegistrationServiceV3 registrationServiceV3, ExecutionServiceV3 executionService) {
@@ -40,7 +50,7 @@ public class RegistrationControllerV3 {
      * @throws IOException
      */
     @PostMapping("register")
-    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException, RouterException {
+    public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
         log.info("-------register call v3-------------");
         return registrationServiceV3.register(request, httpHeaders, response);
     }
@@ -52,6 +62,7 @@ public class RegistrationControllerV3 {
         String responseType = httpHeaders.get("response-type");
         log.info("--------authorization token----------" + authorizationToken);
         if (authorizationToken == null || !authorizationToken.startsWith("Bearer")) {
+            auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
             throw new RouterException(INVALID_REQUEST_500, "Invalid JWT token", null);
         }
         if (responseType !=null && MULTIPART.equalsIgnoreCase(responseType))
