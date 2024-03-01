@@ -8,6 +8,7 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.domain.ApiAuthorizationConfig;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.model.EsbOutput;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.repository.SecApiAuthorizationConfigRepo;
 import decimal.apigateway.service.ExecutionServiceV2;
@@ -43,6 +44,7 @@ import java.util.*;
 
 import static decimal.apigateway.commons.Constant.*;
 import static decimal.apigateway.service.ExecutionServiceImpl.getBusinessKey;
+import static decimal.apigateway.service.ExecutionServiceImpl.setStatusCodeIfPresent;
 
 @Service
 @Log
@@ -129,8 +131,13 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         ResponseEntity<Object> responseEntity = esbClient.executeRequestV2(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
         HttpHeaders responseHeaders = responseEntity.getHeaders();
 
+        String statusCode="";
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
+
+        if (responseHeaders!=null && responseHeaders.containsKey("statuscode")){
+            statusCode= responseHeaders.get("statuscode").get(0);
+        }
 
         List<String> businessKeySet = getBusinessKey(responseEntity.getBody());
         String responseBody = JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys);
@@ -153,7 +160,10 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
 
-        return finalResponseMap;
+        EsbOutput esbOutput= new EsbOutput();
+        esbOutput.setResponse(finalResponseMap);
+        setStatusCodeIfPresent(statusCode,esbOutput);
+        return esbOutput;
 
     }
 
@@ -213,12 +223,17 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
 
         ResponseEntity<Object> responseEntity= esbClient.executePlainRequest(request,httpHeaders);
-
+        String statusCode="";
         Object responseBody = responseEntity.getBody();
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
+
+        if(responseHeaders!=null && responseHeaders.containsKey("statuscode"))
+        {
+            statusCode= responseHeaders.get("statuscode").get(0);
+        }
 
         List<String> businessKeySet = getBusinessKey(responseBody);
         auditPayload.getResponse().setResponse(JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys));
@@ -234,10 +249,16 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
             Map<String, String> finalResponseMap = new HashMap<>();
             finalResponseMap.put("response", encryptedResponse.getMessage());
 
-            return finalResponseMap;
+            EsbOutput esbOutput= new EsbOutput();
+            esbOutput.setResponse(finalResponseMap);
+            setStatusCodeIfPresent(statusCode,esbOutput);
+            return esbOutput;
         }
 
-        return responseBody;
+        EsbOutput esbOutput= new EsbOutput();
+        esbOutput.setResponse(responseBody);
+        setStatusCodeIfPresent(statusCode,esbOutput);
+        return esbOutput;
     }
 
     @Override
@@ -576,7 +597,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     private static Map<String, String> setHeaders(Map<String, String> httpHeaders, Map<String, String> headers, String logsRequired, String serviceLog, String logPurgeDays) {
         httpHeaders.put("logsrequired", logsRequired);
         httpHeaders.put("serviceLogs", serviceLog);
-        httpHeaders.put("loginid", headers.getOrDefault("loginid",String.valueOf(LocalDateTime.now())));
+        httpHeaders.put("loginid", headers.getOrDefault("loginid","vahana"));
         httpHeaders.put("logpurgedays", logPurgeDays);
         httpHeaders.put("keys_to_mask", headers.get("keys_to_mask"));
         httpHeaders.put("executionsource","API-GATEWAY");
