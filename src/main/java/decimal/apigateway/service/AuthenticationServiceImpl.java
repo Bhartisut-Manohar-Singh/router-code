@@ -86,16 +86,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public ResponseEntity<Object> logout(Map<String, String> httpHeaders) {
+    public ResponseEntity<Object> logout(Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
 
         MicroserviceResponse response = new MicroserviceResponse();
 
-        try {
+
             log.info("logout------httpHeaders" + httpHeaders);
             authenticationProcessor.logout(httpHeaders);
             log.info("logout microserviceResponse------------------------ ");
 
-        } catch (RouterException e) {
+       /* } catch (RouterException e) {
             log.info("exception printing--------" + e.getMessage());
             String errorCode = "625";
             if (errorCode.equals(e.getErrorCode())) {
@@ -109,7 +109,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             }
         } catch (JsonProcessingException je) {
             throw new RuntimeException("Something went wrong");
-        }
+        }*/
         log.info("status---------" + response.getStatus());
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("status", response.getStatus());

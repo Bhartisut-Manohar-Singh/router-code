@@ -1,5 +1,6 @@
 package decimal.apigateway.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import decimal.apigateway.exception.RouterException;
 
 import javax.servlet.http.HttpServletResponse;
@@ -13,5 +14,5 @@ public interface RegistrationServiceV2 {
 
     Object forceLogout(String request, Map<String, String> httpHeaders, HttpServletResponse response)throws RouterException;
 
-    Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response);
+    Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws RouterException, JsonProcessingException;
 }
