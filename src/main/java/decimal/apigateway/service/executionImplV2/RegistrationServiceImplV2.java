@@ -1,5 +1,6 @@
 package decimal.apigateway.service.executionImplV2;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -241,7 +242,7 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
     }
 
     @Override
-    public Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response) {
+    public Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws RouterException, JsonProcessingException {
         try {
             MicroserviceResponse microserviceResponse = requestValidatorV2.validateLogout(request, httpHeaders);
 
