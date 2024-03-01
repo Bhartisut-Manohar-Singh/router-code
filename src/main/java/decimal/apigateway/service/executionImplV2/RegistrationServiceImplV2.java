@@ -1,5 +1,6 @@
 package decimal.apigateway.service.executionImplV2;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
 
 import static decimal.apigateway.commons.Constant.JSON;
@@ -241,8 +243,10 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
     }
 
     @Override
-    public Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response) {
+    public Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws RouterException, JsonProcessingException {
         try {
+            auditPayload.setRequestTimestamp(Instant.now());
+
             MicroserviceResponse microserviceResponse = requestValidatorV2.validateLogout(request, httpHeaders);
 
             httpHeaders.put("username", microserviceResponse.getResponse().toString());

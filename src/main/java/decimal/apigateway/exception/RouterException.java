@@ -69,4 +69,10 @@ public class RouterException extends Exception {
         this.response = response;
     }
 
+    public RouterException(String errorCode, Exception e, String errorType, String errorHint,Object response) {
+        this(errorCode, Constant.ROUTER_ERROR_TYPE_SECURITY, "Signature verification failed", "Signature verification failed", e);
+        this.errorType = errorType;
+        this.errorHint = errorHint;
+        this.response = response;
+    }
 }
