@@ -1,7 +1,6 @@
 package decimal.apigateway.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.domain.MessageMasterConfig;
@@ -220,7 +219,7 @@ public class ExceptionController {
     @ExceptionHandler(value = RequestNotPermitted.class)
     public ResponseEntity<Object> handleRouterException(RequestNotPermitted ex) throws JsonProcessingException {
         log.info("Inside request not permission exception handler - " + ex.getMessage());
-        RateLimitError rateLimitError = new RateLimitError(TOO_MANY_REQUESTS,FAILURE_STATUS,HttpStatus.TOO_MANY_REQUESTS.value());
+        RateLimitError rateLimitError = new RateLimitError(ex.getMessage(), FAILURE_STATUS,HttpStatus.TOO_MANY_REQUESTS.value());
 
         auditPayload = logsWriter.initializeLog("Request", JSON, ex.getHttpHeaders(),ex.getRequestTimestamp());
         auditTraceFilter.setIsServicesLogsEnabled(true);

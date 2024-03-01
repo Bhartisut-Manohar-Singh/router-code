@@ -45,7 +45,7 @@ public class RateLimitService {
 
         if (rateLimitAppConfig.isPresent()) {
                 if (!consumeTokens(rateLimitAppConfig.get(),RL_TILD+appId)) {
-                 throw new RequestNotPermitted(NO_TOKENS_LEFT_FOR_APP,requestTimestamp,httpHeaders);
+                 throw new RequestNotPermitted(NO_TOKENS_LEFT_FOR_APP+appId,requestTimestamp,httpHeaders);
                 }
 
             }
@@ -54,7 +54,7 @@ public class RateLimitService {
 
         if(rateLimitServiceConfig.isPresent()){
             if (!consumeTokens(rateLimitServiceConfig.get(),RL_TILD+appId+TILD_SPLITTER+serviceName)) {
-                throw new RequestNotPermitted(NO_TOKENS_LEFT_FOR_SERVICE,requestTimestamp,httpHeaders);
+                throw new RequestNotPermitted(NO_TOKENS_LEFT_FOR_SERVICE+serviceName,requestTimestamp,httpHeaders);
             }
         }
             // Both app and service checks passed
