@@ -1,5 +1,6 @@
 package decimal.apigateway.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -7,9 +8,8 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
-import decimal.apigateway.service.clients.EsbClient;
-import decimal.apigateway.service.clients.SecurityClient;
-import decimal.apigateway.service.validator.RequestValidator;
+import decimal.apigateway.service.validator.RequestValidatorV1;
+import decimal.apigateway.clients.EsbClientAuth;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
@@ -36,10 +36,10 @@ import static decimal.apigateway.service.ExecutionServiceImpl.getBusinessKey;
 public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
 
     @Autowired
-    RequestValidator requestValidator;
+    RequestValidatorV1 requestValidator;
 
     @Autowired
-    EsbClient esbClient;
+    EsbClientAuth esbClientAuth;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -66,7 +66,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
     String path;
 
     @Autowired
-    SecurityClient securityClient;
+    SecurityService securityService;
 
 
     @Override
@@ -84,7 +84,8 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         log.info("Public request validated successfully.... ");
 
         JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
-        Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"),HashMap.class);
+        log.info("----- Response Node: " + objectMapper.writeValueAsString(responseNode));
+        Map<String,String> headers = objectMapper.convertValue(responseNode.get("response").get("headers"), new TypeReference<>(){});
         String isDigitallySigned = headers.get(IS_DIGITALLY_SIGNED);
         String isPayloadEncrypted = headers.get(IS_PAYLOAD_ENCRYPTED);
 
@@ -99,16 +100,16 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
                 throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send encrypted payload.\"}"));
 
             if(("Y").equalsIgnoreCase(isPayloadEncrypted) && !httpHeaders.containsKey(Headers.txnkey.name()))
-                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send txnkey in Headers as your request payload is encrypted.\"}"));
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send txnkey in HeadersV1 as your request payload is encrypted.\"}"));
 
             if(("Y").equalsIgnoreCase(isDigitallySigned) && !httpHeaders.containsKey(Headers.hash.name()))
-                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send hash in Headers as your request is digitally signed.\"}"));
+                throw new RouterException(INVALID_REQUEST_500,"Please send a valid request",objectMapper.readTree("{\"status\" : \"FAILURE\",\"statusCode\" : \"INVALID_REQUEST_400\",\"message\" :\"Please send hash in HeadersV1 as your request is digitally signed.\"}"));
 
             httpHeaders.put(IS_DIGITALLY_SIGNED,isDigitallySigned);
             httpHeaders.put(IS_PAYLOAD_ENCRYPTED,isPayloadEncrypted);
             httpHeaders.put(Headers.clientsecret.name(), headers.get(Headers.clientsecret.name()));
 
-            MicroserviceResponse decryptedResponse = securityClient.decryptRequestWithoutSession(("Y").equalsIgnoreCase(isPayloadEncrypted) ? node.get("request").asText() : request, httpHeaders);
+            MicroserviceResponse decryptedResponse = securityService.decryptRequestWithoutSession(("Y").equalsIgnoreCase(isPayloadEncrypted) ? node.get("request").asText() : request, httpHeaders);
 
             if(("Y").equalsIgnoreCase(isPayloadEncrypted)) {
                 request = decryptedResponse.getResponse().toString();
@@ -136,7 +137,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         log.info(" ======= calling esb ======= ");
         log.info(" ======= request ======= " + request);
         log.info(" ======= headers ======= " + objectMapper.writeValueAsString(httpHeaders));
-        ResponseEntity<Object> responseEntity= esbClient.executePlainRequest(request,httpHeaders);
+        ResponseEntity<Object> responseEntity = esbClientAuth.executePlainRequest(request, httpHeaders);
 
          Object responseBody = responseEntity.getBody();
 
@@ -153,9 +154,9 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
 
         logsWriter.updateLog(auditPayload);
 
-        if (("Y").equalsIgnoreCase(isPayloadEncrypted))
-        {
-            MicroserviceResponse encryptedResponse = securityClient.encryptResponseWithoutSession(responseEntity, headers);
+        if (("Y").equalsIgnoreCase(isPayloadEncrypted)) {
+            MicroserviceResponse encryptedResponse = securityService.encryptResponseWithoutSession(responseEntity,
+                    httpHeaders);
             Map<String, String> finalResponseMap = new HashMap<>();
             finalResponseMap.put("response", encryptedResponse.getMessage());
 
@@ -194,7 +195,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         auditPayload.getRequest().setHeaders(httpHeaders);
 
 
-        ResponseEntity<byte[]> responseEntity= esbClient.executeMultipart(request,httpHeaders);
+        ResponseEntity<byte[]> responseEntity = esbClientAuth.executeMultipart(request, httpHeaders);
 
         Object responseBody = responseEntity.getBody();
 
