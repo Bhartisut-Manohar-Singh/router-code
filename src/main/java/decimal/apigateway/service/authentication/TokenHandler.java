@@ -195,7 +195,7 @@ public class TokenHandler {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(System.currentTimeMillis()));
 
-        calendar.add(Calendar.DAY_OF_MONTH, applicationDef.getAppSessionExpiryTime().intValue());
+        calendar.add(Calendar.MINUTE, applicationDef.getUserSessionExpiryTime().intValue());
 
         return calendar.getTime();
     }
