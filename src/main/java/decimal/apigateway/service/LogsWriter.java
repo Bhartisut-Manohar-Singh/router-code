@@ -3,6 +3,7 @@ package decimal.apigateway.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.constant.LogsIdentifier;
+import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.RequestIdentifier;
 import lombok.extern.java.Log;
@@ -28,6 +29,9 @@ public class LogsWriter {
 
     @Autowired
     private AuditPayload auditPayload;
+
+    @Autowired
+    private AuditTraceFilter auditTraceFilter;
 
     @Value("${dms.default.servicename}")
     private String dmsDefaultServiceName;
@@ -71,6 +75,8 @@ public class LogsWriter {
         auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().toEpochMilli() - auditPayload.getRequestTimestamp().toEpochMilli());
 
         AuditPayload auditPayloadFinal =new AuditPayload(auditPayload.getRequestTimestamp(),auditPayload.getResponseTimestamp(),auditPayload.getTimeTaken(),auditPayload.getRequest(),auditPayload.getResponse(),auditPayload.getStatus(),auditPayload.getRequestIdentifier(),auditPayload.isLogRequestAndResponse());
+
+        if(logsConnector !=null && auditTraceFilter !=null)
         logsConnector.audit(auditPayloadFinal);
     }
 
