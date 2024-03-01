@@ -1,6 +1,5 @@
 package decimal.apigateway.service.security;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.LogsWriter;
@@ -36,7 +35,7 @@ public class SecurityServiceEncImpl implements SecurityServiceEnc {
 
 
 
-    public MicroserviceResponse encryptResponse(String body, Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
+    public MicroserviceResponse encryptResponse(String body, Map<String, String> httpHeaders) throws RouterException {
 
         if (securityLogsEnabled.equalsIgnoreCase("Y")) {
             auditPayload = auditPayload();

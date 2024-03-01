@@ -2,8 +2,6 @@ package decimal.apigateway.exception;
 
 import lombok.Getter;
 import lombok.Setter;
-
-import java.net.http.HttpHeaders;
 import java.time.Instant;
 import java.util.Map;
 

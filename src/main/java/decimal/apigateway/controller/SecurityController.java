@@ -1,7 +1,6 @@
 package decimal.apigateway.controller;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
@@ -48,7 +47,7 @@ public class SecurityController {
     }
 
     @PostMapping(value = "encryptResponse")
-    MicroserviceResponse encryptResponse(@RequestBody Object finalResponse, @RequestHeader Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
+    MicroserviceResponse encryptResponse(@RequestBody Object finalResponse, @RequestHeader Map<String, String> httpHeaders) throws RouterException {
 
         return securityServiceEnc.encryptResponse(finalResponse.toString(), httpHeaders);
 

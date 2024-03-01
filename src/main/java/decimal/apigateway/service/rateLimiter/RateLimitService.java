@@ -1,20 +1,14 @@
 package decimal.apigateway.service.rateLimiter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import decimal.apigateway.commons.RouterResponseCode;
 import decimal.apigateway.entity.*;
 import decimal.apigateway.exception.RequestNotPermitted;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.repository.RateLimitRepo;
-import decimal.apigateway.service.LogsWriter;
-import decimal.logs.model.AuditPayload;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpServerErrorException;
 
 
 import javax.annotation.PostConstruct;

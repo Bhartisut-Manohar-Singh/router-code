@@ -18,7 +18,6 @@ import decimal.logs.connector.LogsConnector;
 import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.ErrorPayload;
-import decimal.logs.model.Response;
 import decimal.logs.model.SystemError;
 import lombok.extern.java.Log;
 import org.slf4j.Logger;

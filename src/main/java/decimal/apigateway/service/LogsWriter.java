@@ -1,8 +1,6 @@
 package decimal.apigateway.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.constant.LogsIdentifier;
 import decimal.logs.model.AuditPayload;
@@ -68,14 +66,13 @@ public class LogsWriter {
     }
 
 
-    public void updateLog(AuditPayload auditPayload) throws JsonProcessingException {
+    public void updateLog(AuditPayload auditPayload){
         auditPayload.setResponseTimestamp(Instant.now());
         auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().toEpochMilli() - auditPayload.getRequestTimestamp().toEpochMilli());
 
         AuditPayload auditPayloadFinal =new AuditPayload(auditPayload.getRequestTimestamp(),auditPayload.getResponseTimestamp(),auditPayload.getTimeTaken(),auditPayload.getRequest(),auditPayload.getResponse(),auditPayload.getStatus(),auditPayload.getRequestIdentifier(),auditPayload.isLogRequestAndResponse());
         logsConnector.audit(auditPayloadFinal);
     }
-
 
     private Predicate<String> isNotNullAndNotEmpty = (str) -> str != null && !str.isEmpty();
 
