@@ -1,135 +1,152 @@
 package decimal.apigateway.service.validator;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
-import decimal.apigateway.enums.RequestValidationTypes;
+import decimal.apigateway.commons.RouterResponseCode;
+import decimal.apigateway.domain.Session;
+import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
-import decimal.apigateway.service.clients.SecurityClient;
-import decimal.logs.filters.AuditTraceFilter;
-import decimal.logs.model.AuditPayload;
+import decimal.apigateway.model.Request;
+import decimal.apigateway.service.security.AuthenticationSession;
+import decimal.apigateway.service.security.CryptographyService;
+import decimal.logs.model.RequestIdentifier;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.java.Log;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
-
-import static decimal.apigateway.enums.RequestValidationTypes.*;
-
 
 @Log
 @Service
-public class RequestValidator {
-
-    private final
-    SecurityClient securityClient;
+public class RequestValidator implements Validator {
+    @Value("${system.generated.key}")
+    String systemKey;
 
     @Autowired
-    ObjectMapper objectMapper;
+    CryptographyService cryptographyService;
 
-    public RequestValidator(SecurityClient securityClient) {
-        this.securityClient = securityClient;
-    }
+    @Autowired
+    AuthenticationSession authenticationSession;
 
-    public Object validateRegistrationRequest(String request, Map<String, String> httpHeaders) throws RouterException {
-        log.info("=== calling validateRegistrationRequest to security client === " + new Gson().toJson(httpHeaders));
-        return securityClient.validateRegistration(request, httpHeaders).getResponse();
-    }
+    @Autowired
+    Request auditTraceFilter;
 
-    public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders,String serviceName) throws RouterException {
-        httpHeaders.put("scopeToCheck", "PUBLIC");
-        httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
-        httpHeaders.put("username", httpHeaders.get("clientid"));
+    public static final String TOKEN_PREFIX = "Bearer "; // the prefix of the token in the http header
+    public static final String HEADER_STRING = "authorization"; // the http header containing the
 
-        log.info("=== calling validatePlainRequest to security client === " + new Gson().toJson(httpHeaders));
-        return securityClient.validatePlainRequest(request, httpHeaders,serviceName);
+    public MicroserviceResponse validate(String request, Map<String, String> httpHeaders) throws RouterException
+    {
+        RequestIdentifier requestIdentifier = auditTraceFilter.getRequestIdentifier(auditTraceFilter);
 
-    }
+        String authorizationToken = httpHeaders.get(HEADER_STRING);
+        String requestId = httpHeaders.get(Headers.requestid.name());
+        System.out.println("authorizationToken:"+authorizationToken);
 
-    public void validatePlainDynamicRequest(String request, Map<String, String> httpHeaders) throws RouterException {
+        String securityVersion = httpHeaders.get(Constant.ROUTER_HEADER_SECURITY_VERSION);
 
-        httpHeaders.put("clientid", httpHeaders.get("orgid") + "~" + httpHeaders.get("appid"));
+        log.info("Validating  request authorization token " );
 
-        RequestValidationTypes[] requestValidationTypes = { CLIENT_SECRET,IP};
+        if (authorizationToken == null || !authorizationToken.startsWith(TOKEN_PREFIX)) {
+            log.info("Error in processing request because of invalid authorization token found in the request");
 
-        for (RequestValidationTypes plainRequestValidation : requestValidationTypes) {
-            securityClient.validate(request, httpHeaders, plainRequestValidation.name());
+            throw new RouterException(RouterResponseCode.ERROR_IN_PROCESSING_REQUEST, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Error in processing request because of invalid authorization token found in the request");
         }
-    }
 
-    @Autowired
-    AuditTraceFilter auditTraceFilter;
+        String encryptedJWTToken;
 
-    public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) throws RouterException {
-        String clientId = httpHeaders.get("clientid");
-
-        httpHeaders.put("orgid", clientId.split(Constant.TILD_SPLITTER)[0]);
-        httpHeaders.put("appid", clientId.split(Constant.TILD_SPLITTER)[1]);
-
-        MicroserviceResponse response = securityClient.validate(request, httpHeaders, RequestValidationTypes.REQUEST.name());
         try {
-            log.info("====== response from security client ======= " + objectMapper.writeValueAsString(response));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        String userName = response.getResponse().toString();
+            String token = authorizationToken.replace(TOKEN_PREFIX, "");
+            System.out.println("token:"+token);
 
-        int size = RouterOperations.getStringArray(userName, Constant.TILD_SPLITTER).size();
 
-        httpHeaders.put("username", userName);
+            encryptedJWTToken = Jwts.parser().setSigningKey(systemKey).parseClaimsJws(token).getBody().getSubject();
+            System.out.println("token after parsing:"+encryptedJWTToken);
+        } catch (ExpiredJwtException e) {
+            log.info("JWT Token is expired. Token is:" + authorizationToken+" Exception: "+e);
 
-        httpHeaders.put("scopeToCheck", size > 3 ? "SECURE" : "OPEN");
+            Object username = cryptographyService.decryptJWTToken(securityVersion, systemKey, e.getClaims().getSubject(), requestId);
 
-        httpHeaders.put("loginid", userName.split(Constant.TILD_SPLITTER)[2]);
+            List<String> userNameData = RouterOperations.getStringArray(username.toString(), Constant.TILD_SPLITTER);
+            if (userNameData.size() > 3) {
+                checkApplicationSessionExpiry(username.toString(), requestId);
 
-        auditPayload.getRequestIdentifier().setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
+            } else {
+                authenticationSession.removeSession(username.toString());
+            }
+            // If App session is not valid then throw App Authentication failure
+            throw new RouterException(RouterResponseCode.APP_AUTHENTICATION_FAILURE, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "JWT token has been expired");
 
-        response = securityClient.validateExecutionRequest(request, httpHeaders);
-
-        Map<String, String> customData = response.getCustomData();
-
-        httpHeaders.put("logsrequired", customData.get("appLogs"));
-        httpHeaders.put("serviceLogs", customData.get("serviceLog"));
-        httpHeaders.put(Constant.KEYS_TO_MASK, customData.get(Constant.KEYS_TO_MASK));
-        httpHeaders.put("logpurgedays",customData.get("logpurgedays"));
-
-        return httpHeaders;
-    }
-
-    public Map<String, String> validateDynamicRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) {
-
-        String clientId = httpHeaders.get("clientid");
-
-        httpHeaders.put("orgid", clientId.split(Constant.TILD_SPLITTER)[0]);
-        httpHeaders.put("appid", clientId.split(Constant.TILD_SPLITTER)[1]);
-
-        MicroserviceResponse response = securityClient.validate(request, httpHeaders, RequestValidationTypes.REQUEST.name());
-
-        String userName = response.getResponse().toString();
-
-        httpHeaders.put("username", userName);
-
-        if(userName != null) {
-            auditPayload.getRequestIdentifier().setLoginId(userName.split(Constant.TILD_SPLITTER)[2]);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("=============="+RouterResponseCode.JWT_PARSING_ERROR+"=================");
+            log.info("Error while parsing Bearer JWT Token. Token is:" + authorizationToken+" Exception: "+e);
+            throw new RouterException(RouterResponseCode.JWT_PARSING_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "It seems that there is some error when parsing JWT token. Check your token if it is valid or not");
         }
 
-        RequestValidationTypes[] requestValidationTypesArr = {APPLICATION, INACTIVE_SESSION, SESSION, IP, TXN_KEY, HASH};
+        log.info("JWT Token is parsed. Let Decrypt it now");
+        System.out.println("Encrypted JWT Token:"+encryptedJWTToken);
 
-        for (RequestValidationTypes requestValidationTypes : requestValidationTypesArr) {
-            securityClient.validate(request, httpHeaders, requestValidationTypes.name());
+        MicroserviceResponse response = new MicroserviceResponse();
+        try {
+            Object user = cryptographyService.decryptJWTToken(securityVersion, systemKey, encryptedJWTToken, requestId).toString();
+            response.setResponse(user);
+
+            System.out.println(user);
+        } catch (Exception e) {
+            System.out.println("=============="+RouterResponseCode.JWT_DECRYPTION_ERROR+"=================");
+            e.printStackTrace();
+            log.info("Error while decrypting Bearer JWT Token. Token is:" + encryptedJWTToken+" Exception: "+ e);
+            throw new RouterException(RouterResponseCode.JWT_DECRYPTION_ERROR, e, Constant.ROUTER_ERROR_TYPE_SECURITY, "There is some error in decrypting JWT token");
         }
 
-        return httpHeaders;
+        log.info("Validating authorization token is success: ");
+
+        return response;
+    }
+    private void checkApplicationSessionExpiry(String username, String requestId) throws RouterException {
+        try {
+
+            List<String> userNameData = RouterOperations.getStringArray(username, Constant.TILD_SPLITTER);
+
+            authenticationSession.removeSession(username);
+
+            String applicationUser =  RouterOperations.getJoiningString(Constant.TILD_SPLITTER, userNameData.get(0), userNameData.get(1), userNameData.get(3));
+
+            log.info("application user details -------------"+applicationUser);
+
+            Session session = authenticationSession.getSession(applicationUser);
+
+            log.info("application session details----------"+session);
+
+            if(session != null)
+            {
+                String encryptedJWTToken = Jwts.parser().setSigningKey(systemKey).parseClaimsJws(session.getAppJwtKey()).getBody().getSubject();
+            }
+
+            throw new RouterException(RouterResponseCode.USER_AUTHENTICATION_FAILURE, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Not able to find user session");
+        } catch (ExpiredJwtException ae) {
+            log.info("Exception for authentication in app level session check."+ae);
+
+            // Fetching App session stratergy data to remove session
+            List<String> userNameData = RouterOperations.getStringArray(username, "~");
+            String applicationUser = RouterOperations.getJoiningString(Constant.TILD_SPLITTER, userNameData.get(0), userNameData.get(1), userNameData.get(3));
+
+            authenticationSession.removeSession(applicationUser);
+
+        } catch (RouterException e1) {
+            e1.printStackTrace();
+            log.info("Exception for authentication in app level session check."+e1);
+            throw e1;
+
+        } catch (Exception e1) {
+            log.info("Exception for authentication in app level session check."+ e1);
+            throw new RouterException(RouterResponseCode.ERROR_IN_PROCESSING_REQUEST, (Exception) null, Constant.ROUTER_ERROR_TYPE_SECURITY, "Exception for authentication in app level session");
+        }
     }
 
-    public MicroserviceResponse validateAuthentication(String request, Map<String, String> httpHeaders) throws RouterException {
-        return securityClient.validateAuthentication(request, httpHeaders);
-    }
-
-    public MicroserviceResponse validateLogout(String request, Map<String, String> httpHeaders) throws RouterException {
-        return securityClient.validate(request, httpHeaders, RequestValidationTypes.REQUEST.name());
-    }
 }
