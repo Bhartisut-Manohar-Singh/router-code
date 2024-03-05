@@ -51,12 +51,11 @@ public class RateLimiterAspect{
     public void rateLimiters(String requestBody, Map<String, String> httpHeaders) {
     }
 
-   // @Before("((within(decimal.apigateway.controller.controllerV2.ExecutionControllerV2.executeRequest)) && args(requestBody, httpHeaders,..)")
-   @Before("within(decimal.apigateway.controller.controllerV2.ExecutionControllerV2) && execution(public * executeRequest(..)) && args(requestBody, httpHeaders,..)")
-    public void rateLimiterAdviceV2(JoinPoint proceedingJoinPoint, String requestBody, Map<String, String> httpHeaders, @PathVariable(name = "destinationAppId") String destinationAppId) throws Throwable {
+   @Before("within(decimal.apigateway.controller.controllerV2.ExecutionControllerV2) && execution(public * executeRequest(..)) && args(requestBody, httpHeaders, destinationAppId, serviceName)")
+   public void rateLimiterAdviceV2(JoinPoint proceedingJoinPoint, String requestBody, Map<String, String> httpHeaders, String destinationAppId, String serviceName) throws Throwable {
         log.info("inside before ExecutionControllerV2 executeRequest");
         String[] orgApp = getAppAndOrgId(httpHeaders);
-        String serviceName = httpHeaders.get("servicename");
+        serviceName = httpHeaders.get("servicename");
         String orgid = orgApp[0];
         String appid = orgApp[1];
        Optional<ApiAuthorizationConfig> bySourceOrgIdAndSourceAppIdAndDestinationAppId = apiAuthorizationConfigRepo.findBySourceOrgIdAndSourceAppIdAndDestinationAppId(orgid,appid,destinationAppId);
@@ -88,7 +87,7 @@ public class RateLimiterAspect{
             throw new RouterException(RouterResponseCode.APPLICATION_DEF_NOT_FOUND, (Exception) null,FAILURE_STATUS, "Application def not found for given orgId and appId");
 
         ApplicationDef applicationDef =  objectMapper.readValue(applicationDefConfig.get().getApiData(), ApplicationDef.class);
-        //String isRateLimitingRequired = applicationDef.getIsRateLimitingRequired();
+        String isRateLimitingRequired = applicationDef.getIsRateLimitingRequired();
 
        // if(isRateLimitingRequired != null && isRateLimitingRequired.equalsIgnoreCase("Y")){
             log.info("----------Executing rate limiter.....");
