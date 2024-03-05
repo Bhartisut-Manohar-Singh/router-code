@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -55,6 +56,7 @@ public class RateLimiterAspect{
     public void rateLimiterAdviceV2(JoinPoint proceedingJoinPoint, String requestBody, Map<String, String> httpHeaders, @PathVariable(name = "destinationAppId") String destinationAppId) throws Throwable {
         log.info("inside before ExecutionControllerV2 executeRequest");
         String[] orgApp = getAppAndOrgId(httpHeaders);
+        String serviceName = httpHeaders.get("servicename");
         String orgid = orgApp[0];
         String appid = orgApp[1];
        Optional<ApiAuthorizationConfig> bySourceOrgIdAndSourceAppIdAndDestinationAppId = apiAuthorizationConfigRepo.findBySourceOrgIdAndSourceAppIdAndDestinationAppId(orgid,appid,destinationAppId);
@@ -65,6 +67,8 @@ public class RateLimiterAspect{
            updatedHeader.put(orgid,bySourceOrgIdAndSourceAppIdAndDestinationAppId.get().getDestinationOrgId());
            updatedHeader.put(appid,destinationAppId);
        }
+
+       rateLimitValidator(httpHeaders,orgid,appid,serviceName);
     }
 
     @Before("rateLimiters(requestBody, httpHeaders)")
@@ -74,7 +78,11 @@ public class RateLimiterAspect{
         String[] orgApp = getAppAndOrgId(httpHeaders);
         String orgid = orgApp[0];
         String appid = orgApp[1];
+        rateLimitValidator(httpHeaders,orgid,appid,serviceName);
+    }
 
+
+    private void rateLimitValidator(Map<String,String> httpHeaders,String  orgid,String appid,String serviceName) throws RouterException, IOException {
         Optional<ApplicationDefRedisConfig> applicationDefConfig = applicationDefRepo.findByOrgIdAndAppId(orgid, appid);
         if (applicationDefConfig.isEmpty())
             throw new RouterException(RouterResponseCode.APPLICATION_DEF_NOT_FOUND, (Exception) null,FAILURE_STATUS, "Application def not found for given orgId and appId");
@@ -86,7 +94,6 @@ public class RateLimiterAspect{
             log.info("----------Executing rate limiter.....");
             rateLimitService.allowRequest(appid,serviceName,httpHeaders);
         }
-
     }
 
 
