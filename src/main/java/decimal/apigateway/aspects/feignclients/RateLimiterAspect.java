@@ -3,10 +3,13 @@ package decimal.apigateway.aspects.feignclients;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterResponseCode;
+import decimal.apigateway.domain.ApiAuthorizationConfig;
 import decimal.apigateway.domain.ApplicationDefRedisConfig;
+import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.ApplicationDef;
 import decimal.apigateway.repository.ApplicationDefRedisConfigRepo;
+import decimal.apigateway.repository.SecApiAuthorizationConfigRepo;
 import decimal.apigateway.service.rateLimiter.RateLimitService;
 import lombok.extern.java.Log;
 import org.aspectj.lang.JoinPoint;
@@ -37,8 +40,24 @@ public class RateLimiterAspect{
     ObjectMapper objectMapper;
 
 
+    @Autowired
+    SecApiAuthorizationConfigRepo apiAuthorizationConfigRepo;
+
+
     @Pointcut("((within(decimal.apigateway.controller.V3.RegistrationControllerV3) && execution(public * executePlainRequest(..)))) && args(requestBody, httpHeaders,..)")
     public void rateLimiters(String requestBody, Map<String, String> httpHeaders) {
+    }
+
+   // @Before("((within(decimal.apigateway.controller.controllerV2.ExecutionControllerV2.executeRequest)) && args(requestBody, httpHeaders,..)")
+   @Before("within(decimal.apigateway.controller.controllerV2.ExecutionControllerV2) && execution(public * executeRequest(..)) && args(requestBody, httpHeaders,..)")
+    public void rateLimiterAdviceV2(JoinPoint proceedingJoinPoint, String requestBody, Map<String, String> httpHeaders) throws Throwable {
+        log.info("inside before ");
+       Optional<ApiAuthorizationConfig> bySourceOrgIdAndSourceAppId = apiAuthorizationConfigRepo.findBySourceOrgIdAndSourceAppIdAndDestinationAppId(httpHeaders.get(String.valueOf(Headers.orgid)), httpHeaders.get(String.valueOf(Headers.appid)),httpHeaders.get(String.valueOf(Headers.destinationappid)));
+       if(bySourceOrgIdAndSourceAppId.isPresent()){
+           httpHeaders.put(String.valueOf(Headers.orgid),bySourceOrgIdAndSourceAppId.get().getDestinationOrgId());
+           httpHeaders.put(String.valueOf(Headers.appid),bySourceOrgIdAndSourceAppId.get().getDestinationAppId());
+           httpHeaders.put(String.valueOf(Headers.destinationorgid),bySourceOrgIdAndSourceAppId.get().getDestinationOrgId());
+       }
     }
 
     @Before("rateLimiters(requestBody, httpHeaders)")
