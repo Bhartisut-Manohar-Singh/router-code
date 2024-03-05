@@ -68,7 +68,7 @@ public class RateLimiterAspect{
            updatedHeader.put(appid,destinationAppId);
        }
 
-       rateLimitValidator(httpHeaders,orgid,appid,serviceName);
+       rateLimitValidator(updatedHeader,orgid,appid,serviceName);
     }
 
     @Before("rateLimiters(requestBody, httpHeaders)")
