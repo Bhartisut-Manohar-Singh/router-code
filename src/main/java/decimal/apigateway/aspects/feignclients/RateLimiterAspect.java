@@ -55,19 +55,27 @@ public class RateLimiterAspect{
    public void rateLimiterAdviceV2(JoinPoint proceedingJoinPoint, String requestBody, Map<String, String> httpHeaders, String destinationAppId, String serviceName) throws Throwable {
         log.info("inside before ExecutionControllerV2 executeRequest");
         String[] orgApp = getAppAndOrgId(httpHeaders);
+        log.info(objectMapper.writeValueAsString(orgApp));
+
         serviceName = httpHeaders.get("servicename");
         String orgid = orgApp[0];
         String appid = orgApp[1];
+
+        log.info("org id   " + orgApp[0]);
+        log.info("app id  " + orgApp[1]);
        Optional<ApiAuthorizationConfig> bySourceOrgIdAndSourceAppIdAndDestinationAppId = apiAuthorizationConfigRepo.findBySourceOrgIdAndSourceAppIdAndDestinationAppId(orgid,appid,destinationAppId);
        Map<String,String> updatedHeader = new HashMap<>();
        updatedHeader.putAll(httpHeaders);
 
+       log.info(objectMapper.writeValueAsString("updated Header  " + updatedHeader));
+
        if(bySourceOrgIdAndSourceAppIdAndDestinationAppId.isPresent()){
            updatedHeader.put(orgid,bySourceOrgIdAndSourceAppIdAndDestinationAppId.get().getDestinationOrgId());
            updatedHeader.put(appid,destinationAppId);
+           log.info(objectMapper.writeValueAsString("updated Header before ratelimiting   " + updatedHeader));
+           rateLimitValidator(updatedHeader,orgid,appid,serviceName);
        }
 
-       rateLimitValidator(updatedHeader,orgid,appid,serviceName);
     }
 
     @Before("rateLimiters(requestBody, httpHeaders)")
