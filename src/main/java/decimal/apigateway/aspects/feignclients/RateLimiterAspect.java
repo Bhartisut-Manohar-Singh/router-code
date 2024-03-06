@@ -57,7 +57,6 @@ public class RateLimiterAspect{
         String[] orgApp = getAppAndOrgId(httpHeaders);
         log.info(objectMapper.writeValueAsString(orgApp));
 
-        serviceName = httpHeaders.get("servicename");
         String orgid = orgApp[0];
         String appid = orgApp[1];
 
