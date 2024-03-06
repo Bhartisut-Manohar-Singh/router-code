@@ -166,7 +166,6 @@ public class Constant {
     public static final String INVALID_ORG_APP= "Request header parameter missing: OrgId or appId";
 
 
-
     public static final List<String> getSecuredKeys() {
         return Arrays.asList(ROUTER_HEADER_PASSWRD, ROUTER_HEADER_JWT, "private-exponent", "private-exponent");
     }
