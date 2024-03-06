@@ -91,12 +91,12 @@ public class RateLimiterAspect{
             throw new RouterException(RouterResponseCode.APPLICATION_DEF_NOT_FOUND, (Exception) null,FAILURE_STATUS, "Application def not found for given orgId and appId");
 
         ApplicationDef applicationDef =  objectMapper.readValue(applicationDefConfig.get().getApiData(), ApplicationDef.class);
-       // String isRateLimitingRequired = applicationDef.getIsRateLimitingRequired();
+        String isRateLimitingRequired = applicationDef.getIsRateLimitingRequired();
 
-       // if(isRateLimitingRequired != null && isRateLimitingRequired.equalsIgnoreCase("Y")){
+        if(isRateLimitingRequired != null && isRateLimitingRequired.equalsIgnoreCase("Y")){
             log.info("----------Executing rate limiter.....");
             rateLimitService.allowRequest(appid,serviceName,httpHeaders);
-       // }
+        }
     }
 
 
