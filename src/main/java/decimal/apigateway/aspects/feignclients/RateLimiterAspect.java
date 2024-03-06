@@ -62,7 +62,9 @@ public class RateLimiterAspect{
 
         log.info("org id   " + orgApp[0]);
         log.info("app id  " + orgApp[1]);
+        log.info("destination appId " + destinationAppId);
        Optional<ApiAuthorizationConfig> bySourceOrgIdAndSourceAppIdAndDestinationAppId = apiAuthorizationConfigRepo.findBySourceOrgIdAndSourceAppIdAndDestinationAppId(orgid,appid,destinationAppId);
+       log.info(objectMapper.writeValueAsString("apiAuthConfig"   + bySourceOrgIdAndSourceAppIdAndDestinationAppId));
        Map<String,String> updatedHeader = new HashMap<>();
        updatedHeader.putAll(httpHeaders);
 
