@@ -73,6 +73,8 @@ public class RateLimiterAspect{
        if(bySourceOrgIdAndSourceAppIdAndDestinationAppId.isPresent()){
            updatedHeader.put(orgid,bySourceOrgIdAndSourceAppIdAndDestinationAppId.get().getDestinationOrgId());
            updatedHeader.put(appid,destinationAppId);
+           updatedHeader.put("servicename",serviceName);
+           log.info("service name  " + serviceName);
            log.info(objectMapper.writeValueAsString("updated Header before ratelimiting   " + updatedHeader));
            rateLimitValidator(updatedHeader,updatedHeader.get(orgid),destinationAppId,serviceName);
        }
