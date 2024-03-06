@@ -159,6 +159,7 @@ public class Constant {
     public static final String RESPONSE="response";
 
     public static final String SSO="SSO";
+    public static final String AUTH_SSO = "auth_sso";
 
     public static final String CLIENT_SECRET_ERROR= "Client secret not found in the request headers";
 
