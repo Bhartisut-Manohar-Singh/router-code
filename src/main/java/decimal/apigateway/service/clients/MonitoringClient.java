@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @FeignClient(value = Constant.MONITORING_MICRO_SERVICE)
-//@RequestMapping(value ="vmonitoring-exe/")
 public interface MonitoringClient {
 
     @PostMapping(value ="vmonitoring-exe/audit/operations", consumes = "application/json")

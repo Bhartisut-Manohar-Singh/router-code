@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
-/*import springfox.documentation.swagger2.annotations.EnableSwagger2;*/
+//import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication(exclude = {ServiceRegistryAutoConfiguration.class, AutoServiceRegistrationAutoConfiguration.class})
 @EnableDiscoveryClient

@@ -8,6 +8,7 @@ import decimal.apigateway.commons.Constant;
 
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.model.EsbOutput;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
 import decimal.apigateway.service.security.SecurityServiceEnc;
@@ -35,7 +36,6 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static decimal.apigateway.commons.Constant.*;
@@ -149,13 +149,22 @@ public class ExecutionServiceImpl implements ExecutionService {
         log.info(" ======= calling esb ======= ");
         log.info(" ======= request ======= " + request);
         log.info(" ======= headers ======= " + objectMapper.writeValueAsString(httpHeaders));
+        httpHeaders.remove("content-length");
         ResponseEntity<Object> responseEntity = esbClient.executePlainRequest(request, httpHeaders);
 
         Object responseBody = responseEntity.getBody();
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
+        String statusCode= "";
+
         if (responseHeaders != null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
+
+
+        if (responseHeaders != null && responseHeaders.containsKey("statuscode"))
+        {
+            statusCode=responseHeaders.get("statuscode").get(0);
+        }
 
         log.info(" ===== response Body from esb ===== " + new Gson().toJson(responseBody));
         List<String> businessKeySet = getBusinessKey(responseBody);
@@ -167,14 +176,27 @@ public class ExecutionServiceImpl implements ExecutionService {
         logsWriter.updateLog(auditPayload);
 
         if (("Y").equalsIgnoreCase(isPayloadEncrypted)) {
-            MicroserviceResponse encryptedResponse = securityService.encryptResponseWithoutSession(responseEntity, headers);
+            MicroserviceResponse encryptedResponse = securityService.encryptResponseWithoutSession(responseEntity, httpHeaders);
             Map<String, String> finalResponseMap = new HashMap<>();
             finalResponseMap.put("response", encryptedResponse.getMessage());
 
-            return finalResponseMap;
-        }
+            EsbOutput output= new EsbOutput();
+            output.setResponse(finalResponseMap);
+            setStatusCodeIfPresent(statusCode, output);
 
-        return responseBody;
+            return output;
+        }
+        EsbOutput output= new EsbOutput();
+        output.setResponse(responseBody);
+        setStatusCodeIfPresent(statusCode, output);
+
+        return output;
+    }
+
+    public static void setStatusCodeIfPresent(String statusCode, EsbOutput output) {
+
+        if (!statusCode.isEmpty() && statusCode.chars().allMatch(Character::isDigit) )
+            output.setStatusCode(statusCode);
     }
 
     private static Map<String, String> setHeaders(Map<String, String> httpHeaders, Map<String, String> headers, String logsRequired, String serviceLog, String logPurgeDays) {
@@ -222,11 +244,19 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setRequestBody(maskRequestBody);
         updatedHttpHeaders.put("executionsource", "API-GATEWAY");
 
+        updatedHttpHeaders.remove("content-length");
         ResponseEntity<Object> responseEntity = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
         HttpHeaders responseHeaders = responseEntity.getHeaders();
 
+        String statusCode= "";
+
         if (responseHeaders != null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
+
+        if (responseHeaders != null && responseHeaders.containsKey("statuscode"))
+        {
+            statusCode=responseHeaders.get("statuscode").get(0);
+        }
 
         log.info(" ===== response Body from esb ===== " + objectMapper.writeValueAsString(responseEntity.getBody()));
         List<String> businessKeySet = getBusinessKey(responseEntity.getBody());
@@ -249,8 +279,10 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
-
-        return finalResponseMap;
+        EsbOutput esbOutput= new EsbOutput();
+        esbOutput.setResponse(finalResponseMap);
+        setStatusCodeIfPresent(statusCode,esbOutput);
+        return esbOutput;
     }
 
     @Override

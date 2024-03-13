@@ -8,7 +8,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
@@ -69,8 +68,8 @@ public class CryptoUtilV2 implements ICryptoUtil{
 
         try {
             factory = SecretKeyFactory.getInstance ( PBKDF2WithHmacSHA1 );
-            KeySpec spec = new PBEKeySpec( passphrase.toCharArray (), hexStringToByteArray ( salt.toCharArray () ), AES_KEY_GENERATION_ITERATION_COUNT, AES_KEY_LENGTH );
-            key = new SecretKeySpec( factory.generateSecret ( spec ).getEncoded (), AES );
+            KeySpec spec = new PBEKeySpec ( passphrase.toCharArray (), hexStringToByteArray ( salt.toCharArray () ), AES_KEY_GENERATION_ITERATION_COUNT, AES_KEY_LENGTH );
+            key = new SecretKeySpec ( factory.generateSecret ( spec ).getEncoded (), AES );
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             e.printStackTrace ();
         }
@@ -280,7 +279,7 @@ public class CryptoUtilV2 implements ICryptoUtil{
         Cipher cipher = Cipher.getInstance ( AES_PADDING );
         byte[] ivArray = hexStringtoByteArray ( iv );
         try {
-            cipher.init ( encryptMode, key, new IvParameterSpec( ivArray ) );
+            cipher.init ( encryptMode, key, new IvParameterSpec ( ivArray ) );
             return cipher.doFinal ( bytes );
 
         } catch (InvalidKeyException e) {

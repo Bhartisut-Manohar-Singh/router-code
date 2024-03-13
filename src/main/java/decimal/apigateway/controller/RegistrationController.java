@@ -4,6 +4,8 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.RegistrationService;
+import decimal.apigateway.service.serviceV3.RegistrationServiceV4;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,9 @@ public class RegistrationController {
     private RegistrationService registrationService;
 
     @Autowired
+    RegistrationServiceV4 registrationServiceV4;
+
+    @Autowired
     public RegistrationController(RegistrationService registrationService) {
         this.registrationService = registrationService;
     }
@@ -29,11 +34,17 @@ public class RegistrationController {
     public Object executeService(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, HttpServletResponse response) throws IOException, RouterException {
 
         String serviceName = httpHeaders.get("servicename");
+        String loginType = httpHeaders.getOrDefault("auth_method","*");
         log.info("Service Name: " + serviceName);
+        log.info("Login Type: "+ loginType);
 
         log.info("====================Call for register=============================");
         if (serviceName.contains("AUTH") || serviceName.contains("auth"))
-            return registrationService.authenticate(request, httpHeaders, response);
+            if (Constant.AUTH_SSO.equalsIgnoreCase(loginType)){
+                return registrationServiceV4.authenticate(request, httpHeaders, response);
+            } else {
+                return registrationService.authenticate(request, httpHeaders, response);
+            }
         else if(serviceName.equalsIgnoreCase("REGISTERAPP"))
             return registrationService.register(request, httpHeaders, response);
         else

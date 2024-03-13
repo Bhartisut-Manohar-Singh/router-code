@@ -7,7 +7,9 @@ import com.google.gson.Gson;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
+import decimal.apigateway.model.EsbOutput;
 import decimal.apigateway.model.MicroserviceResponse;
+import decimal.apigateway.service.validator.PublicJwtTokenValidator;
 import decimal.apigateway.service.validator.RequestValidatorV1;
 import decimal.apigateway.clients.EsbClientAuth;
 import decimal.logs.filters.AuditTraceFilter;
@@ -30,6 +32,7 @@ import java.util.*;
 
 import static decimal.apigateway.commons.Constant.*;
 import static decimal.apigateway.service.ExecutionServiceImpl.getBusinessKey;
+import static decimal.apigateway.service.ExecutionServiceImpl.setStatusCodeIfPresent;
 
 @Service
 @Log
@@ -68,6 +71,9 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
     @Autowired
     SecurityService securityService;
 
+    @Autowired
+    PublicJwtTokenValidator publicJwtTokenValidator;
+
 
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
@@ -78,6 +84,8 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         String clientId = httpHeaders.get(Constant.ORG_ID) + Constant.TILD_SPLITTER + httpHeaders.get(Constant.APP_ID);
         httpHeaders.put(Constant.CLIENT_ID, clientId);
         httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
+
+        publicJwtTokenValidator.validate(request,httpHeaders);
 
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
 
@@ -141,9 +149,13 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
 
          Object responseBody = responseEntity.getBody();
 
+         String statusCode="";
         HttpHeaders responseHeaders = responseEntity.getHeaders();
         if(responseHeaders!=null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
+
+        if(responseHeaders!=null && responseHeaders.containsKey("statuscode"))
+            statusCode=responseHeaders.get("statuscode").get(0);
 
         log.info(" ===== response Body from esb ===== " + new Gson().toJson(responseBody));
         List<String> businessKeySet = getBusinessKey(responseBody);
@@ -159,11 +171,16 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
                     httpHeaders);
             Map<String, String> finalResponseMap = new HashMap<>();
             finalResponseMap.put("response", encryptedResponse.getMessage());
-
-            return finalResponseMap;
+            EsbOutput esbOutput= new EsbOutput();
+            esbOutput.setResponse(finalResponseMap);
+            setStatusCodeIfPresent(statusCode,esbOutput);
+            return esbOutput;
         }
 
-        return responseBody;
+        EsbOutput esbOutput= new EsbOutput();
+        esbOutput.setResponse(responseBody);
+        setStatusCodeIfPresent(statusCode,esbOutput);
+        return esbOutput;
     }
 
     @Override
@@ -172,10 +189,14 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
 
         httpHeaders.put(Constant.ROUTER_HEADER_SECURITY_VERSION, "2");
-        MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
-        JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
-        Map<String,String> headers = objectMapper.convertValue(responseNode.get("headers"),HashMap.class);
 
+        publicJwtTokenValidator.validate(request,httpHeaders);
+
+        MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders,httpHeaders.get("servicename"));
+
+        JsonNode responseNode =  objectMapper.convertValue(microserviceResponse.getResponse(),JsonNode.class);
+        log.info("----- Response Node: " + objectMapper.writeValueAsString(responseNode));
+        Map<String,String> headers = objectMapper.convertValue(responseNode.get("response").get("headers"), new TypeReference<>(){});
         String logsRequired = headers.get("logsrequired");
         String serviceLog = headers.get("serviceLog");
         String keysToMask = headers.get("keys_to_mask");
@@ -194,7 +215,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         auditPayload.getRequest().setRequestBody(JsonMasker.maskMessage(request, maskKeys));
         auditPayload.getRequest().setHeaders(httpHeaders);
 
-
+        httpHeaders.remove("content-length");
         ResponseEntity<byte[]> responseEntity = esbClientAuth.executeMultipart(request, httpHeaders);
 
         Object responseBody = responseEntity.getBody();
@@ -221,7 +242,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
     private static Map<String, String> setHeaders(Map<String, String> httpHeaders, Map<String, String> headers, String logsRequired, String serviceLog, String logPurgeDays) {
         httpHeaders.put("logsrequired", logsRequired);
         httpHeaders.put("serviceLogs", serviceLog);
-        httpHeaders.put("loginid", headers.getOrDefault("loginid",String.valueOf(LocalDateTime.now())));
+        httpHeaders.put("loginid", headers.getOrDefault("loginid","vahana"));
         httpHeaders.put("logpurgedays", logPurgeDays);
         httpHeaders.put("keys_to_mask", headers.get("keys_to_mask"));
         httpHeaders.put("executionsource","API-GATEWAY");

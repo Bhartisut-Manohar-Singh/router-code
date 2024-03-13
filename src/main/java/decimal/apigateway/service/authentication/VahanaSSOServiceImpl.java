@@ -10,6 +10,8 @@ import decimal.apigateway.model.SSOTokenModel;
 import decimal.apigateway.model.SSOTokenResponse;
 import decimal.apigateway.repository.SSOTokenRepo;
 import decimal.apigateway.service.AuthApplicationDefConfig;
+import io.netty.util.internal.StringUtil;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,7 @@ public class VahanaSSOServiceImpl implements VahanaSSOService{
     @Override
     public Object generateSSOToken(SSOTokenModel ssoTokenModel, Map<String,String> httpHeaders) throws RouterException, IOException {
         Boolean aBoolean = validateGenerateTokenRequest(ssoTokenModel, httpHeaders);
+
         if(aBoolean) {
             Optional<SSOTokenRedis> ssoTokenRedis = ssoTokenRepo.findByOrgIdAndAppIdAndLoginId(ssoTokenModel.getOrgId(), ssoTokenModel.getAppId(), ssoTokenModel.getLoginId());
             if (ssoTokenRedis.isPresent()) {
@@ -61,6 +64,9 @@ public class VahanaSSOServiceImpl implements VahanaSSOService{
 
     private Boolean validateGenerateTokenRequest(SSOTokenModel ssoTokenModel, Map<String, String> httpHeaders) throws RouterException, IOException {
         Boolean status=true;
+        String client= httpHeaders.get("clientid");
+        if (StringUtil.isNullOrEmpty(client))
+            throw new IOException("clientId not present");
         List<String> clientId = AuthRouterOperations.getStringArray(httpHeaders.get(Constant.CLIENT_ID), "~");
 
         String orgId = clientId.get(0);

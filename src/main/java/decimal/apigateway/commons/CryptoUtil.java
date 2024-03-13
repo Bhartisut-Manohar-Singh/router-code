@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -72,8 +71,7 @@ public class CryptoUtil implements ICryptoUtil {
 
             return convertByteArrayToHexString ( encrypted );
 
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException | NoSuchPaddingException |
-                 BadPaddingException | InvalidKeyException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException | NoSuchPaddingException | BadPaddingException | InvalidKeyException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
             throw new RouterException( AuthRouterResponseCode.REQUEST_DATA_DECRYPTION_ERROR, e );
         }
     }

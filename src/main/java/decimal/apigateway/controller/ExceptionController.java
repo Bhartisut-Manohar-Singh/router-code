@@ -1,11 +1,12 @@
 package decimal.apigateway.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import decimal.apigateway.domain.MessageMasterConfig;
 import decimal.apigateway.exception.PublicTokenCreationException;
+import decimal.apigateway.exception.RateLimitError;
+import decimal.apigateway.exception.RequestNotPermitted;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.model.ResponseOutput;
@@ -17,7 +18,6 @@ import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.ErrorPayload;
 import decimal.logs.model.SystemError;
-import decimal.ratelimiter.exception.RequestNotPermitted;
 import lombok.extern.java.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -219,9 +219,20 @@ public class ExceptionController {
     @ExceptionHandler(value = RequestNotPermitted.class)
     public ResponseEntity<Object> handleRouterException(RequestNotPermitted ex) throws JsonProcessingException {
         log.info("Inside request not permission exception handler - " + ex.getMessage());
+        RateLimitError rateLimitError = new RateLimitError(ex.getMessage(), FAILURE_STATUS,HttpStatus.TOO_MANY_REQUESTS.value());
 
-        return new ResponseEntity<>(ex.getMessage(), null, HttpStatus.TOO_MANY_REQUESTS);
+        auditPayload = logsWriter.initializeLog("Request", JSON, ex.getHttpHeaders(),ex.getRequestTimestamp());
+        auditTraceFilter.setIsServicesLogsEnabled(true);
+        auditPayload.getResponse().setResponse(mapper.writeValueAsString(rateLimitError));
+        auditPayload.getResponse().setStatus(FAILURE_STATUS);
+        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.setStatus(FAILURE_STATUS);
+        logsWriter.updateLog(auditPayload);
+
+        return new ResponseEntity<>(rateLimitError, null, HttpStatus.TOO_MANY_REQUESTS);
     }
+
+
 
     @ExceptionHandler(value = PublicTokenCreationException.class)
     public ResponseEntity<Object> handlePublicJwtCreationException(PublicTokenCreationException ex) {

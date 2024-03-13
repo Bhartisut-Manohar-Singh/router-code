@@ -1,9 +1,9 @@
 package decimal.apigateway.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import decimal.logs.connector.LogsConnector;
 import decimal.logs.constant.LogsIdentifier;
+import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.RequestIdentifier;
 import lombok.extern.java.Log;
@@ -30,6 +30,9 @@ public class LogsWriter {
     @Autowired
     private AuditPayload auditPayload;
 
+    @Autowired
+    private AuditTraceFilter auditTraceFilter;
+
     @Value("${dms.default.servicename}")
     private String dmsDefaultServiceName;
 
@@ -53,12 +56,27 @@ public class LogsWriter {
         return auditPayload;
     }
 
+    public AuditPayload initializeLog(String request,String requestType, Map<String, String> httpHeaders,Instant requestTimestamp)
+    {
+        auditPayload.setRequestTimestamp(requestTimestamp);
+
+        RequestIdentifier requestIdentifier = getRequestIdentifier(httpHeaders,requestType);
+
+        auditPayload.setRequestIdentifier(requestIdentifier);
+
+        auditPayload.getRequest().setHeaders(httpHeaders);
+
+        return auditPayload;
+    }
+
+
     public void updateLog(AuditPayload auditPayload){
         auditPayload.setResponseTimestamp(Instant.now());
         auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().toEpochMilli() - auditPayload.getRequestTimestamp().toEpochMilli());
 
         AuditPayload auditPayloadFinal =new AuditPayload(auditPayload.getRequestTimestamp(),auditPayload.getResponseTimestamp(),auditPayload.getTimeTaken(),auditPayload.getRequest(),auditPayload.getResponse(),auditPayload.getStatus(),auditPayload.getRequestIdentifier(),auditPayload.isLogRequestAndResponse());
-        log.info(" ==== auditPayloadFinal ==== " + new Gson().toJson(auditPayloadFinal));
+
+        if(logsConnector !=null && auditTraceFilter !=null)
         logsConnector.audit(auditPayloadFinal);
     }
 

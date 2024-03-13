@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import decimal.apigateway.clients.UserManagerClient;
 import decimal.apigateway.commons.AuthRouterOperations;
 import decimal.apigateway.commons.AuthRouterResponseCode;
 import decimal.apigateway.domain.SSOTokenRedis;
@@ -34,6 +35,9 @@ public class UserAuthentication {
 
     @Autowired
     private EsbClientAuth esbClientAuth;
+
+    @Autowired
+    private UserManagerClient userManagerClient;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -116,6 +120,7 @@ public class UserAuthentication {
         else  {
             log.info("calling esb client************");
 
+            httpHeaders.remove("content-length");
             Object response = esbClientAuth.executeAuthentication(request, httpHeaders);
 
             //logsConnector.textPayload("Response has been received from ESB", auditTraceFilter.requestIdentifier);
@@ -215,7 +220,7 @@ public class UserAuthentication {
         }
 
         else  {
-
+            httpHeaders.remove("content-length");
             Object response = esbClientAuth.executev2Authentication(request, httpHeaders);
 
            // logsConnector.textPayload("Response has been received from ESB", auditTraceFilter.requestIdentifier);
@@ -371,6 +376,81 @@ public class UserAuthentication {
             return JsonMasker.maskMessage(data, Arrays.asList(split));
         } else {
             return data;
+        }
+    }
+
+    public Object authenticateV4(String request, Map<String, String> httpHeaders,String loginType)
+            throws RouterException, IOException {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode nodes = objectMapper.createObjectNode();
+
+        String logsRequired = httpHeaders.get("logsrequired");
+        String serviceLog = httpHeaders.get("servicelogs");
+
+        boolean logRequestResponse = "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog);
+        if (logRequestResponse) {
+            String maskRequest = maskData(httpHeaders, request);
+        } else {
+            nodes.put("message", "It seems that request logs is not enabled for this api/service.");
+        }
+
+        String userName = httpHeaders.get(Headers.username.name());
+
+        List<String> userNameData = AuthRouterOperations.getStringArray(userName, TILD_SPLITTER);
+
+        httpHeaders.put(Headers.orgid.name(), userNameData.get(0));
+        httpHeaders.put(Headers.appid.name(), userNameData.get(1));
+        httpHeaders.put(Headers.loginid.name(), userNameData.get(2));
+        httpHeaders.put("Content-Type", "application/json");
+
+        if("SSO".equalsIgnoreCase(loginType)){
+            validationSSOToken(request,httpHeaders,null,logRequestResponse,nodes);
+
+            String serviceName = httpHeaders.get(Headers.servicename.name());
+            JsonNode jsonNode = objectMapper.readValue(request, JsonNode.class);
+            JsonNode jsonNode1 = jsonNode.get("services");
+            String loginId= jsonNode1.get(serviceName).get(0).get("loginId").asText();
+
+            log.info("serviceName : "+serviceName+" loginId : "+ loginId);
+
+            Object response = userManagerClient.loginDetails(loginId);
+
+            log.info("Response : "+objectMapper.writeValueAsString(response));
+            return response;
+
+        }
+
+        else  {
+            log.info("calling esb client************");
+
+            Object response = esbClientAuth.executeAuthentication(request, httpHeaders);
+
+            Map<String, String> authResponse = objectMapper.convertValue(response, new TypeReference<Map<String, String>>() {
+            });
+
+            String responseBody = maskData(httpHeaders, objectMapper.writeValueAsString(authResponse));
+
+            if (FAILURE_STATUS.equalsIgnoreCase(authResponse.get("status"))) {
+                System.out.println("Failure in auth process :" + authResponse.get("auth"));
+                String message = authResponse.get("message");
+
+                RouterException exception = new RouterException(AuthRouterResponseCode.ROUTER_AUTH_FAIL, (Exception) null, "AUTH", message);
+                exception.setResponse(authResponse.get("auth"));
+
+                //VSN-3399
+                exception.setErrorHint(message !=null && !message.isEmpty() ? message : "Authentication Failed");
+
+                throw exception;
+            }
+
+            if (logRequestResponse) {
+                String maskRequest = maskData(httpHeaders, responseBody);
+            } else {
+                nodes.put("message", "It seems that request logs is not enabled for this api/service.");
+            }
+
+            return authResponse.get("auth");
         }
     }
 

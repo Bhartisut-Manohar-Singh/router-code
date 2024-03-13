@@ -31,7 +31,7 @@ public class CryptoFactory {
             }
         } else {
             System.out.println("=====================securityVersion is NULL:"+securityVersion+"======================");
-            return  applicationContext.getBean(CryptoUtilV2.class);
+            return  applicationContext.getBean(CryptoUtil.class);
         }
      //   return null != securityVersion && securityVersion.equals("2") ? applicationContext.getBean(CryptoUtilV2.class) : applicationContext.getBean(CryptoUtil.class);
     }

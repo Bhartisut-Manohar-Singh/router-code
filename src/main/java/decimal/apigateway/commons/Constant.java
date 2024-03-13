@@ -12,6 +12,10 @@ public class Constant {
 
 
     public static final String TILD_SPLITTER = "~";
+    public static final String RL_TILD = "RL~";
+    public static final String NO_TOKENS_LEFT_FOR_APP = "No tokens left for APP ID : ";
+    public static final String NO_TOKENS_LEFT_FOR_SERVICE = "No tokens left for SERVICE NAME : ";
+
     public static final String ESB = "esb";
     public static final String MULTIPART_FILES= "files";
     public static final String MONITORING_MICRO_SERVICE = "VMONITORING-EXE";
@@ -155,9 +159,11 @@ public class Constant {
     public static final String RESPONSE="response";
 
     public static final String SSO="SSO";
+    public static final String AUTH_SSO = "auth_sso";
 
+    public static final String CLIENT_SECRET_ERROR= "Client secret not found in the request headers";
 
-
+    public static final String INVALID_ORG_APP= "Request header parameter missing: OrgId or appId";
 
 
     public static final List<String> getSecuredKeys() {

@@ -2,7 +2,6 @@ package decimal.apigateway.commons;
 
 import decimal.apigateway.exception.RouterException;
 
-
 import javax.crypto.SecretKey;
 import java.util.Map;
 
