@@ -1,9 +1,10 @@
 package decimal.apigateway.configuration;
 
+
+import decimal.logs.model.CustomPayload;
 import decimal.apigateway.enums.Headers;
-import decimal.logs.connector.LogsConnector;
-import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.filters.IdentifierFilter;
+import decimal.logs.filters.AuditTraceFilter;
 import decimal.logs.model.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -65,8 +66,9 @@ public class LogsManagementConfiguration {
         List<String> registeredUrls = new ArrayList<>();
         registeredUrls.add("logout");
         registeredUrls.add("forceLogout");
-
-
+        registeredUrls.add("generate/SSOToken");
+        registeredUrls.add("validate/SSOToken");
+        registeredUrls.add("sso-login-details");
         return new AuditTraceFilter("api-gateway", isHttpTracingEnabled, registeredUrls);
     }
 
