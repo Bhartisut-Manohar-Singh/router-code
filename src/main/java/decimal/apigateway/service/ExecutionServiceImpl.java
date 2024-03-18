@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
@@ -149,6 +149,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         log.info(" ======= calling esb ======= ");
         log.info(" ======= request ======= " + request);
         log.info(" ======= headers ======= " + objectMapper.writeValueAsString(httpHeaders));
+        httpHeaders.remove("content-length");
         ResponseEntity<Object> responseEntity = esbClient.executePlainRequest(request, httpHeaders);
 
         Object responseBody = responseEntity.getBody();
@@ -243,6 +244,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setRequestBody(maskRequestBody);
         updatedHttpHeaders.put("executionsource", "API-GATEWAY");
 
+        updatedHttpHeaders.remove("content-length");
         ResponseEntity<Object> responseEntity = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
         HttpHeaders responseHeaders = responseEntity.getHeaders();
 

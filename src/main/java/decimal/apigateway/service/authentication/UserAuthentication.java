@@ -120,6 +120,7 @@ public class UserAuthentication {
         else  {
             log.info("calling esb client************");
 
+            httpHeaders.remove("content-length");
             Object response = esbClientAuth.executeAuthentication(request, httpHeaders);
 
             //logsConnector.textPayload("Response has been received from ESB", auditTraceFilter.requestIdentifier);
@@ -219,7 +220,7 @@ public class UserAuthentication {
         }
 
         else  {
-
+            httpHeaders.remove("content-length");
             Object response = esbClientAuth.executev2Authentication(request, httpHeaders);
 
            // logsConnector.textPayload("Response has been received from ESB", auditTraceFilter.requestIdentifier);

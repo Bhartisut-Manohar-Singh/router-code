@@ -1,3 +1,4 @@
+/*
 package decimal.apigateway.configuration;
 
 import org.springframework.context.annotation.Bean;
@@ -18,4 +19,4 @@ public class SwaggerConfig {
                 .paths(PathSelectors.any())
                 .build();
     }
-}
+}*/

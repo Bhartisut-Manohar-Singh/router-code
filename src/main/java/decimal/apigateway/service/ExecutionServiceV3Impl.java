@@ -215,7 +215,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         auditPayload.getRequest().setRequestBody(JsonMasker.maskMessage(request, maskKeys));
         auditPayload.getRequest().setHeaders(httpHeaders);
 
-
+        httpHeaders.remove("content-length");
         ResponseEntity<byte[]> responseEntity = esbClientAuth.executeMultipart(request, httpHeaders);
 
         Object responseBody = responseEntity.getBody();
