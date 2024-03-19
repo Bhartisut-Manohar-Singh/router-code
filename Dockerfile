@@ -14,8 +14,6 @@ ENV APP=${APP} \
 ARG build_name
 
 COPY ${JOB_NAME}/target/${build_name}.jar ${PROJECT_HOME}/
-#COPY ${JOB_NAME}/target/logging-agent-1.0.jar ${PROJECT_HOME}/
-#COPY ${JOB_NAME}/target/logging-agent-1.0.jar ${PROJECT_HOME}/
 RUN ls -la ${PROJECT_HOME}/
 ARG JAR=${build_name}.jar
 ENV JAR=${JAR}
