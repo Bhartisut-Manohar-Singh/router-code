@@ -5,10 +5,12 @@ package decimal.apigateway.service.validator;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.commons.RouterResponseCode;
+import decimal.apigateway.domain.Session;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.ApplicationDef;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.model.Request;
+import decimal.apigateway.repository.redis.AuthenticationSessionRepoRedis;
 import decimal.apigateway.repository.redis.RedisKeyValuePairRepository;
 import decimal.apigateway.service.ApplicationDefConfig;
 import lombok.extern.java.Log;
@@ -31,6 +33,9 @@ public class InActiveSessionValidator implements Validator
     RedisKeyValuePairRepository redisKeyValuePairRepository;
 
     @Autowired
+    AuthenticationSessionRepoRedis authenticationSessionRepoRedis;
+
+    @Autowired
     Request auditTraceFilter;
 
 //    @Autowired
@@ -44,7 +49,6 @@ public class InActiveSessionValidator implements Validator
         String clientId = httpHeaders.get(Constant.CLIENT_ID);
         String requestId = httpHeaders.get(Constant.ROUTER_HEADER_REQUEST_ID);
         String userName = httpHeaders.get(Constant.ROUTER_HEADER_USERNAME);
-
         log.info("Validating  inactive session: "+userName);
 
         List<String> clientIdData = RouterOperations.getStringArray(clientId, Constant.TILD_SPLITTER);
@@ -70,7 +74,10 @@ public class InActiveSessionValidator implements Validator
 
 
             } else {
+
                 log.info(requestId+" - "+"==============================tokenDetails not found in Redis.Inactive session expired.=========================");
+                List<Session> authenticationSessionRepoRedis1=authenticationSessionRepoRedis.findByOrgIdAndAppIdAndLoginId(clientIdData.get(0), clientIdData.get(1),token);
+                authenticationSessionRepoRedis1.removeAll(authenticationSessionRepoRedis1);
                 throw new RouterException(RouterResponseCode.INACTIVE_USER_SESSION, null);
             }
         }
