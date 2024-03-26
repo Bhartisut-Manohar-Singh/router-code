@@ -46,6 +46,8 @@ public class Constant {
 
     public static final String LOGIN_ID = "loginid";
 
+    public static final String SERVICE_NAME = "servicename";
+
 
     public static final String ROUTER_HEADER_SOURCE_IP = "X-FORWARDED-FOR";
     public static final String COLON = ":";
