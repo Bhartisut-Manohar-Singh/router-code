@@ -2,6 +2,7 @@ package decimal.apigateway.service.validator;
 
 //import decimal.logs.connector.LogsConnector;
 //import decimal.logs.model.RequestIdentifier;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.commons.RouterResponseCode;
@@ -28,6 +29,9 @@ public class InActiveSessionValidator implements Validator
 
     @Autowired
     ApplicationDefConfig applicationDefConfig;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Autowired
     RedisKeyValuePairRepository redisKeyValuePairRepository;
@@ -75,9 +79,12 @@ public class InActiveSessionValidator implements Validator
 
             } else {
 
-                log.info(requestId+" - "+"==============================tokenDetails not found in Redis.Inactive session expired.=========================");
+                log.info(requestId+" - "+"==============================tokenDetails not found in Redis.Inactive session expired.=========================");/*
                 List<Session> authenticationSessionRepoRedis1=authenticationSessionRepoRedis.findByOrgIdAndAppIdAndLoginId(clientIdData.get(0), clientIdData.get(1),token);
-                authenticationSessionRepoRedis1.removeAll(authenticationSessionRepoRedis1);
+                authenticationSessionRepoRedis1.removeAll(authenticationSessionRepoRedis1);*/
+                List<Session> sessionsToRemove = authenticationSessionRepoRedis.findByOrgIdAndAppIdAndLoginId(clientIdData.get(0), clientIdData.get(1),token);
+                System.out.println("===============session found for id is===========" +objectMapper.writeValueAsString(sessionsToRemove));
+                authenticationSessionRepoRedis.deleteAll(sessionsToRemove);
                 throw new RouterException(RouterResponseCode.INACTIVE_USER_SESSION, null);
             }
         }
