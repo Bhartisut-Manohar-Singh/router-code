@@ -1,5 +1,7 @@
 package decimal.apigateway.service.authentication.sessionmgmt;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.commons.AuthRouterOperations;
 import decimal.apigateway.commons.AuthRouterResponseCode;
 import decimal.apigateway.commons.Constant;
@@ -32,10 +34,13 @@ public class MultipleSessionService implements MultipleSession {
     @Autowired
     AuditTraceFilter auditTraceFilter;
 
+    @Autowired
+    ObjectMapper objectMapper;
+
     
 
     @Override
-    public void validateMultipleSession(Map<String, String> httpHeaders) throws RouterException {
+    public void validateMultipleSession(Map<String, String> httpHeaders) throws RouterException, JsonProcessingException {
         String username = httpHeaders.get(Headers.username.name());
         String requestId = httpHeaders.get(Headers.requestid.name());
 
@@ -59,6 +64,7 @@ public class MultipleSessionService implements MultipleSession {
             log.info("Multiple session is not allowed for username" + username);
             authenticationSessionService.removeSessionByOrgIdAndAppIdAndDeviceId(orgId, appId, deviceId);
             List<Session> sessions = authenticationSessionService.findByOrgIdAndAppIdAndLoginId(orgId, appId, loginId);
+            log.info("=========sessions found are========="  +objectMapper.writeValueAsString(sessions));
 
             manageForceLoginSessions(sessions, httpHeaders.get(Constant.IS_FORCE_LOGIN), username, requestId);
         }
