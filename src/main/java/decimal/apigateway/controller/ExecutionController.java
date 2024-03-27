@@ -44,8 +44,9 @@ public class ExecutionController
     }
 
     @PostMapping("gatewayProcessor/{serviceName}")
-    public Object executePlainRequestJson(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
+    public Object executePlainRequestJson(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders,@PathVariable String serviceName) throws RouterException, IOException {
         System.out.println("==============================Gateway Processor=============================");
+        httpHeaders.put("servicename", serviceName);
         Object o = executionService.executePlainRequest(request, httpHeaders);
 
         EsbOutput output = mapper.convertValue(o, EsbOutput.class);
