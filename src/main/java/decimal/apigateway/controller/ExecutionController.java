@@ -43,7 +43,7 @@ public class ExecutionController
         return new ResponseEntity<>(output.getResponse(), HttpStatus.valueOf(Integer.parseInt(output.getStatusCode())));
     }
 
-    @PostMapping("gatewayProcessor/{serviceName}")
+    @PostMapping("callback/{serviceName}")
     public Object executePlainRequestJson(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders,@PathVariable String serviceName) throws RouterException, IOException {
         System.out.println("==============================Gateway Processor=============================");
         httpHeaders.put("servicename", serviceName);
