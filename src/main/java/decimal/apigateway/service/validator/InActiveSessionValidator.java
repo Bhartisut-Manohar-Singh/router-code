@@ -32,13 +32,7 @@ public class InActiveSessionValidator implements Validator
     ApplicationDefConfig applicationDefConfig;
 
     @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
     RedisKeyValuePairRepository redisKeyValuePairRepository;
-
-    @Autowired
-    AuthenticationSessionRepoRedis authenticationSessionRepoRedis;
 
     @Autowired
     AuthenticationSessionService authenticationSessionService;
@@ -83,14 +77,8 @@ public class InActiveSessionValidator implements Validator
 
             } else {
 
-                log.info(requestId+" - "+"==============================tokenDetails not found in Redis.Inactive session expired.=========================");/*
-                List<Session> authenticationSessionRepoRedis1=authenticationSessionRepoRedis.findByOrgIdAndAppIdAndLoginId(clientIdData.get(0), clientIdData.get(1),token);
-                authenticationSessionRepoRedis1.removeAll(authenticationSessionRepoRedis1);*/
-              /*  List<Session> sessionsToRemove = authenticationSessionRepoRedis.findByOrgIdAndAppIdAndLoginId(clientIdData.get(0), clientIdData.get(1),token);
-                System.out.println("===============session found for id is===========" +objectMapper.writeValueAsString(sessionsToRemove));
-                authenticationSessionRepoRedis.deleteAll(sessionsToRemove);*/
+                log.info(requestId+" - "+"==============================tokenDetails not found in Redis.Inactive session expired.=========================");
                 authenticationSessionService.removeSession(token);
-
                 throw new RouterException(RouterResponseCode.INACTIVE_USER_SESSION, null);
             }
         }
