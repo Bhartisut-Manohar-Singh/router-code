@@ -2,16 +2,14 @@ package decimal.apigateway.service.validator;
 
 //import decimal.logs.connector.LogsConnector;
 //import decimal.logs.model.RequestIdentifier;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.commons.RouterOperations;
 import decimal.apigateway.commons.RouterResponseCode;
-import decimal.apigateway.domain.Session;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.ApplicationDef;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.model.Request;
-import decimal.apigateway.repository.redis.AuthenticationSessionRepoRedis;
 import decimal.apigateway.repository.redis.RedisKeyValuePairRepository;
 import decimal.apigateway.service.ApplicationDefConfig;
 import decimal.apigateway.service.authentication.sessionmgmt.AuthenticationSessionService;

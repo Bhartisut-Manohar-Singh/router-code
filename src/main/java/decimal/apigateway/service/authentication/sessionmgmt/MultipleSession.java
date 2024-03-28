@@ -3,8 +3,6 @@
  */
 package decimal.apigateway.service.authentication.sessionmgmt;
 
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import decimal.apigateway.exception.RouterException;
 
 import java.util.Map;
@@ -15,7 +13,7 @@ import java.util.Map;
  */
 public interface MultipleSession {
 
-    void validateMultipleSession(Map<String, String> httpHeaders) throws RouterException, JsonProcessingException;
+    void validateMultipleSession(Map<String, String> httpHeaders) throws RouterException;
 
     boolean killAllUserSessions(String orgId, String appId, String loginId);
 
