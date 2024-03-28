@@ -46,7 +46,7 @@ public class ExecutionController
     @PostMapping("callback/{serviceName}")
     public Object executePlainRequestJson(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders,@PathVariable String serviceName) throws RouterException, IOException {
         System.out.println("==============================Gateway Processor=============================");
-        httpHeaders.put("servicename", serviceName);
+        httpHeaders.put(Constant.SERVICE_NAME, serviceName);
         Object o = executionService.executePlainRequest(request, httpHeaders);
 
         EsbOutput output = mapper.convertValue(o, EsbOutput.class);
