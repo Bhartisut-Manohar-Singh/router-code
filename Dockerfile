@@ -1,22 +1,22 @@
 FROM 712693083859.dkr.ecr.ap-south-1.amazonaws.com/java-base-image:java11-v2
 LABEL maintainer="devops@decimal.co.in"
 
-RUN apt-get update && \
-    apt-get install -y build-essential libssl-dev libcurl4-openssl-dev wget
+# RUN apt-get update && \
+#     apt-get install -y build-essential libssl-dev libcurl4-openssl-dev wget
 
-# Download and install curl 8.4.0 with OpenSSL TLS backend
-RUN wget https://curl.se/download/curl-8.4.0.tar.gz && \
-    tar -xvf curl-8.4.0.tar.gz && \
-    cd curl-8.4.0 && \
-    ./configure --with-openssl && \
-    make && \
-    make install && \
-    cd .. && \
-    rm -rf curl-8.4.0* && \
-    apt-get remove -y build-essential wget && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# # Download and install curl 8.4.0 with OpenSSL TLS backend
+# RUN wget https://curl.se/download/curl-8.4.0.tar.gz && \
+#     tar -xvf curl-8.4.0.tar.gz && \
+#     cd curl-8.4.0 && \
+#     ./configure --with-openssl && \
+#     make && \
+#     make install && \
+#     cd .. && \
+#     rm -rf curl-8.4.0* && \
+#     apt-get remove -y build-essential wget && \
+#     apt-get autoremove -y && \
+#     apt-get clean && \
+#     rm -rf /var/lib/apt/lists/*
 
 # Set the correct library path and update ldconfig cache
 ENV LD_LIBRARY_PATH /usr/local/lib
