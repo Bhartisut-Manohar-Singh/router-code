@@ -1,4 +1,4 @@
-FROM public.ecr.aws/j5q7y0z3/java-base-image:latest
+FROM 712693083859.dkr.ecr.ap-south-1.amazonaws.com/java-base-image:java11-v2
 LABEL maintainer="devops@decimal.co.in"
 
 RUN apt-get update && \
