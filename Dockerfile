@@ -1,29 +1,11 @@
 FROM 712693083859.dkr.ecr.ap-south-1.amazonaws.com/java-base-image:java11-v1
 LABEL maintainer="devops@decimal.co.in"
 
-# RUN apt-get update && \
-#     apt-get install -y build-essential libssl-dev libcurl4-openssl-dev wget
-
-# # Download and install curl 8.4.0 with OpenSSL TLS backend
-# RUN wget https://curl.se/download/curl-8.4.0.tar.gz && \
-#     tar -xvf curl-8.4.0.tar.gz && \
-#     cd curl-8.4.0 && \
-#     ./configure --with-openssl && \
-#     make && \
-#     make install && \
-#     cd .. && \
-#     rm -rf curl-8.4.0* && \
-#     apt-get remove -y build-essential wget && \
-#     apt-get autoremove -y && \
-#     apt-get clean && \
-#     rm -rf /var/lib/apt/lists/*
-
 RUN apt-get update && \
-    apt-get install -y gnupg && \
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C && \
-    apt-get update && \
-    apt-get install -y build-essential libssl-dev libcurl4-openssl-dev wget && \
-    wget https://curl.se/download/curl-8.4.0.tar.gz && \
+    apt-get install -y build-essential libssl-dev libcurl4-openssl-dev wget
+
+# Download and install curl 8.4.0 with OpenSSL TLS backend
+RUN wget https://curl.se/download/curl-8.4.0.tar.gz && \
     tar -xvf curl-8.4.0.tar.gz && \
     cd curl-8.4.0 && \
     ./configure --with-openssl && \
