@@ -597,7 +597,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     private static Map<String, String> setHeaders(Map<String, String> httpHeaders, Map<String, String> headers, String logsRequired, String serviceLog, String logPurgeDays) {
         httpHeaders.put("logsrequired", logsRequired);
         httpHeaders.put("serviceLogs", serviceLog);
-        httpHeaders.put("loginid", headers.getOrDefault("loginid","vahana"));
+        httpHeaders.put("loginid", httpHeaders.getOrDefault("loginid","vahana"));
         httpHeaders.put("logpurgedays", logPurgeDays);
         httpHeaders.put("keys_to_mask", headers.get("keys_to_mask"));
         httpHeaders.put("executionsource","API-GATEWAY");
