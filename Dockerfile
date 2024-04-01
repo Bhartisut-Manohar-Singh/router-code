@@ -1,4 +1,4 @@
-FROM 712693083859.dkr.ecr.ap-south-1.amazonaws.com/java-base-image:java11-v2
+FROM 712693083859.dkr.ecr.ap-south-1.amazonaws.com/java-base-image:java11-v3
 LABEL maintainer="devops@decimal.co.in"
 
 # RUN apt-get update && \
