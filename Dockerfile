@@ -1,4 +1,4 @@
-FROM openjdk:11
+FROM 712693083859.dkr.ecr.ap-south-1.amazonaws.com/java-base-image:java11-v1
 LABEL maintainer="devops@decimal.co.in"
 
 RUN apt-get update && \
