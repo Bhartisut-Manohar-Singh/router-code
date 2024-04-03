@@ -162,7 +162,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         auditPayload.getResponse().setResponse(new Gson().toJson(responseEntity.getBody()));
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
 
         logsWriter.updateLog(auditPayload);
 
@@ -230,7 +230,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         auditPayload.getResponse().setResponse(responseBody instanceof  byte [] ? objectMapper.writeValueAsString(responseMap) : objectMapper.writeValueAsString(responseBody));
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
 
         logsWriter.updateLog(auditPayload);
 

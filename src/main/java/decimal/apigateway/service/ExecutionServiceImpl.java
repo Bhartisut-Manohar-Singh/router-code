@@ -36,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static decimal.apigateway.commons.Constant.*;
@@ -91,14 +92,11 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders, httpHeaders.get("servicename"));
         JsonNode responseNode = objectMapper.convertValue(microserviceResponse.getResponse(), JsonNode.class);
-        //Map<String, String> headers = objectMapper.convertValue(responseNode.get("headers"), HashMap.class);
-        Map<String,Object> response = objectMapper.convertValue(responseNode.get("response"),HashMap.class);
-        log.info("==== inside executePlainRequest ====  response "+response);
 
-        log.info("==== inside executePlainRequest ====  headers "+response.get("headers"));
+        Map<String,Object> response = objectMapper.convertValue(responseNode.get("response"),HashMap.class);
+
         Map<String,String> headers = (Map<String, String>) response.get("headers");
 
-        log.info("=== calling execute plain request -------=== " + new Gson().toJson(headers));
         String isDigitallySigned = headers.get(IS_DIGITALLY_SIGNED);
         String isPayloadEncrypted = headers.get(IS_PAYLOAD_ENCRYPTED);
 
@@ -171,7 +169,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getResponse().setResponse(new Gson().toJson(responseEntity.getBody()));
         auditPayload.getRequestIdentifier().setBusinessFilter(businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
 
         logsWriter.updateLog(auditPayload);
 
@@ -314,23 +312,24 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setMethod("POST");
         auditPayload.getRequest().setUri(serviceUrl);
 
+        httpHeaders1.remove("content-length");
         httpHeaders1.put("executionsource", Collections.singletonList("API-GATEWAY"));
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
-
         log.info(" ==== Dyanmic Router URL ====" + serviceUrl);
+        log.info(" ==== requestEntity  ====" + new Gson().toJson(requestEntity));
 
         ResponseEntity<Object> exchange = null;
         try {
             exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
-            log.info(" ==== response body ==== " + objectMapper.writeValueAsString(exchange.getBody()));
+            System.out.println(" ==== response body ==== " + new Gson().toJson(exchange));
         } catch (Exception e) {
             log.info(" === exception occured === " + e.getMessage());
         }
 
         HttpHeaders headers = exchange.getHeaders();
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200 && (headers.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(headers.get("status").get(0)) : true)) {
             auditPayload.setStatus(SUCCESS_STATUS);
@@ -399,7 +398,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpHeaders responseHeaders = exchange.getHeaders();
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
@@ -473,7 +472,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         System.out.println("==========================================Returned From DMS Upload Api=========================================");
 
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
@@ -516,7 +515,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Request requestData = new Request();
         Response responseData = new Response();
-        requestData.setTimestamp(Instant.now());
+        requestData.setTimestamp(LocalDateTime.now());
         requestData.setRequestBody(objectMapper.writeValueAsString(request));
         requestData.setHeaders(updateHttpHeaders.toSingleValueMap());
         auditPayload.setRequest(requestData);
@@ -544,7 +543,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         HttpHeaders responseHeaders = exchange.getHeaders();
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
 
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
         if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
             auditPayload.setStatus(SUCCESS_STATUS);
             dynamicResponse.setStatus(SUCCESS_STATUS);
@@ -557,7 +556,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         dynamicResponse.setResponse(exchange.getBody());
-        responseData.setTimestamp(Instant.now());
+        responseData.setTimestamp(LocalDateTime.now());
         responseData.setResponse(objectMapper.writeValueAsString(dynamicResponse));
         auditPayload.setRequest(requestData);
         auditPayload.setResponse(responseData);

@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static decimal.apigateway.commons.Constant.JSON;
@@ -246,7 +247,7 @@ public class RegistrationServiceImplV2 implements RegistrationServiceV2 {
     @Override
     public Object logout(String request, Map<String, String> httpHeaders, HttpServletResponse response) throws RouterException, JsonProcessingException {
         try {
-            auditPayload.setRequestTimestamp(Instant.now());
+            auditPayload.setRequestTimestamp(LocalDateTime.now());
 
             MicroserviceResponse microserviceResponse = requestValidatorV2.validateLogout(request, httpHeaders);
 

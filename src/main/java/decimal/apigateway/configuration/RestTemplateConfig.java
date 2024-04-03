@@ -15,6 +15,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 
 @Configuration
@@ -42,7 +43,8 @@ public class RestTemplateConfig {
         connectionManager.setDefaultMaxPerRoute(maxConnectionPerRoute);
 
         //For Setting TimeOut
-        RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(Timeout.of(Duration.ofMillis(readTimeout))).build();
+        //RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(Timeout.of(Duration.ofMillis(readTimeout))).build();
+        RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(readTimeout, TimeUnit.MILLISECONDS).build();
 
         CloseableHttpClient closeableHttpClient = HttpClientBuilder.create()
                 .setConnectionManager(connectionManager)

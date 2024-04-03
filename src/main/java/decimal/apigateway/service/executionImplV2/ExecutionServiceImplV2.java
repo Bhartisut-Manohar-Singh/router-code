@@ -241,7 +241,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         auditPayload.getResponse().setResponse(JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys));
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
 
         logsWriter.updateLog(auditPayload);
 
@@ -308,7 +308,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         HttpHeaders headers = exchange.getHeaders();
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200 && (headers.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(headers.get("status").get(0)) : true)) {
             auditPayload.setStatus(SUCCESS_STATUS);
@@ -392,7 +392,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         Request requestData=new Request();
         Response responseData=new Response();
-        requestData.setTimestamp(Instant.now());
+        requestData.setTimestamp(LocalDateTime.now());
         requestData.setRequestBody(objectMapper.writeValueAsString(request));
         requestData.setHeaders(updateHttpHeaders.toSingleValueMap());
         auditPayload.setRequest(requestData);
@@ -421,7 +421,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         HttpHeaders responseHeaders = exchange.getHeaders();
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
 
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
         if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
             auditPayload.setStatus(SUCCESS_STATUS);
             dynamicResponse.setStatus(SUCCESS_STATUS);
@@ -434,7 +434,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         }
 
         dynamicResponse.setResponse(exchange.getBody());
-        responseData.setTimestamp(Instant.now());
+        responseData.setTimestamp(LocalDateTime.now());
         responseData.setResponse(objectMapper.writeValueAsString(dynamicResponse));
         auditPayload.setRequest(requestData);
         auditPayload.setResponse(responseData);
@@ -482,7 +482,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         HttpHeaders responseHeaders = exchange.getHeaders();
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
@@ -564,7 +564,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         log.info("==========================================Returned From DMS Upload Api=========================================" );
 
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
