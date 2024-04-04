@@ -9,6 +9,9 @@ public class Constant {
     public static final String AUTHENTICATION_MICRO_SERVICE = "authentication-service";
     public static final String SUCCESS_STATUS = "SUCCESS";
     public static final String FAILURE_STATUS = "FAILURE";
+    public static final String VMONITOR_SERVICE_NAME = "    vmonitoring-exe\n";
+
+
 
 
     public static final String TILD_SPLITTER = "~";

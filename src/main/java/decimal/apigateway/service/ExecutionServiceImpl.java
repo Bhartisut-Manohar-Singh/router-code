@@ -350,7 +350,9 @@ public class ExecutionServiceImpl implements ExecutionService {
             throw new RouterException(decryptedResponse.getResponse());
         }
 
-        logsWriter.updateLog(auditPayload);
+        if(!VMONITOR_SERVICE_NAME.equalsIgnoreCase(serviceName))
+            logsWriter.updateLog(auditPayload);
+
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
 
