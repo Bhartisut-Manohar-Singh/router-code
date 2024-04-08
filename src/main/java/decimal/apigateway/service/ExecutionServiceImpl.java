@@ -588,8 +588,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         for (ServiceInstance serviceInstance : instances) {
-            Map<String, String> metadata = serviceInstance.getMetadata();
-            contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
+            contextPath = getContextPath(serviceInstance);
+            //contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
             log.info(" === context path === " + contextPath);
             port = serviceInstance.getPort();
         }
@@ -602,6 +602,23 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
         log.info(" === mapping === " + mapping);
         return "http://" + serviceName + ":" + port + (contextPath == null ? "" : contextPath) + mapping;
+    }
+
+    private String getContextPath(ServiceInstance serviceInstance) {
+
+        Map<String, String> metadata = serviceInstance.getMetadata();
+        String contextPath = null;
+
+        if(!metadata.isEmpty()){
+            contextPath = metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path");
+            log.info(" ==== context path from meta data ==== " + contextPath);
+        }
+        else {
+            log.info(" ==== meta data is empty ==== ");
+            contextPath = "/"+serviceInstance.getServiceId();
+            log.info(" ==== contextPath ==== " + contextPath);
+        }
+        return contextPath;
     }
 
     public static List<String> getBusinessKey(Object response) {
