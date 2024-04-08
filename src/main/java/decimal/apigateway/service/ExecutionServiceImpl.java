@@ -588,8 +588,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         for (ServiceInstance serviceInstance : instances) {
-            contextPath = getContextPath(serviceInstance);
-            //contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
+            Map<String, String> metadata = serviceInstance.getMetadata();
+            contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
             log.info(" === context path === " + contextPath);
             port = serviceInstance.getPort();
         }
