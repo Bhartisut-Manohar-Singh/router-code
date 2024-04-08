@@ -12,6 +12,7 @@ import decimal.apigateway.model.EsbOutput;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
 import decimal.apigateway.service.security.SecurityServiceEnc;
+import decimal.apigateway.service.util.ServiceInstanceUtil;
 import decimal.apigateway.service.validator.RequestValidatorV1;
 import decimal.apigateway.clients.EsbClientAuth;
 import decimal.logs.connector.LogsConnector;
@@ -34,8 +35,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -82,8 +83,6 @@ public class ExecutionServiceImpl implements ExecutionService {
     SecurityService securityService;
 
 
-
-
     @Override
     public Object executePlainRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
@@ -93,9 +92,9 @@ public class ExecutionServiceImpl implements ExecutionService {
         MicroserviceResponse microserviceResponse = requestValidator.validatePlainRequest(request, httpHeaders, httpHeaders.get("servicename"));
         JsonNode responseNode = objectMapper.convertValue(microserviceResponse.getResponse(), JsonNode.class);
 
-        Map<String,Object> response = objectMapper.convertValue(responseNode.get("response"),HashMap.class);
+        Map<String, Object> response = objectMapper.convertValue(responseNode.get("response"), HashMap.class);
 
-        Map<String,String> headers = (Map<String, String>) response.get("headers");
+        Map<String, String> headers = (Map<String, String>) response.get("headers");
 
         String isDigitallySigned = headers.get(IS_DIGITALLY_SIGNED);
         String isPayloadEncrypted = headers.get(IS_PAYLOAD_ENCRYPTED);
@@ -153,15 +152,14 @@ public class ExecutionServiceImpl implements ExecutionService {
         Object responseBody = responseEntity.getBody();
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
-        String statusCode= "";
+        String statusCode = "";
 
         if (responseHeaders != null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
 
 
-        if (responseHeaders != null && responseHeaders.containsKey("statuscode"))
-        {
-            statusCode=responseHeaders.get("statuscode").get(0);
+        if (responseHeaders != null && responseHeaders.containsKey("statuscode")) {
+            statusCode = responseHeaders.get("statuscode").get(0);
         }
 
         log.info(" ===== response Body from esb ===== " + new Gson().toJson(responseBody));
@@ -178,13 +176,13 @@ public class ExecutionServiceImpl implements ExecutionService {
             Map<String, String> finalResponseMap = new HashMap<>();
             finalResponseMap.put("response", encryptedResponse.getMessage());
 
-            EsbOutput output= new EsbOutput();
+            EsbOutput output = new EsbOutput();
             output.setResponse(finalResponseMap);
             setStatusCodeIfPresent(statusCode, output);
 
             return output;
         }
-        EsbOutput output= new EsbOutput();
+        EsbOutput output = new EsbOutput();
         output.setResponse(responseBody);
         setStatusCodeIfPresent(statusCode, output);
 
@@ -193,14 +191,14 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     public static void setStatusCodeIfPresent(String statusCode, EsbOutput output) {
 
-        if (!statusCode.isEmpty() && statusCode.chars().allMatch(Character::isDigit) )
+        if (!statusCode.isEmpty() && statusCode.chars().allMatch(Character::isDigit))
             output.setStatusCode(statusCode);
     }
 
     private static Map<String, String> setHeaders(Map<String, String> httpHeaders, Map<String, String> headers, String logsRequired, String serviceLog, String logPurgeDays) {
         httpHeaders.put("logsrequired", logsRequired);
         httpHeaders.put("serviceLogs", serviceLog);
-        httpHeaders.put("loginid", headers.getOrDefault("loginid","vahana"));
+        httpHeaders.put("loginid", headers.getOrDefault("loginid", "vahana"));
         httpHeaders.put("logpurgedays", logPurgeDays);
         httpHeaders.put("keys_to_mask", headers.get("keys_to_mask"));
         httpHeaders.put("executionsource", "API-GATEWAY");
@@ -246,14 +244,13 @@ public class ExecutionServiceImpl implements ExecutionService {
         ResponseEntity<Object> responseEntity = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
         HttpHeaders responseHeaders = responseEntity.getHeaders();
 
-        String statusCode= "";
+        String statusCode = "";
 
         if (responseHeaders != null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
 
-        if (responseHeaders != null && responseHeaders.containsKey("statuscode"))
-        {
-            statusCode=responseHeaders.get("statuscode").get(0);
+        if (responseHeaders != null && responseHeaders.containsKey("statuscode")) {
+            statusCode = responseHeaders.get("statuscode").get(0);
         }
 
         log.info(" ===== response Body from esb ===== " + objectMapper.writeValueAsString(responseEntity.getBody()));
@@ -277,9 +274,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
-        EsbOutput esbOutput= new EsbOutput();
+        EsbOutput esbOutput = new EsbOutput();
         esbOutput.setResponse(finalResponseMap);
-        setStatusCodeIfPresent(statusCode,esbOutput);
+        setStatusCodeIfPresent(statusCode, esbOutput);
         return esbOutput;
     }
 
@@ -588,8 +585,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         for (ServiceInstance serviceInstance : instances) {
-            Map<String, String> metadata = serviceInstance.getMetadata();
-            contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
+            contextPath = getContextPath(serviceInstance);
             log.info(" === context path === " + contextPath);
             port = serviceInstance.getPort();
         }
@@ -605,20 +601,13 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     private String getContextPath(ServiceInstance serviceInstance) {
-
-        Map<String, String> metadata = serviceInstance.getMetadata();
-        String contextPath = null;
-
-        if(!metadata.isEmpty()){
-            contextPath = metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path");
-            log.info(" ==== context path from meta data ==== " + contextPath);
+        ServiceInstanceUtil serviceInstanceUtil = objectMapper.convertValue(serviceInstance, ServiceInstanceUtil.class);
+        try {
+            log.info(" ==== serviceInstanceUtil ====" + objectMapper.writeValueAsString(serviceInstanceUtil));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
-        else {
-            log.info(" ==== meta data is empty ==== ");
-            contextPath = "/"+serviceInstance.getServiceId();
-            log.info(" ==== contextPath ==== " + contextPath);
-        }
-        return contextPath;
+        return serviceInstanceUtil.getTags().get(1).split("=")[1];
     }
 
     public static List<String> getBusinessKey(Object response) {
