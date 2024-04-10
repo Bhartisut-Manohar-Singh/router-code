@@ -265,7 +265,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         log.info("==== body and headers ====" + objectMapper.writeValueAsString(responseEntity.getBody()) + " " + objectMapper.writeValueAsString(httpHeaders));
         MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(responseEntity.getBody()), httpHeaders);
-        log.info("==== encryptedResponse ==== " + objectMapper.writeValueAsString(encryptedResponse));
+        log.info("==== encryptedResponse ====1 " + objectMapper.writeValueAsString(encryptedResponse));
 
         if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
