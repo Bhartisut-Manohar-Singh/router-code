@@ -62,7 +62,7 @@ public class JacksonAuth {
         }
     }
 
-    public static Map<String, Object> stringToMap(String jsonString) {
+    public static Map<String, String> stringToMap(String jsonString) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             // convert JSON string to Map

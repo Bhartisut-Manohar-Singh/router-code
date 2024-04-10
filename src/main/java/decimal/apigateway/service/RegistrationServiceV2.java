@@ -2,8 +2,9 @@ package decimal.apigateway.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import decimal.apigateway.exception.RouterException;
+import jakarta.servlet.http.HttpServletResponse;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
