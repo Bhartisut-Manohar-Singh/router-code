@@ -85,7 +85,7 @@ public class RequestValidatorV2 {
 
     public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
         httpHeaders.put("scopeToCheck", "PUBLIC");
-        httpHeaders.put("clientid", httpHeaders.get("sourceOrgId") + "~" +httpHeaders.get(Headers.sourceappid.name()));
+        httpHeaders.put("clientid", httpHeaders.get(Headers.sourceorgid.name()) + "~" +httpHeaders.get(Headers.sourceappid.name()));
         httpHeaders.put("username", httpHeaders.get("clientid"));
         //Need to work on this.
         return securityService.validatePlainRequest(request, httpHeaders, serviceName);
@@ -121,7 +121,7 @@ public class RequestValidatorV2 {
 
     public void validatePlainDynamicRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        httpHeaders.put("clientid", httpHeaders.get("sourceOrgId") + "~" + httpHeaders.get(Headers.sourceappid.name()));
+        httpHeaders.put("clientid", httpHeaders.get(Headers.sourceorgid.name()) + "~" + httpHeaders.get(Headers.sourceappid.name()));
 
         RequestValidationTypes[] requestValidationTypes = { CLIENT_SECRET,IP};
 
