@@ -461,7 +461,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         HttpHeaders headers = new HttpHeaders();
 
         headers.add("sourceOrgId", updateHttpHeaders.get("sourceOrgId"));
-        headers.add("sourceAppId", updateHttpHeaders.get("sourceAppId"));
+        headers.add("sourceappid", updateHttpHeaders.get("sourceappid"));
 
         body.add("uploadRequest", uploadRequest);
 
