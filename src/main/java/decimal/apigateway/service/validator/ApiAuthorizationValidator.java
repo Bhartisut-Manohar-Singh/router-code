@@ -28,7 +28,7 @@ public class ApiAuthorizationValidator implements Validator {
     @Override
     public MicroserviceResponse validate(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
         log.info("httpHeaders-------------from ApiAuthorizationValidator---"+httpHeaders);
-        String sourceAppId = httpHeaders.get("sourceAppId");
+        String sourceAppId = httpHeaders.get(Headers.sourceappid.name());
         String destinationAppId = httpHeaders.get(Headers.destinationappid.name());
         String serviceName = httpHeaders.get(Headers.servicename.name());
 
