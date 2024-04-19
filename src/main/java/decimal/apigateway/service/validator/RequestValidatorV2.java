@@ -39,8 +39,8 @@ public class RequestValidatorV2 {
     public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) throws RouterException, IOException {
         String clientId = httpHeaders.get("clientid");
 
-        httpHeaders.put(Headers.sourceappid.name(), clientId.split(Constant.TILD_SPLITTER)[0]);
-        httpHeaders.put(Headers.sourceorgid.name(), clientId.split(Constant.TILD_SPLITTER)[1]);
+        httpHeaders.put(Headers.sourceorgid.name(), clientId.split(Constant.TILD_SPLITTER)[0]);
+        httpHeaders.put(Headers.sourceappid.name(), clientId.split(Constant.TILD_SPLITTER)[1]);
 
         log.info("V2: Finally calling security client"+httpHeaders);
 
@@ -96,8 +96,8 @@ public class RequestValidatorV2 {
 
         String clientId = httpHeaders.get("clientid");
 
-        httpHeaders.put(Headers.sourceappid.name(), clientId.split(Constant.TILD_SPLITTER)[0]);
-        httpHeaders.put(Headers.sourceorgid.name(), clientId.split(Constant.TILD_SPLITTER)[1]);
+        httpHeaders.put(Headers.sourceorgid.name(), clientId.split(Constant.TILD_SPLITTER)[0]);
+        httpHeaders.put(Headers.sourceappid.name(), clientId.split(Constant.TILD_SPLITTER)[1]);
         MicroserviceResponse response = securityService.validate(request, httpHeaders, REQUEST.name());
         //MicroserviceResponse response = securityClient.validate(request, httpHeaders, RequestValidationTypesV1.REQUEST.name());
 
