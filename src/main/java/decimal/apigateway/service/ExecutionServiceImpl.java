@@ -568,7 +568,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
 
-    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath, Boolean isDynamic) throws RouterException {
+    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath, Boolean isDynamic) throws RouterException, JsonProcessingException {
 
         String contextPath = "";
         int port = 0;
