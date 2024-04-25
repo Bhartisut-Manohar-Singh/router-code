@@ -615,7 +615,12 @@ public class ExecutionServiceImpl implements ExecutionService {
         if(serviceInstanceUtil.getTags() != null && !serviceInstanceUtil.getTags().isEmpty()){
             return serviceInstanceUtil.getTags().get(0).split("=")[1];
         }
-        return null;
+        else
+        {
+            Map<String, String> metadata = serviceInstance.getMetadata();
+            return metadata.get("context-path") == null ? metadata.get("context-path") : null;
+
+        }
     }
 
     public static List<String> getBusinessKey(Object response) {
