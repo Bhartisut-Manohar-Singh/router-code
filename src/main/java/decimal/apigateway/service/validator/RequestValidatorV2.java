@@ -1,6 +1,7 @@
 package decimal.apigateway.service.validator;
 
 import decimal.apigateway.commons.Constant;
+import decimal.apigateway.enums.Headers;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.SecurityService;
@@ -38,8 +39,8 @@ public class RequestValidatorV2 {
     public Map<String, String> validateRequest(String request, Map<String, String> httpHeaders, AuditPayload auditPayload) throws RouterException, IOException {
         String clientId = httpHeaders.get("clientid");
 
-        httpHeaders.put("sourceOrgId", clientId.split(Constant.TILD_SPLITTER)[0]);
-        httpHeaders.put("sourceAppId", clientId.split(Constant.TILD_SPLITTER)[1]);
+        httpHeaders.put(Headers.sourceorgid.name(), clientId.split(Constant.TILD_SPLITTER)[0]);
+        httpHeaders.put(Headers.sourceappid.name(), clientId.split(Constant.TILD_SPLITTER)[1]);
 
         log.info("V2: Finally calling security client"+httpHeaders);
 
@@ -84,7 +85,7 @@ public class RequestValidatorV2 {
 
     public MicroserviceResponse validatePlainRequest(String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
         httpHeaders.put("scopeToCheck", "PUBLIC");
-        httpHeaders.put("clientid", httpHeaders.get("sourceOrgId") + "~" + httpHeaders.get("sourceAppId"));
+        httpHeaders.put("clientid", httpHeaders.get(Headers.sourceorgid.name()) + "~" +httpHeaders.get(Headers.sourceappid.name()));
         httpHeaders.put("username", httpHeaders.get("clientid"));
         //Need to work on this.
         return securityService.validatePlainRequest(request, httpHeaders, serviceName);
@@ -95,8 +96,8 @@ public class RequestValidatorV2 {
 
         String clientId = httpHeaders.get("clientid");
 
-        httpHeaders.put("sourceOrgId", clientId.split(Constant.TILD_SPLITTER)[0]);
-        httpHeaders.put("sourceAppId", clientId.split(Constant.TILD_SPLITTER)[1]);
+        httpHeaders.put(Headers.sourceorgid.name(), clientId.split(Constant.TILD_SPLITTER)[0]);
+        httpHeaders.put(Headers.sourceappid.name(), clientId.split(Constant.TILD_SPLITTER)[1]);
         MicroserviceResponse response = securityService.validate(request, httpHeaders, REQUEST.name());
         //MicroserviceResponse response = securityClient.validate(request, httpHeaders, RequestValidationTypesV1.REQUEST.name());
 
@@ -120,7 +121,7 @@ public class RequestValidatorV2 {
 
     public void validatePlainDynamicRequest(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        httpHeaders.put("clientid", httpHeaders.get("sourceOrgId") + "~" + httpHeaders.get("sourceAppId"));
+        httpHeaders.put("clientid", httpHeaders.get(Headers.sourceorgid.name()) + "~" + httpHeaders.get(Headers.sourceappid.name()));
 
         RequestValidationTypes[] requestValidationTypes = { CLIENT_SECRET,IP};
 
