@@ -12,6 +12,7 @@ import decimal.apigateway.model.EsbOutput;
 import decimal.apigateway.model.MicroserviceResponse;
 import decimal.apigateway.service.multipart.MultipartInputStreamFileResource;
 import decimal.apigateway.service.security.SecurityServiceEnc;
+import decimal.apigateway.service.util.ServiceInstanceUtil;
 import decimal.apigateway.service.validator.RequestValidatorV1;
 import decimal.apigateway.clients.EsbClientAuth;
 import decimal.logs.connector.LogsConnector;
@@ -33,9 +34,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static decimal.apigateway.commons.Constant.*;
@@ -79,8 +81,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     @Autowired
     SecurityService securityService;
-
-
 
 
     @Override
@@ -149,20 +149,20 @@ public class ExecutionServiceImpl implements ExecutionService {
         log.info(" ======= calling esb ======= ");
         log.info(" ======= request ======= " + request);
         log.info(" ======= headers ======= " + objectMapper.writeValueAsString(httpHeaders));
+        httpHeaders.remove("content-length");
         ResponseEntity<Object> responseEntity = esbClient.executePlainRequest(request, httpHeaders);
 
         Object responseBody = responseEntity.getBody();
 
         HttpHeaders responseHeaders = responseEntity.getHeaders();
-        String statusCode= "";
+        String statusCode = "";
 
         if (responseHeaders != null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
 
 
-        if (responseHeaders != null && responseHeaders.containsKey("statuscode"))
-        {
-            statusCode=responseHeaders.get("statuscode").get(0);
+        if (responseHeaders != null && responseHeaders.containsKey("statuscode")) {
+            statusCode = responseHeaders.get("statuscode").get(0);
         }
 
         log.info(" ===== response Body from esb ===== " + new Gson().toJson(responseBody));
@@ -170,7 +170,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getResponse().setResponse(new Gson().toJson(responseEntity.getBody()));
         auditPayload.getRequestIdentifier().setBusinessFilter(businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
 
         logsWriter.updateLog(auditPayload);
 
@@ -179,13 +179,13 @@ public class ExecutionServiceImpl implements ExecutionService {
             Map<String, String> finalResponseMap = new HashMap<>();
             finalResponseMap.put("response", encryptedResponse.getMessage());
 
-            EsbOutput output= new EsbOutput();
+            EsbOutput output = new EsbOutput();
             output.setResponse(finalResponseMap);
             setStatusCodeIfPresent(statusCode, output);
 
             return output;
         }
-        EsbOutput output= new EsbOutput();
+        EsbOutput output = new EsbOutput();
         output.setResponse(responseBody);
         setStatusCodeIfPresent(statusCode, output);
 
@@ -194,14 +194,14 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     public static void setStatusCodeIfPresent(String statusCode, EsbOutput output) {
 
-        if (!statusCode.isEmpty() && statusCode.chars().allMatch(Character::isDigit) )
+        if (!statusCode.isEmpty() && statusCode.chars().allMatch(Character::isDigit))
             output.setStatusCode(statusCode);
     }
 
     private static Map<String, String> setHeaders(Map<String, String> httpHeaders, Map<String, String> headers, String logsRequired, String serviceLog, String logPurgeDays) {
         httpHeaders.put("logsrequired", logsRequired);
         httpHeaders.put("serviceLogs", serviceLog);
-        httpHeaders.put("loginid", httpHeaders.getOrDefault("loginid","vahana"));
+        httpHeaders.put("loginid", headers.getOrDefault("loginid", "vahana"));
         httpHeaders.put("logpurgedays", logPurgeDays);
         httpHeaders.put("keys_to_mask", headers.get("keys_to_mask"));
         httpHeaders.put("executionsource", "API-GATEWAY");
@@ -243,17 +243,17 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setRequestBody(maskRequestBody);
         updatedHttpHeaders.put("executionsource", "API-GATEWAY");
 
+        updatedHttpHeaders.remove("content-length");
         ResponseEntity<Object> responseEntity = esbClient.executeRequest(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
         HttpHeaders responseHeaders = responseEntity.getHeaders();
 
-        String statusCode= "";
+        String statusCode = "";
 
         if (responseHeaders != null && responseHeaders.containsKey("status"))
             auditPayload.setStatus(responseHeaders.get("status").get(0));
 
-        if (responseHeaders != null && responseHeaders.containsKey("statuscode"))
-        {
-            statusCode=responseHeaders.get("statuscode").get(0);
+        if (responseHeaders != null && responseHeaders.containsKey("statuscode")) {
+            statusCode = responseHeaders.get("statuscode").get(0);
         }
 
         log.info(" ===== response Body from esb ===== " + objectMapper.writeValueAsString(responseEntity.getBody()));
@@ -265,7 +265,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         log.info("==== body and headers ====" + objectMapper.writeValueAsString(responseEntity.getBody()) + " " + objectMapper.writeValueAsString(httpHeaders));
         MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(responseEntity.getBody()), httpHeaders);
-        log.info("==== encryptedResponse ==== " + objectMapper.writeValueAsString(encryptedResponse));
+        log.info("==== encryptedResponse ====1 " + objectMapper.writeValueAsString(encryptedResponse));
 
         if (!SUCCESS_STATUS.equalsIgnoreCase(decryptedResponse.getStatus())) {
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
@@ -277,9 +277,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Map<String, String> finalResponseMap = new HashMap<>();
         finalResponseMap.put("response", encryptedResponse.getMessage());
-        EsbOutput esbOutput= new EsbOutput();
+        EsbOutput esbOutput = new EsbOutput();
         esbOutput.setResponse(finalResponseMap);
-        setStatusCodeIfPresent(statusCode,esbOutput);
+        setStatusCodeIfPresent(statusCode, esbOutput);
         return esbOutput;
     }
 
@@ -312,11 +312,12 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setMethod("POST");
         auditPayload.getRequest().setUri(serviceUrl);
 
+        httpHeaders1.remove("content-length");
         httpHeaders1.put("executionsource", Collections.singletonList("API-GATEWAY"));
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
-
         log.info(" ==== Dyanmic Router URL ====" + serviceUrl);
+        log.info(" ==== requestEntity  ====" + new Gson().toJson(requestEntity));
 
         ResponseEntity<Object> exchange = null;
         try {
@@ -328,7 +329,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpHeaders headers = exchange.getHeaders();
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200 && (headers.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(headers.get("status").get(0)) : true)) {
             auditPayload.setStatus(SUCCESS_STATUS);
@@ -399,7 +400,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpHeaders responseHeaders = exchange.getHeaders();
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
@@ -473,7 +474,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         System.out.println("==========================================Returned From DMS Upload Api=========================================");
 
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
@@ -516,7 +517,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Request requestData = new Request();
         Response responseData = new Response();
-        requestData.setTimestamp(Instant.now());
+        requestData.setTimestamp(LocalDateTime.now());
         requestData.setRequestBody(objectMapper.writeValueAsString(request));
         requestData.setHeaders(updateHttpHeaders.toSingleValueMap());
         auditPayload.setRequest(requestData);
@@ -544,7 +545,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         HttpHeaders responseHeaders = exchange.getHeaders();
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
 
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
         if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
             auditPayload.setStatus(SUCCESS_STATUS);
             dynamicResponse.setStatus(SUCCESS_STATUS);
@@ -557,7 +558,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         dynamicResponse.setResponse(exchange.getBody());
-        responseData.setTimestamp(Instant.now());
+        responseData.setTimestamp(LocalDateTime.now());
         responseData.setResponse(objectMapper.writeValueAsString(dynamicResponse));
         auditPayload.setRequest(requestData);
         auditPayload.setResponse(responseData);
@@ -589,8 +590,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         for (ServiceInstance serviceInstance : instances) {
-            Map<String, String> metadata = serviceInstance.getMetadata();
-            contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
+            contextPath = getContextPath(serviceInstance);
             log.info(" === context path === " + contextPath);
             port = serviceInstance.getPort();
         }
@@ -603,6 +603,16 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
         log.info(" === mapping === " + mapping);
         return "http://" + serviceName + ":" + port + (contextPath == null ? "" : contextPath) + mapping;
+    }
+
+    private String getContextPath(ServiceInstance serviceInstance) {
+        ServiceInstanceUtil serviceInstanceUtil = objectMapper.convertValue(serviceInstance, ServiceInstanceUtil.class);
+        try {
+            log.info(" ==== serviceInstanceUtil ====" + objectMapper.writeValueAsString(serviceInstanceUtil));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return serviceInstanceUtil.getTags().get(0).split("=")[1];
     }
 
     public static List<String> getBusinessKey(Object response) {
