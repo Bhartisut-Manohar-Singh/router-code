@@ -612,7 +612,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        return serviceInstanceUtil.getTags().get(0).split("=")[1];
+        return serviceInstanceUtil.getTags().get(0).split("=")[0];
     }
 
     public static List<String> getBusinessKey(Object response) {
