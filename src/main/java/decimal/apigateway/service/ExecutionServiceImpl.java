@@ -618,6 +618,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         else
         {
             Map<String, String> metadata = serviceInstance.getMetadata();
+            log.info("meta data  " + metadata.get("context-path"));
             return metadata.get("context-path") == null ? metadata.get("context-path") : null;
 
         }
