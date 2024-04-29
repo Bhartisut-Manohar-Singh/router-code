@@ -613,7 +613,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             throw new RuntimeException(e);
         }
         if(serviceInstanceUtil.getTags() != null && !serviceInstanceUtil.getTags().isEmpty()){
-            return serviceInstanceUtil.getTags().get(0).split("=")[1];
+            return serviceInstanceUtil.getTags().get(1).split("=")[1];
         }
         else
         {
