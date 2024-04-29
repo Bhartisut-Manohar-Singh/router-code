@@ -616,7 +616,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             String contextPath = null;
             for(String tags : serviceInstanceUtil.getTags())
             {
-                if(tags.contains("contextPath")) {
+                if(tags!=null && tags.contains("contextPath")) {
                     contextPath = tags.split("=")[1];
                     break;
                 }
