@@ -568,7 +568,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
 
-    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath, Boolean isDynamic) throws RouterException {
+    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath, Boolean isDynamic) throws RouterException, JsonProcessingException {
 
         String contextPath = "";
         int port = 0;
@@ -605,7 +605,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         return "http://" + serviceName + ":" + port + (contextPath == null ? "" : contextPath) + mapping;
     }
 
-    private String getContextPath(ServiceInstance serviceInstance) {
+    private String getContextPath(ServiceInstance serviceInstance) throws JsonProcessingException {
         ServiceInstanceUtil serviceInstanceUtil = objectMapper.convertValue(serviceInstance, ServiceInstanceUtil.class);
         try {
             log.info(" ==== serviceInstanceUtil ====" + objectMapper.writeValueAsString(serviceInstanceUtil));
@@ -613,9 +613,22 @@ public class ExecutionServiceImpl implements ExecutionService {
             throw new RuntimeException(e);
         }
         if(serviceInstanceUtil.getTags() != null && !serviceInstanceUtil.getTags().isEmpty()){
-            return serviceInstanceUtil.getTags().get(0).split("=")[1];
+            String contextPath = null;
+            for(String tags : serviceInstanceUtil.getTags())
+            {
+                if(tags!=null && tags.contains("contextPath")) {
+                    contextPath = tags.split("=")[1];
+                    break;
+                }
+            }
+
+            return contextPath;
         }
-        return null;
+        else
+        {
+            Map<String, String> metadata = serviceInstance.getMetadata();
+            return metadata.get("context-path") != null ? metadata.get("context-path") : null;
+        }
     }
 
     public static List<String> getBusinessKey(Object response) {

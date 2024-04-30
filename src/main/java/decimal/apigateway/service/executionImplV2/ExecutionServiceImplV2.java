@@ -277,7 +277,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         String basePath = path + "/engine/v1/dynamic-router/" + serviceName;
 
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, true);
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, false);
 
         HttpHeaders httpHeaders1 = new HttpHeaders();
 
@@ -338,9 +338,9 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
     }
 
-    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath, Boolean isDynamic) throws RouterException {
+    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath, Boolean isDMSUpload) throws RouterException {
 
-        String contextPath = "";
+        String contextPath = DMS_CONTEXT_PATH;
         int port = 0;
 
         List<String> services = discoveryClient.getServices();
@@ -367,14 +367,12 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
                 throw new RuntimeException(e);
             }
             port = serviceInstance.getPort();
-            contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
-            log.info(" ==== contextPath  ==== " + contextPath);
-            log.info(" ==== mapping ==== " + mapping);
         }
-        if(isDynamic){
-            return "http://" + serviceName.toLowerCase() +":"+ port  + mapping;
+        if(isDMSUpload){
+            return  "http://" + serviceName.toLowerCase() +":"+ port + contextPath + mapping;
         }
-        return  "http://" + serviceName.toLowerCase() +":"+ port + contextPath + mapping;
+        return "http://" + serviceName.toLowerCase() +":"+ port  + mapping;
+
 
     }
 
@@ -400,7 +398,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         String basePath = path + "/engine/v2/dynamic-router/plain/" + serviceName;
 
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, true);
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, false);
 
         if (serviceUrl.contains("/service-executor/execute-plain"))
         {
@@ -446,70 +444,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
     @Override
     public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
-
-        auditPayload = logsWriter.initializeLog(uploadRequest,MULTIPART, httpHeaders);
-
-        auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
-
-        Map<String, String> updateHttpHeaders = requestValidatorV2.validateDynamicRequest(request, httpHeaders,auditPayload);
-
-        String basePath = path + "/engine/v2/dynamic-router/upload-gateway/" + serviceName;
-
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, false);
-
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        for (MultipartFile file : files) {
-            body.add(Constant.MULTIPART_FILES, new MultipartInputStreamFileResource(file.getInputStream(), file.getOriginalFilename()));
-        }
-        HttpHeaders headers = new HttpHeaders();
-
-        headers.add(Headers.sourceorgid.name(), updateHttpHeaders.get(Headers.sourceorgid.name()));
-        headers.add((Headers.sourceappid.name()), updateHttpHeaders.get(Headers.sourceappid.name()));
-
-        body.add("uploadRequest", uploadRequest);
-
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        auditPayload.getRequest().setRequestBody(uploadRequest);
-        auditPayload.getRequest().setMethod("POST");
-        auditPayload.getRequest().setHeaders(httpHeaders);
-        auditPayload.getRequest().setUri(serviceUrl);
-
-
-        headers.put("executionsource", Collections.singletonList("API-GATEWAY"));
-
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
-
-        HttpHeaders responseHeaders = exchange.getHeaders();
-        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
-
-        MicroserviceResponse dynamicResponse = new MicroserviceResponse();
-        if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
-            auditPayload.setStatus(SUCCESS_STATUS);
-            dynamicResponse.setStatus(SUCCESS_STATUS);
-            auditPayload.getResponse().setStatus("200");
-
-        } else {
-            auditPayload.setStatus(FAILURE_STATUS);
-            dynamicResponse.setStatus(FAILURE_STATUS);
-            auditPayload.getResponse().setStatus(String.valueOf(exchange.getStatusCode().value()));
-        }
-
-        dynamicResponse.setResponse(exchange.getBody());
-
-        logsWriter.updateLog(auditPayload);
-
-        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
-        //MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
-
-        Map<String, String> finalResponseMap = new HashMap<>();
-        finalResponseMap.put("response", encryptedResponse.getMessage());
-
-        return finalResponseMap;
-
-
+        return null;
     }
 
     @Override
@@ -532,7 +467,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         String basePath = path + "/engine/v2/dynamic-router/upload-file/" + serviceName;
 
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, false);
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, true);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         for (MultipartFile file : files) {
