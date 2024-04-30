@@ -108,7 +108,7 @@ public class UserAuthentication {
         httpHeaders.put(Headers.loginid.name(), userNameData.get(2));
         httpHeaders.put("Content-Type", "application/json");
 
-        //request1.setTimestamp(Instant.now());
+        //request1.setTimestamp(LocalDateTime.now());
 
         //logsConnector.textPayload("Sending authentication request to ESB", auditTraceFilter.requestIdentifier);
 
@@ -120,6 +120,7 @@ public class UserAuthentication {
         else  {
             log.info("calling esb client************");
 
+            httpHeaders.remove("content-length");
             Object response = esbClientAuth.executeAuthentication(request, httpHeaders);
 
             //logsConnector.textPayload("Response has been received from ESB", auditTraceFilter.requestIdentifier);
@@ -128,7 +129,7 @@ public class UserAuthentication {
             });
 
            // Response response1 = new Response();
-            //response1.setTimestamp(Instant.now());
+            //response1.setTimestamp(LocalDateTime.now());
 
             String responseBody = maskData(httpHeaders, objectMapper.writeValueAsString(authResponse));
             /*response1.setResponse(responseBody);
@@ -210,7 +211,7 @@ public class UserAuthentication {
         httpHeaders.put(Headers.loginid.name(), userNameData.get(2));
         httpHeaders.put("Content-Type", "application/json");
 
-       // request1.setTimestamp(Instant.now());
+       // request1.setTimestamp(LocalDateTime.now());
 
         //logsConnector.textPayload("Sending authentication request to ESB", auditTraceFilter.requestIdentifier);
 
@@ -219,7 +220,7 @@ public class UserAuthentication {
         }
 
         else  {
-
+            httpHeaders.remove("content-length");
             Object response = esbClientAuth.executev2Authentication(request, httpHeaders);
 
            // logsConnector.textPayload("Response has been received from ESB", auditTraceFilter.requestIdentifier);
@@ -228,7 +229,7 @@ public class UserAuthentication {
             });
 
            // Response response1 = new Response();
-            //response1.setTimestamp(Instant.now());
+            //response1.setTimestamp(LocalDateTime.now());
 
             String responseBody = maskData(httpHeaders, objectMapper.writeValueAsString(authResponse));
             //response1.setResponse(responseBody);
@@ -347,7 +348,7 @@ public class UserAuthentication {
             /*logsConnector.textPayload("SSO Token successfully validated for given details.", auditTraceFilter.requestIdentifier);
 
             responseData.setStatus(HttpStatus.OK.name());
-            responseData.setTimestamp(Instant.now());
+            responseData.setTimestamp(LocalDateTime.now());
             responseData.setResponse(objectMapper.writeValueAsString(new SSOTokenResponse(SUCCESS_STATUS, TOKEN_VALID, TOKEN_VALID,null)));
 
             if (logRequestResponse) {

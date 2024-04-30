@@ -143,6 +143,7 @@ public class Constant {
     public static final String ERROR_HINT = "errorHint";
 
     public static final String COMMA_SPLITTER = ",";
+    public static final String DMS_CONTEXT_PATH = "/document-manager";
 
     public static final int DEFAULT_CACHING_TIME_IN_DB_MINUTES = 1440;
 
