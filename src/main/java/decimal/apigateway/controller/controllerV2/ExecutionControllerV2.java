@@ -80,11 +80,6 @@ public class ExecutionControllerV2 {
     public Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable(name = "destinationAppId") String destinationAppId,
                                  @PathVariable(name = "serviceName") String serviceName) throws RouterException, IOException {
         log.info("======================Gateway Execute V2 Called=============================");
-        /*httpHeaders.put("sourceAppId", sourceAppId);
-        httpHeaders.put("sourceOrgId", sourceOrgId);*/
-        /*
-        Because of network call previous header keys were in camel case.
-        */
          httpHeaders.put("destinationappid", destinationAppId);
         httpHeaders.put("servicename",serviceName);
 
