@@ -613,15 +613,21 @@ public class ExecutionServiceImpl implements ExecutionService {
             throw new RuntimeException(e);
         }
         if(serviceInstanceUtil.getTags() != null && !serviceInstanceUtil.getTags().isEmpty()){
-            return serviceInstanceUtil.getTags().get(0).split("=")[1];
+            String contextPath = null;
+            for(String tags : serviceInstanceUtil.getTags())
+            {
+                if(tags!=null && tags.contains("contextPath")) {
+                    contextPath = tags.split("=")[1];
+                    break;
+                }
+            }
+
+            return contextPath;
         }
         else
         {
             Map<String, String> metadata = serviceInstance.getMetadata();
-            log.info("meta data is  " + objectMapper.writeValueAsString(metadata));
-            log.info("meta data context path  " + metadata.get("context-path"));
             return metadata.get("context-path") != null ? metadata.get("context-path") : null;
-
         }
     }
 
