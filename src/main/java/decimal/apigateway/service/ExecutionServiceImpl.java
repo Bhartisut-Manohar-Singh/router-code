@@ -317,15 +317,8 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
         log.info(" ==== Dyanmic Router URL ====" + serviceUrl);
-        log.info(" ==== requestEntity  ====" + new Gson().toJson(requestEntity));
 
-        ResponseEntity<Object> exchange = null;
-        try {
-            exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
-            log.info(" ==== response body ==== " + objectMapper.writeValueAsString(exchange.getBody()));
-        } catch (Exception e) {
-            log.info(" === exception occured === " + e.getMessage());
-        }
+        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         HttpHeaders headers = exchange.getHeaders();
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
