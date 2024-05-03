@@ -313,12 +313,20 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setUri(serviceUrl);
 
         httpHeaders1.remove("content-length");
+        httpHeaders1.remove("method");
         httpHeaders1.put("executionsource", Collections.singletonList("API-GATEWAY"));
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
         log.info(" ==== Dyanmic Router URL ====" + serviceUrl);
+        ResponseEntity<Object> exchange = null;
+        try {
+            exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
-        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
 
         HttpHeaders headers = exchange.getHeaders();
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
