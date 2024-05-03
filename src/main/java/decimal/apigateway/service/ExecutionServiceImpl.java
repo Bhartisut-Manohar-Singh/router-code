@@ -313,7 +313,11 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getRequest().setUri(serviceUrl);
 
         httpHeaders1.remove("content-length");
-        httpHeaders1.remove("method");
+        httpHeaders1.remove("authorization");
+        httpHeaders1.remove("hash");
+        httpHeaders1.remove("nounce");
+
+
         httpHeaders1.put("executionsource", Collections.singletonList("API-GATEWAY"));
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
