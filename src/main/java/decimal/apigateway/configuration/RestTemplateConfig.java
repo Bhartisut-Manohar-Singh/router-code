@@ -46,15 +46,14 @@ public class RestTemplateConfig {
         //RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(Timeout.of(Duration.ofMillis(readTimeout))).build();
         RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(readTimeout, TimeUnit.MILLISECONDS).build();
 
-        CloseableHttpClient closeableHttpClient = HttpClientBuilder.create()
+        HttpClient closeableHttpClient = HttpClientBuilder.create()
                 .setConnectionManager(connectionManager)
                 .setDefaultRequestConfig(requestConfig)
                 .build();
 
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(closeableHttpClient);
         //requestFactory.setReadTimeout(readTimeout); This has been replaced by RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(Timeout.of(Duration.ofMillis(readTimeout))).build();
         requestFactory.setConnectTimeout(connectionTimeout);
-        requestFactory.setHttpClient(closeableHttpClient);
         template.setRequestFactory(requestFactory);
         return template;
     }
