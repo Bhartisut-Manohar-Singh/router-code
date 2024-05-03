@@ -21,4 +21,5 @@ ENV JAR=${JAR}
 COPY start_server.sh ${PROJECT_HOME}/start_server.sh
 RUN chmod +x ${PROJECT_HOME}/start_server.sh
 
+
 ENTRYPOINT ["/opt/deployment/tpg-api-gateway/start_server.sh"]
