@@ -61,11 +61,13 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     RestTemplate restTemplate;
 
     @Autowired
+    RestTemplate multipartRestTemplate;
+
+    @Autowired
     ObjectMapper objectMapper;
 
     @Autowired
     EsbClientAuth esbClient;
-
 
     @Autowired
     SecApiAuthorizationConfigRepo apiAuthorizationConfigRepo;
@@ -494,7 +496,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         log.info("==========================================Calling DMS Upload Api=========================================" );
         log.info(" ================ Service Url ==============" + serviceUrl );
-        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
+        ResponseEntity<Object> exchange = multipartRestTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         HttpHeaders responseHeaders= exchange.getHeaders();
         log.info("==========================================Returned From DMS Upload Api=========================================" );

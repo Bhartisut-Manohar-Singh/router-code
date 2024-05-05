@@ -70,6 +70,9 @@ public class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     RestTemplate restTemplate;
 
+    @Autowired
+    RestTemplate multipartRestTemplate;
+
     @Value("${isHttpTracingEnabled}")
     boolean isHttpTracingEnabled;
 
@@ -389,7 +392,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
+        ResponseEntity<Object> exchange = multipartRestTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         HttpHeaders responseHeaders = exchange.getHeaders();
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
@@ -461,7 +464,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         System.out.println("==========================================Calling DMS Upload Api=========================================");
 
-        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
+        ResponseEntity<Object> exchange = multipartRestTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         HttpHeaders responseHeaders = exchange.getHeaders();
         System.out.println("==========================================Returned From DMS Upload Api=========================================");
