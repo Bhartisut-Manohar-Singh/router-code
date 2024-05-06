@@ -75,7 +75,7 @@
         <dependency>
             <groupId>decimal</groupId>
             <artifactId>logs-management</artifactId>
-            <version>3.3.4-SNAP</version>
+            <version>3.3.5-SNAP</version>
         </dependency>
 
         <!--Log4j2 v2.17.0  -->
