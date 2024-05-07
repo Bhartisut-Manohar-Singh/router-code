@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-public class DeleteCacheController {
+public class DeleteSessionController {
 
     @Autowired
     CacheClearRepo cacheClearRepo;
@@ -46,8 +46,6 @@ public class DeleteCacheController {
         try {
             for (int i = 0; i <= count; i++) {
                 List<Session> byOrgIdAndAppId = cacheClearRepo.findTop1000ByOrgIdAndAppIdOrderByLastLoginAsc(orgid, appid);
-                System.out.println("=====================================To be Deleted========================");
-                System.out.println(new ObjectMapper().writeValueAsString(byOrgIdAndAppId));
                 cacheClearRepo.deleteAll(byOrgIdAndAppId);
             }
                 return new RouterResponse("SUCCESS", "Sessions Deleted Successfullly", null);
