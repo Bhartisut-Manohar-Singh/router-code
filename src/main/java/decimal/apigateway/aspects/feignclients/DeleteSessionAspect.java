@@ -6,25 +6,22 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.domain.ApplicationDefRedisConfig;
 import decimal.apigateway.exception.ConfigFetchException;
 import decimal.apigateway.model.ApplicationDef;
-import decimal.apigateway.model.SSOTokenModel;
 import decimal.apigateway.repository.ApplicationDefRedisConfigRepo;
 import lombok.extern.java.Log;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Map;
 import java.util.Optional;
 
 @Component
 @Aspect
 @Log
-public class DeleteCacheAspect {
+public class DeleteSessionAspect {
 
     @Autowired
     ApplicationDefRedisConfigRepo applicationDefConfigRepo;
