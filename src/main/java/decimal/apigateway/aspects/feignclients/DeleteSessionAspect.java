@@ -55,7 +55,7 @@ public class DeleteSessionAspect {
 
 
     @Before(value = "execution(* decimal.apigateway.controller.DeleteSessionController.*(..)) && args(appId, orgId , clientSecret)")
-    public void generateSSOToken(@RequestHeader String appId, @RequestHeader String orgId, @RequestHeader String clientSecret) throws ParseException {
+    public void deleteSessionByOrgApp(@RequestHeader String appId, @RequestHeader String orgId, @RequestHeader String clientSecret) throws ParseException {
         log.info("in Aspect method()");
         this.verifyClientSecret(appId,orgId, clientSecret);
     }
