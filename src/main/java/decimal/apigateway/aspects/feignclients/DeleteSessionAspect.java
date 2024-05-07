@@ -29,7 +29,7 @@ public class DeleteSessionAspect {
     @Autowired
     ObjectMapper objectMapper;
 
-    private void verifyClientSecret(String appId, String orgId , String clientSecret) {
+    private void verifyClientSecret(String appId, String orgId , String clientsecret) {
       /*  String clientSecret = httpHeaders.get(Constant.CLIENT_SECRET);
         log.info(" client Secret from headers: {}" + clientSecret);
         String appId = ssoTokenModel.getAppId();
@@ -49,7 +49,7 @@ public class DeleteSessionAspect {
             throw new ConfigFetchException(Constant.FAILURE_STATUS, "No valid configuration found for given orgId and appId ");
         }
 
-        if (!applicationDef.getClientSecret().equalsIgnoreCase(clientSecret))
+        if (!applicationDef.getClientSecret().equalsIgnoreCase(clientsecret))
             throw new ConfigFetchException(Constant.FAILURE_STATUS, "Invalid client secret");
     }
 
