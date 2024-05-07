@@ -39,11 +39,13 @@ public class DeleteSessionAspect {
         Optional<ApplicationDefRedisConfig> applicationDefConfig = applicationDefConfigRepo.findByAppId(appId);
 
         if (applicationDefConfig.isEmpty()) {
+            log.info("is applicationDefConfig is empty "+applicationDefConfig.isEmpty());
             throw new ConfigFetchException(Constant.FAILURE_STATUS, " No details found for given app-id in APP_DEF ");
         }
 
         ApplicationDef applicationDef;
         try {
+            log.info("in try block");
             applicationDef = objectMapper.readValue(applicationDefConfig.get().getApiData(), ApplicationDef.class);
         } catch (IOException e) {
             throw new ConfigFetchException(Constant.FAILURE_STATUS, "No valid configuration found for given orgId and appId ");
