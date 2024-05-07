@@ -45,6 +45,19 @@ public class ExecutionControllerV2 {
         return new ResponseEntity<>(output.getResponse(), HttpStatus.valueOf(Integer.parseInt(output.getStatusCode())));
     }
 
+    @PostMapping("callback/{serviceName}")
+    public Object executePlainRequestJson(@RequestBody String request, @PathVariable String serviceName,@RequestHeader Map<String, String> httpHeaders) throws RouterException, IOException {
+        log.info("==============================Gateway Processor=============================");
+        httpHeaders.put(Constant.SERVICE_NAME, serviceName);
+        Object o = executionServiceV2.executePlainRequest(request, httpHeaders);
+        EsbOutput output = mapper.convertValue(o, EsbOutput.class);
+
+        if (output.getStatusCode()==null || output.getStatusCode().isEmpty()){
+            return new ResponseEntity<>(output.getResponse(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(output.getResponse(), HttpStatus.valueOf(Integer.parseInt(output.getStatusCode())));
+    }
+
     @PostMapping("execute/{sourceOrgId}/{sourceAppId}/{serviceName}/{version}")
     public Object executePlainRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable String sourceOrgId,
                                       @PathVariable String sourceAppId, @PathVariable String serviceName, @PathVariable String version) throws RouterException, IOException {
@@ -67,11 +80,6 @@ public class ExecutionControllerV2 {
     public Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable(name = "destinationAppId") String destinationAppId,
                                  @PathVariable(name = "serviceName") String serviceName) throws RouterException, IOException {
         log.info("======================Gateway Execute V2 Called=============================");
-        /*httpHeaders.put("sourceAppId", sourceAppId);
-        httpHeaders.put("sourceOrgId", sourceOrgId);*/
-        /*
-        Because of network call previous header keys were in camel case.
-        */
          httpHeaders.put("destinationappid", destinationAppId);
         httpHeaders.put("servicename",serviceName);
 

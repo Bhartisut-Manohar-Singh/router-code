@@ -32,7 +32,7 @@ public class MultipleSessionService implements MultipleSession {
     @Autowired
     AuditTraceFilter auditTraceFilter;
 
-    
+
 
     @Override
     public void validateMultipleSession(Map<String, String> httpHeaders) throws RouterException {
@@ -59,7 +59,6 @@ public class MultipleSessionService implements MultipleSession {
             log.info("Multiple session is not allowed for username" + username);
             authenticationSessionService.removeSessionByOrgIdAndAppIdAndDeviceId(orgId, appId, deviceId);
             List<Session> sessions = authenticationSessionService.findByOrgIdAndAppIdAndLoginId(orgId, appId, loginId);
-
             manageForceLoginSessions(sessions, httpHeaders.get(Constant.IS_FORCE_LOGIN), username, requestId);
         }
 

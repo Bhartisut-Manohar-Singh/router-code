@@ -3,7 +3,6 @@
  */
 package decimal.apigateway.service.authentication.sessionmgmt;
 
-
 import decimal.apigateway.exception.RouterException;
 
 import java.util.Map;

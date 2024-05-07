@@ -1,5 +1,6 @@
-FROM openjdk:17
+FROM 712693083859.dkr.ecr.ap-south-1.amazonaws.com/java-base-image:java17-v3
 LABEL maintainer="devops@decimal.co.in"
+
 
 EXPOSE 80
 ARG JOB_NAME
@@ -19,5 +20,6 @@ ARG JAR=${build_name}.jar
 ENV JAR=${JAR}
 COPY start_server.sh ${PROJECT_HOME}/start_server.sh
 RUN chmod +x ${PROJECT_HOME}/start_server.sh
+
 
 ENTRYPOINT ["/opt/deployment/tpg-api-gateway/start_server.sh"]

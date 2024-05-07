@@ -9,6 +9,9 @@ public class Constant {
     public static final String AUTHENTICATION_MICRO_SERVICE = "authentication-service";
     public static final String SUCCESS_STATUS = "SUCCESS";
     public static final String FAILURE_STATUS = "FAILURE";
+    public static final String VMONITOR_SERVICE_NAME = "vmonitoring-exe";
+
+
 
 
     public static final String TILD_SPLITTER = "~";
@@ -26,6 +29,8 @@ public class Constant {
     public static final String INVALID_SERVICE_NAME = "Invalid Service Name";
     public static final String MULTIPART = "MULTIPART";
     public static final String JSON = "JSON";
+    public static final String SERVICENAME = "JSON";
+
 
     public static final String INVALID_REQUEST_500 = "INVALID_REQUEST_500";
     public static final String IS_PAYLOAD_ENCRYPTED = "ispayloadencrypted";
@@ -45,6 +50,8 @@ public class Constant {
     public static final String CLIENT_ID = "clientid";
 
     public static final String LOGIN_ID = "loginid";
+
+    public static final String SERVICE_NAME = "servicename";
 
 
     public static final String ROUTER_HEADER_SOURCE_IP = "X-FORWARDED-FOR";
@@ -136,6 +143,7 @@ public class Constant {
     public static final String ERROR_HINT = "errorHint";
 
     public static final String COMMA_SPLITTER = ",";
+    public static final String DMS_CONTEXT_PATH = "/document-manager";
 
     public static final int DEFAULT_CACHING_TIME_IN_DB_MINUTES = 1440;
 

@@ -75,7 +75,7 @@
         <dependency>
             <groupId>decimal</groupId>
             <artifactId>logs-management</artifactId>
-            <version>3.3.4-SNAP</version>
+            <version>3.3.5-SNAP</version>
         </dependency>
 
         <!--Log4j2 v2.17.0  -->
@@ -97,7 +97,7 @@
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-consul-all</artifactId>
+            <artifactId>spring-cloud-starter-consul-discovery</artifactId>
         </dependency>
 
 
@@ -113,12 +113,6 @@
         </dependency>
 
         <dependency>
-            <groupId>decimal</groupId>
-            <artifactId>rate-limiter</artifactId>
-            <version>4.1.8.SNAP</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
@@ -128,12 +122,7 @@
             <artifactId>jjwt</artifactId>
             <version>0.6.0</version>
         </dependency>
-        <dependency>
-            <groupId>io.github.resilience4j</groupId>
-            <artifactId>resilience4j-ratelimiter</artifactId>
-            <version>1.5.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
+
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
