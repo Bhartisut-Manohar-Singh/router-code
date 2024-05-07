@@ -1,6 +1,5 @@
 package decimal.apigateway.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.domain.Session;
 import decimal.apigateway.model.RouterResponse;
 import decimal.apigateway.repository.CacheClearRepo;
