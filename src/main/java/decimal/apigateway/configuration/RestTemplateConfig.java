@@ -55,28 +55,4 @@ public class RestTemplateConfig {
         template.setRequestFactory(requestFactory);
         return template;
     }
-
-    @Bean
-    @LoadBalanced
-    @Lazy
-    public RestTemplate multipartRestTemplate()
-    {
-        RestTemplate template = new RestTemplate();
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-        connectionManager.setMaxTotal(maxHttpConnections);
-        connectionManager.setDefaultMaxPerRoute(maxConnectionPerRoute);
-
-        RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(readTimeout, TimeUnit.MILLISECONDS).build();
-
-        CloseableHttpClient closeableHttpClient = HttpClientBuilder.create()
-                .setConnectionManager(connectionManager)
-                .setDefaultRequestConfig(requestConfig)
-                .build();
-
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(connectionTimeout);
-        requestFactory.setHttpClient(closeableHttpClient);
-        template.setRequestFactory(requestFactory);
-        return template;
-    }
 }

@@ -37,9 +37,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -59,9 +57,6 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
     @Autowired
     RestTemplate restTemplate;
-
-    @Autowired
-    RestTemplate multipartRestTemplate;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -496,6 +491,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         log.info("==========================================Calling DMS Upload Api=========================================" );
         log.info(" ================ Service Url ==============" + serviceUrl );
+        RestTemplate multipartRestTemplate = new RestTemplate();
         ResponseEntity<Object> exchange = multipartRestTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         HttpHeaders responseHeaders= exchange.getHeaders();
