@@ -29,15 +29,15 @@ public class DeleteSessionAspect {
     @Autowired
     ObjectMapper objectMapper;
 
-    private void verifyClientSecret(String appId, String orgId, String clientsecret) {
+    private void verifyClientSecret(String orgid, String appid, String clientsecret) {
      /*   String clientSecret = httpHeaders.get(Constant.CLIENT_SECRET);
         log.info(" client Secret from headers: {}" + clientSecret);
         String appId = ssoTokenModel.getAppId();
 */
-        log.info("appid----------" + appId);
+        log.info("appid----------" + appid);
         log.info("clientsecret -------------" + clientsecret);
 
-        Optional<ApplicationDefRedisConfig> applicationDefConfig = applicationDefConfigRepo.findByAppId(appId);
+        Optional<ApplicationDefRedisConfig> applicationDefConfig = applicationDefConfigRepo.findByAppId(appid);
 
         if (applicationDefConfig.isEmpty()) {
             log.info("is applicationDefConfig is empty " + applicationDefConfig.isEmpty());
