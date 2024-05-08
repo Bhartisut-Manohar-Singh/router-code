@@ -30,11 +30,10 @@ public class DeleteSessionAspect {
     ObjectMapper objectMapper;
 
     private void verifyClientSecret(String appId, String orgId , String clientsecret) {
-      /*  String clientSecret = httpHeaders.get(Constant.CLIENT_SECRET);
+     /*   String clientSecret = httpHeaders.get(Constant.CLIENT_SECRET);
         log.info(" client Secret from headers: {}" + clientSecret);
         String appId = ssoTokenModel.getAppId();
-*/
-        log.info("appid----------"+appId);
+*/        log.info("appid----------"+appId);
 
         Optional<ApplicationDefRedisConfig> applicationDefConfig = applicationDefConfigRepo.findByAppId(appId);
 
@@ -56,7 +55,7 @@ public class DeleteSessionAspect {
     }
 
 
-    @Before(value = "execution(* decimal.apigateway.controller.DeleteSessionController.*(..)) && args(appId, orgId , clientSecret)")
+    @Before(value = "execution(* decimal.apigateway.controller.DeleteSessionController.*(..)) && args(appId, orgId , clientsecret)")
     public void deleteSessionByOrgApp(@RequestHeader String appId, @RequestHeader String orgId, @RequestHeader String clientsecret) throws ParseException {
         log.info("in Aspect method()");
         this.verifyClientSecret(appId,orgId, clientsecret);
