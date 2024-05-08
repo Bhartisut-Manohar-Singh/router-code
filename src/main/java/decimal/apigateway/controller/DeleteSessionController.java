@@ -5,6 +5,7 @@ import decimal.apigateway.model.RouterResponse;
 import decimal.apigateway.repository.CacheClearRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,7 +17,7 @@ public class DeleteSessionController {
     @Autowired
     CacheClearRepo cacheClearRepo;
 
-    @GetMapping("deleteAllSessions")
+    @PostMapping("deleteAllSessions")
     public Object deleteAllSessions() {
         try {
             cacheClearRepo.deleteAll();
@@ -28,7 +29,7 @@ public class DeleteSessionController {
     }
 
 
-    @GetMapping("deleteSessionByOrgApp")
+    @PostMapping("deleteSessionByOrgApp")
     public Object deleteSessionByOrgApp(@RequestHeader String orgid,@RequestHeader String appid,@RequestHeader String clientsecret) {
         try {
             List<Session> byOrgIdAndAppId = cacheClearRepo.findByOrgIdAndAppId(orgid, appid);
@@ -40,7 +41,7 @@ public class DeleteSessionController {
         }
     }
 
-    @GetMapping("deleteByCount")
+    @PostMapping("deleteByCount")
     public Object deleteByCount(@RequestHeader String orgid,@RequestHeader String appid,@RequestHeader int count,@RequestHeader String date,@RequestHeader String clientSecret) {
         try {
             for (int i = 0; i <= count; i++) {
