@@ -29,7 +29,7 @@ public class DeleteSessionController {
 
 
     @GetMapping("deleteSessionByOrgApp")
-    public Object deleteSessionByOrgApp(@RequestHeader String orgid,@RequestHeader String appid,@RequestHeader String clientSecret) {
+    public Object deleteSessionByOrgApp(@RequestHeader String orgid,@RequestHeader String appid,@RequestHeader String clientsecret) {
         try {
             List<Session> byOrgIdAndAppId = cacheClearRepo.findByOrgIdAndAppId(orgid, appid);
             cacheClearRepo.deleteAll(byOrgIdAndAppId);
