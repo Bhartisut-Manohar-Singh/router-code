@@ -25,11 +25,15 @@ import decimal.logs.model.Request;
 import decimal.logs.model.Response;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.java.Log;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -40,6 +44,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static decimal.apigateway.commons.Constant.*;
 import static decimal.apigateway.service.ExecutionServiceImpl.getBusinessKey;
@@ -82,6 +87,12 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
     @Value("${server.servlet.context-path}")
     String path;
+
+    @Value("${connectionTimeout}")
+    int connectionTimeout;
+
+    @Value("${readTimeout}")
+    int readTimeout;
 
     @Autowired
     SecurityServiceEnc securityServiceEnc;
@@ -491,7 +502,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         log.info("==========================================Calling DMS Upload Api=========================================" );
         log.info(" ================ Service Url ==============" + serviceUrl );
-        RestTemplate multipartRestTemplate = new RestTemplate();
+        RestTemplate multipartRestTemplate = getRestTemplate();
         ResponseEntity<Object> exchange = multipartRestTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         HttpHeaders responseHeaders= exchange.getHeaders();
@@ -539,5 +550,22 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         httpHeaders.put("executionsource","API-GATEWAY");
 
         return httpHeaders;
+    }
+
+    private RestTemplate getRestTemplate()
+    {
+        RestTemplate template = new RestTemplate();
+        RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(readTimeout, TimeUnit.MILLISECONDS).build();
+
+        CloseableHttpClient closeableHttpClient = HttpClientBuilder.create()
+                .setDefaultRequestConfig(requestConfig)
+                .build();
+
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+        //requestFactory.setReadTimeout(readTimeout); This has been replaced by RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(Timeout.of(Duration.ofMillis(readTimeout))).build();
+        requestFactory.setConnectTimeout(connectionTimeout);
+        requestFactory.setHttpClient(closeableHttpClient);
+        template.setRequestFactory(requestFactory);
+        return template;
     }
 }

@@ -22,11 +22,15 @@ import decimal.logs.model.AuditPayload;
 import decimal.logs.model.Request;
 import decimal.logs.model.Response;
 import lombok.extern.java.Log;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -39,6 +43,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static decimal.apigateway.commons.Constant.*;
 
@@ -75,6 +80,12 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     @Value("${server.servlet.context-path}")
     String path;
+
+    @Value("${connectionTimeout}")
+    int connectionTimeout;
+
+    @Value("${readTimeout}")
+    int readTimeout;
 
     @Autowired
     SecurityServiceEnc securityServiceEnc;
@@ -389,7 +400,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        RestTemplate multipartRestTemplate = new RestTemplate();
+        RestTemplate multipartRestTemplate = getRestTemplate();
 
         ResponseEntity<Object> exchange = multipartRestTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
@@ -463,7 +474,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         System.out.println("==========================================Calling DMS Upload Api=========================================");
 
-        RestTemplate multipartRestTemplate = new RestTemplate();
+        RestTemplate multipartRestTemplate = getRestTemplate();
 
         ResponseEntity<Object> exchange = multipartRestTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
@@ -664,5 +675,21 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     }
 
+    private RestTemplate getRestTemplate()
+    {
+        RestTemplate template = new RestTemplate();
+        RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(readTimeout, TimeUnit.MILLISECONDS).build();
+
+        CloseableHttpClient closeableHttpClient = HttpClientBuilder.create()
+                .setDefaultRequestConfig(requestConfig)
+                .build();
+
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+        //requestFactory.setReadTimeout(readTimeout); This has been replaced by RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(Timeout.of(Duration.ofMillis(readTimeout))).build();
+        requestFactory.setConnectTimeout(connectionTimeout);
+        requestFactory.setHttpClient(closeableHttpClient);
+        template.setRequestFactory(requestFactory);
+        return template;
+    }
 
 }
