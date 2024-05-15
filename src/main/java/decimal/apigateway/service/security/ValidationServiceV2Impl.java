@@ -76,8 +76,8 @@ public class ValidationServiceV2Impl implements ValidationServiceV2 {
     private void sourceAppValidator(String request, Map<String, String> httpHeaders) throws RouterException, IOException {
 
         log.info("httpHeaders---------------          "+httpHeaders);
-        String sourceOrgId = httpHeaders.get("sourceOrgId");
-        String sourceAppId = httpHeaders.get("sourceAppId");
+        String sourceOrgId = httpHeaders.get(Headers.sourceorgid.name());
+        String sourceAppId = httpHeaders.get(Headers.sourceappid.name());
         log.info("sourceOrgId----------"+sourceOrgId+"sourceAppId========"+sourceAppId);
 
         httpHeaders.put(Headers.orgid.name(), sourceOrgId);
