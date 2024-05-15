@@ -42,6 +42,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -181,7 +182,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         auditPayload.getResponse().setResponse(new Gson().toJson(responseEntity.getBody()));
         auditPayload.getRequestIdentifier().setBusinessFilter(businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
-        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
 
         logsWriter.updateLog(auditPayload);
 
@@ -333,7 +334,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpHeaders headers = exchange.getHeaders();
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200 && (headers.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(headers.get("status").get(0)) : true)) {
             auditPayload.setStatus(SUCCESS_STATUS);
@@ -406,7 +407,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         HttpHeaders responseHeaders = exchange.getHeaders();
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
@@ -482,7 +483,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         System.out.println("==========================================Returned From DMS Upload Api=========================================");
 
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
@@ -525,7 +526,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Request requestData = new Request();
         Response responseData = new Response();
-        requestData.setTimestamp(LocalDateTime.now());
+        requestData.setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
         requestData.setRequestBody(objectMapper.writeValueAsString(request));
         requestData.setHeaders(updateHttpHeaders.toSingleValueMap());
         auditPayload.setRequest(requestData);
@@ -553,7 +554,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         HttpHeaders responseHeaders = exchange.getHeaders();
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
 
-        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
         if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
             auditPayload.setStatus(SUCCESS_STATUS);
             dynamicResponse.setStatus(SUCCESS_STATUS);
@@ -566,7 +567,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         dynamicResponse.setResponse(exchange.getBody());
-        responseData.setTimestamp(LocalDateTime.now());
+        responseData.setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
         responseData.setResponse(objectMapper.writeValueAsString(dynamicResponse));
         auditPayload.setRequest(requestData);
         auditPayload.setResponse(responseData);
