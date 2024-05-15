@@ -108,12 +108,8 @@ public class UserAuthentication {
         httpHeaders.put(Headers.loginid.name(), userNameData.get(2));
         httpHeaders.put("Content-Type", "application/json");
 
-        //request1.setTimestamp(LocalDateTime.now());
-
-        //logsConnector.textPayload("Sending authentication request to ESB", auditTraceFilter.requestIdentifier);
 
         if("SSO".equalsIgnoreCase(loginType)){
-            //return validationSSOToken(request,httpHeaders,request1,logRequestResponse,nodes);
             return validationSSOToken(request,httpHeaders,null,logRequestResponse,nodes);
         }
 
@@ -128,12 +124,9 @@ public class UserAuthentication {
             Map<String, String> authResponse = objectMapper.convertValue(response, new TypeReference<Map<String, String>>() {
             });
 
-           // Response response1 = new Response();
-            //response1.setTimestamp(LocalDateTime.now());
 
             String responseBody = maskData(httpHeaders, objectMapper.writeValueAsString(authResponse));
-            /*response1.setResponse(responseBody);
-            response1.setMessage("Request executed successfully");*/
+
 
             if (FAILURE_STATUS.equalsIgnoreCase(authResponse.get("status"))) {
                 //logsConnector.textPayload("Failure in auth process because of: " + authResponse.get("auth"), auditTraceFilter.requestIdentifier);
@@ -197,23 +190,16 @@ public class UserAuthentication {
         boolean logRequestResponse = "Y".equalsIgnoreCase(logsRequired) && "Y".equalsIgnoreCase(serviceLog);
         if (logRequestResponse) {
             String maskRequest = maskData(httpHeaders, (String) request);
-           // request1.setRequestBody(maskRequest);
         } else {
             nodes.put("message", "It seems that request logs is not enabled for this api/service.");
-            //request1.setRequestBody(objectMapper.writeValueAsString(nodes));
         }
 
         String userName = httpHeaders.get(Headers.username.name());
         List<String> userNameData = AuthRouterOperations.getStringArray(userName, TILD_SPLITTER);
 
-       // logsConnector.textPayload("Executing authentication request for userName: " + userName, auditTraceFilter.requestIdentifier);
 
         httpHeaders.put(Headers.loginid.name(), userNameData.get(2));
         httpHeaders.put("Content-Type", "application/json");
-
-       // request1.setTimestamp(LocalDateTime.now());
-
-        //logsConnector.textPayload("Sending authentication request to ESB", auditTraceFilter.requestIdentifier);
 
         if("SSO".equalsIgnoreCase(loginType)){
             return validationSSOToken((String) request,httpHeaders,null,logRequestResponse,nodes);
@@ -228,12 +214,8 @@ public class UserAuthentication {
             Map<String, String> authResponse = objectMapper.convertValue(response, new TypeReference<Map<String, String>>() {
             });
 
-           // Response response1 = new Response();
-            //response1.setTimestamp(LocalDateTime.now());
 
             String responseBody = maskData(httpHeaders, objectMapper.writeValueAsString(authResponse));
-            //response1.setResponse(responseBody);
-           // response1.setMessage("Request executed successfully");
 
             if (FAILURE_STATUS.equalsIgnoreCase(authResponse.get("status"))) {
              //   logsConnector.textPayload("Failure in auth process because of: " + authResponse.get("auth"), auditTraceFilter.requestIdentifier);
@@ -345,23 +327,6 @@ public class UserAuthentication {
             throw exception;
         }
         else{
-            /*logsConnector.textPayload("SSO Token successfully validated for given details.", auditTraceFilter.requestIdentifier);
-
-            responseData.setStatus(HttpStatus.OK.name());
-            responseData.setTimestamp(LocalDateTime.now());
-            responseData.setResponse(objectMapper.writeValueAsString(new SSOTokenResponse(SUCCESS_STATUS, TOKEN_VALID, TOKEN_VALID,null)));
-
-            if (logRequestResponse) {
-                String maskResponse = maskData(httpHeaders, responseData.getResponse());
-                responseData.setResponse(maskResponse);
-            } else {
-                nodes.put("message", "It seems that request logs is not enabled for this api/service.");
-                responseData.setResponse(objectMapper.writeValueAsString(nodes));
-            }
-
-            logsConnector.endpoint(new Payload(SUCCESS_STATUS,requestLog, responseData, auditTraceFilter.requestIdentifier));
-
-*/
             return objectMapper.writeValueAsString(new SSOTokenResponse(SUCCESS_STATUS, TOKEN_VALID, TOKEN_VALID,null));
 
         }

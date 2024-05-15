@@ -33,6 +33,7 @@ import org.springframework.web.context.request.WebRequest;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -109,7 +110,7 @@ public class ExceptionController {
        if(auditPayload != null && auditPayload.getResponse()!=null) {
             auditPayload.getResponse().setResponse(ex.getResponse() != null ?mapper.writeValueAsString(map): "");
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
-            auditPayload.getResponse().setTimestamp(LocalDateTime.now());
+            auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
             auditPayload.setStatus(isLogoutSuccess ? SUCCESS_STATUS : FAILURE_STATUS);
             logsWriter.updateLog(auditPayload);
         }
@@ -137,7 +138,7 @@ public class ExceptionController {
         if (auditPayload != null && auditPayload.getResponse() != null) {
             auditPayload.getResponse().setResponse(microserviceResponse.getResponse() != null ? mapper.writeValueAsString(microserviceResponse) : "");
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-            auditPayload.getResponse().setTimestamp(LocalDateTime.now());
+            auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
             auditPayload.setStatus(FAILURE_STATUS);
             logsWriter.updateLog(auditPayload);
         }
@@ -181,7 +182,7 @@ public class ExceptionController {
 
         ErrorPayload errorPayload = new ErrorPayload();
         errorPayload.setSystemError(systemError);
-        errorPayload.setTimestamp(LocalDateTime.now());
+        errorPayload.setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
 
         errorPayload.setRequestIdentifier(auditTraceFilter.requestIdentifier);
 
@@ -207,7 +208,7 @@ public class ExceptionController {
 
         auditPayload.getResponse().setResponse(mapper.writeValueAsString(errorResponse));
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
-        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
         auditPayload.setStatus(FAILURE_STATUS);
 
         logsWriter.updateLog(auditPayload);
@@ -226,7 +227,7 @@ public class ExceptionController {
         auditTraceFilter.setIsServicesLogsEnabled(true);
         auditPayload.getResponse().setResponse(mapper.writeValueAsString(rateLimitError));
         auditPayload.getResponse().setStatus(FAILURE_STATUS);
-        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
         auditPayload.setStatus(FAILURE_STATUS);
         logsWriter.updateLog(auditPayload);
 

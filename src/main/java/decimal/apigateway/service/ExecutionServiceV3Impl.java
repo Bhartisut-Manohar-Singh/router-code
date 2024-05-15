@@ -28,6 +28,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 import static decimal.apigateway.commons.Constant.*;
@@ -162,7 +163,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         auditPayload.getResponse().setResponse(new Gson().toJson(responseEntity.getBody()));
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
-        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
 
         logsWriter.updateLog(auditPayload);
 
@@ -230,7 +231,7 @@ public class ExecutionServiceV3Impl implements ExecutionServiceV3 {
         auditPayload.getResponse().setResponse(responseBody instanceof  byte [] ? objectMapper.writeValueAsString(responseMap) : objectMapper.writeValueAsString(responseBody));
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
-        auditPayload.getResponse().setTimestamp(LocalDateTime.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
 
         logsWriter.updateLog(auditPayload);
 

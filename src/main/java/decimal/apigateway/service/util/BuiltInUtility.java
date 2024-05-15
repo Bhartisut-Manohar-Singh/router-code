@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -23,7 +24,7 @@ public class BuiltInUtility {
     }
 
     public static String getCurrentTimestamp() {
-        return LocalDateTime.now().toString();
+        return LocalDateTime.now(ZoneOffset.UTC).toString();
     }
 
     public static String getCurrentTime() {

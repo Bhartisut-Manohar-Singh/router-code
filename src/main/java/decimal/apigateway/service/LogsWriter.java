@@ -14,6 +14,7 @@ import org.springframework.web.context.annotation.RequestScope;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -46,7 +47,7 @@ public class LogsWriter {
 
     public AuditPayload initializeLog(String request,String requestType, Map<String, String> httpHeaders)
     {
-        auditPayload.setRequestTimestamp(LocalDateTime.now());
+        auditPayload.setRequestTimestamp(LocalDateTime.now(ZoneOffset.UTC));
 
 
         RequestIdentifier requestIdentifier = getRequestIdentifier(httpHeaders,requestType);
@@ -73,7 +74,7 @@ public class LogsWriter {
 
 
     public void updateLog(AuditPayload auditPayload){
-        auditPayload.setResponseTimestamp(LocalDateTime.now());
+        auditPayload.setResponseTimestamp(LocalDateTime.now(ZoneOffset.UTC));
         auditPayload.setTimeTaken(auditPayload.getResponseTimestamp().getSecond() - auditPayload.getRequestTimestamp().getSecond());
 
         AuditPayload auditPayloadFinal =new AuditPayload(auditPayload.getRequestTimestamp(),auditPayload.getResponseTimestamp(),auditPayload.getTimeTaken(),auditPayload.getRequest(),auditPayload.getResponse(),auditPayload.getStatus(),auditPayload.getRequestIdentifier(),auditPayload.isLogRequestAndResponse());
@@ -144,7 +145,7 @@ public class LogsWriter {
     public AuditPayload initializeLog(String request, String requestType, Map<String, String> httpHeaders, String servicaName, AuditPayload auditPayload)
     {
 
-        auditPayload.setRequestTimestamp(LocalDateTime.now());
+        auditPayload.setRequestTimestamp(LocalDateTime.now(ZoneOffset.UTC));
 
         RequestIdentifier requestIdentifier = getRequestIdentifier(httpHeaders,requestType, servicaName);
         auditPayload.setRequestIdentifier(requestIdentifier);
