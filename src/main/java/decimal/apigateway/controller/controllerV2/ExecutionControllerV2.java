@@ -6,13 +6,14 @@ import decimal.apigateway.commons.Constant;
 import decimal.apigateway.exception.RouterException;
 import decimal.apigateway.model.EsbOutput;
 import decimal.apigateway.service.ExecutionServiceV2;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
 
@@ -79,11 +80,6 @@ public class ExecutionControllerV2 {
     public Object executeRequest(@RequestBody String request, @RequestHeader Map<String, String> httpHeaders, @PathVariable(name = "destinationAppId") String destinationAppId,
                                  @PathVariable(name = "serviceName") String serviceName) throws RouterException, IOException {
         log.info("======================Gateway Execute V2 Called=============================");
-        /*httpHeaders.put("sourceAppId", sourceAppId);
-        httpHeaders.put("sourceOrgId", sourceOrgId);*/
-        /*
-        Because of network call previous header keys were in camel case.
-        */
          httpHeaders.put("destinationappid", destinationAppId);
         httpHeaders.put("servicename",serviceName);
 

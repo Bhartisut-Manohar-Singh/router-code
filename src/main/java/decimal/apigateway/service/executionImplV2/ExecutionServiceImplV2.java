@@ -23,12 +23,17 @@ import decimal.logs.masking.JsonMasker;
 import decimal.logs.model.AuditPayload;
 import decimal.logs.model.Request;
 import decimal.logs.model.Response;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.java.Log;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -36,11 +41,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static decimal.apigateway.commons.Constant.*;
 import static decimal.apigateway.service.ExecutionServiceImpl.getBusinessKey;
@@ -65,7 +70,6 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     @Autowired
     EsbClientAuth esbClient;
 
-
     @Autowired
     SecApiAuthorizationConfigRepo apiAuthorizationConfigRepo;
 
@@ -84,6 +88,12 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
     @Value("${server.servlet.context-path}")
     String path;
+
+    @Value("${connectionTimeout}")
+    int connectionTimeout;
+
+    @Value("${readTimeout}")
+    int readTimeout;
 
     @Autowired
     SecurityServiceEnc securityServiceEnc;
@@ -128,6 +138,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         auditPayload.getRequest().setRequestBody(maskRequestBody);
         updatedHttpHeaders.put("executionsource","API-GATEWAY");
 
+        updatedHttpHeaders.remove("content-length");
         ResponseEntity<Object> responseEntity = esbClient.executeRequestV2(decryptedResponse.getResponse().toString(), updatedHttpHeaders);
         HttpHeaders responseHeaders = responseEntity.getHeaders();
 
@@ -239,7 +250,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         auditPayload.getResponse().setResponse(JsonMasker.maskMessage(objectMapper.writeValueAsString(responseEntity.getBody()), maskKeys));
         auditPayload.getRequestIdentifier().setBusinessFilter( businessKeySet);
         auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.OK.value()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
 
         logsWriter.updateLog(auditPayload);
 
@@ -275,7 +286,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         String basePath = path + "/engine/v1/dynamic-router/" + serviceName;
 
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, true);
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, false);
 
         HttpHeaders httpHeaders1 = new HttpHeaders();
 
@@ -306,7 +317,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         HttpHeaders headers = exchange.getHeaders();
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200 && (headers.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(headers.get("status").get(0)) : true)) {
             auditPayload.setStatus(SUCCESS_STATUS);
@@ -336,9 +347,9 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
     }
 
-    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath, Boolean isDynamic) throws RouterException {
+    private String validateAndGetServiceUrl(String serviceName, String requestURI, String basePath, Boolean isDMSUpload) throws RouterException {
 
-        String contextPath = "";
+        String contextPath = DMS_CONTEXT_PATH;
         int port = 0;
 
         List<String> services = discoveryClient.getServices();
@@ -365,14 +376,12 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
                 throw new RuntimeException(e);
             }
             port = serviceInstance.getPort();
-            contextPath = (metadata.get("context-path") == null ? metadata.get("contextPath") : metadata.get("context-path"));
-            log.info(" ==== contextPath  ==== " + contextPath);
-            log.info(" ==== mapping ==== " + mapping);
         }
-        if(isDynamic){
-            return "http://" + serviceName.toLowerCase() +":"+ port  + mapping;
+        if(isDMSUpload){
+            return  "http://" + serviceName.toLowerCase() +":"+ port + contextPath + mapping;
         }
-        return  "http://" + serviceName.toLowerCase() +":"+ port + contextPath + mapping;
+        return "http://" + serviceName.toLowerCase() +":"+ port  + mapping;
+
 
     }
 
@@ -391,14 +400,14 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         Request requestData=new Request();
         Response responseData=new Response();
-        requestData.setTimestamp(Instant.now());
+        requestData.setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
         requestData.setRequestBody(objectMapper.writeValueAsString(request));
         requestData.setHeaders(updateHttpHeaders.toSingleValueMap());
         auditPayload.setRequest(requestData);
 
         String basePath = path + "/engine/v2/dynamic-router/plain/" + serviceName;
 
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, true);
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, false);
 
         if (serviceUrl.contains("/service-executor/execute-plain"))
         {
@@ -420,7 +429,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         HttpHeaders responseHeaders = exchange.getHeaders();
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
 
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
         if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
             auditPayload.setStatus(SUCCESS_STATUS);
             dynamicResponse.setStatus(SUCCESS_STATUS);
@@ -433,7 +442,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         }
 
         dynamicResponse.setResponse(exchange.getBody());
-        responseData.setTimestamp(Instant.now());
+        responseData.setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
         responseData.setResponse(objectMapper.writeValueAsString(dynamicResponse));
         auditPayload.setRequest(requestData);
         auditPayload.setResponse(responseData);
@@ -444,70 +453,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
     @Override
     public Object executeMultipartRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName, String uploadRequest, MultipartFile[] files) throws RouterException, IOException {
-
-        auditPayload = logsWriter.initializeLog(uploadRequest,MULTIPART, httpHeaders);
-
-        auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
-
-        Map<String, String> updateHttpHeaders = requestValidatorV2.validateDynamicRequest(request, httpHeaders,auditPayload);
-
-        String basePath = path + "/engine/v2/dynamic-router/upload-gateway/" + serviceName;
-
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, false);
-
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        for (MultipartFile file : files) {
-            body.add(Constant.MULTIPART_FILES, new MultipartInputStreamFileResource(file.getInputStream(), file.getOriginalFilename()));
-        }
-        HttpHeaders headers = new HttpHeaders();
-
-        headers.add("sourceOrgId", updateHttpHeaders.get("sourceOrgId"));
-        headers.add("sourceAppId", updateHttpHeaders.get("sourceAppId"));
-
-        body.add("uploadRequest", uploadRequest);
-
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        auditPayload.getRequest().setRequestBody(uploadRequest);
-        auditPayload.getRequest().setMethod("POST");
-        auditPayload.getRequest().setHeaders(httpHeaders);
-        auditPayload.getRequest().setUri(serviceUrl);
-
-
-        headers.put("executionsource", Collections.singletonList("API-GATEWAY"));
-
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
-
-        HttpHeaders responseHeaders = exchange.getHeaders();
-        auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
-
-        MicroserviceResponse dynamicResponse = new MicroserviceResponse();
-        if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
-            auditPayload.setStatus(SUCCESS_STATUS);
-            dynamicResponse.setStatus(SUCCESS_STATUS);
-            auditPayload.getResponse().setStatus("200");
-
-        } else {
-            auditPayload.setStatus(FAILURE_STATUS);
-            dynamicResponse.setStatus(FAILURE_STATUS);
-            auditPayload.getResponse().setStatus(String.valueOf(exchange.getStatusCode().value()));
-        }
-
-        dynamicResponse.setResponse(exchange.getBody());
-
-        logsWriter.updateLog(auditPayload);
-
-        MicroserviceResponse encryptedResponse = securityServiceEnc.encryptResponse(objectMapper.writeValueAsString(dynamicResponse), updateHttpHeaders);
-        //MicroserviceResponse encryptedResponse = securityClient.encryptResponse(dynamicResponse, updateHttpHeaders);
-
-        Map<String, String> finalResponseMap = new HashMap<>();
-        finalResponseMap.put("response", encryptedResponse.getMessage());
-
-        return finalResponseMap;
-
-
+        return null;
     }
 
     @Override
@@ -530,7 +476,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         String basePath = path + "/engine/v2/dynamic-router/upload-file/" + serviceName;
 
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, false);
+        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, true);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         for (MultipartFile file : files) {
@@ -557,13 +503,14 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
 
         log.info("==========================================Calling DMS Upload Api=========================================" );
         log.info(" ================ Service Url ==============" + serviceUrl );
-        ResponseEntity<Object> exchange = restTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
+        RestTemplate multipartRestTemplate = getRestTemplate();
+        ResponseEntity<Object> exchange = multipartRestTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
 
         HttpHeaders responseHeaders= exchange.getHeaders();
         log.info("==========================================Returned From DMS Upload Api=========================================" );
 
         auditPayload.getResponse().setResponse(objectMapper.writeValueAsString(exchange.getBody()));
-        auditPayload.getResponse().setTimestamp(Instant.now());
+        auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
 
         MicroserviceResponse dynamicResponse = new MicroserviceResponse();
         if (exchange.getStatusCode().value() == 200 && (responseHeaders.containsKey("status") ? SUCCESS_STATUS.equalsIgnoreCase(responseHeaders.get("status").get(0)) : true)) {
@@ -604,5 +551,22 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         httpHeaders.put("executionsource","API-GATEWAY");
 
         return httpHeaders;
+    }
+
+    private RestTemplate getRestTemplate()
+    {
+        RestTemplate template = new RestTemplate();
+        RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(readTimeout, TimeUnit.MILLISECONDS).build();
+
+        CloseableHttpClient closeableHttpClient = HttpClientBuilder.create()
+                .setDefaultRequestConfig(requestConfig)
+                .build();
+
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+        //requestFactory.setReadTimeout(readTimeout); This has been replaced by RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(Timeout.of(Duration.ofMillis(readTimeout))).build();
+        requestFactory.setConnectTimeout(connectionTimeout);
+        requestFactory.setHttpClient(closeableHttpClient);
+        template.setRequestFactory(requestFactory);
+        return template;
     }
 }

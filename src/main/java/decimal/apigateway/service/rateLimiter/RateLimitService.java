@@ -11,9 +11,11 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -39,8 +41,8 @@ public class RateLimitService {
 
     public Boolean allowRequest(String appId, String serviceName, Map<String, String> httpHeaders) throws RouterException, IOException {
 
-        Instant requestTimestamp = Instant.now();
-        // checks in redis if rate limiting config is present
+        LocalDateTime requestTimestamp = LocalDateTime.now(ZoneOffset.UTC);
+
         Optional<RateLimitConfig> rateLimitAppConfig = rateLimitRepo.findById(appId);
 
         if (rateLimitAppConfig.isPresent()) {
