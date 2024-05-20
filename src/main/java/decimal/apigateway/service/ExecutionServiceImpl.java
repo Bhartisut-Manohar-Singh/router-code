@@ -453,6 +453,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         String basePath = path + "/engine/v1/dynamic-router/upload-file/" + serviceName;
 
         String serviceUrl = validateAndGetServiceUrl(serviceName, httpServletRequest.getRequestURI(), basePath, false);
+        System.out.println("URI--------------------"+httpServletRequest.getRequestURI());
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         for (MultipartFile file : files) {
@@ -483,7 +484,10 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         headers.remove("content-length");
 
-        ResponseEntity<Object> exchange = vahanaDMSClient.uploadFile(headers,mediaDataObjects,files);
+        System.out.println(httpServletRequest.getRequestURI().endsWith("uploadDocument") );
+        System.out.println(httpServletRequest.getRequestURI().endsWith("uploadDocumentAndGetUrl") );
+
+        ResponseEntity<Object> exchange = httpServletRequest.getRequestURI().endsWith("uploadDocument") ? vahanaDMSClient.uploadFile(headers,mediaDataObjects,files) : vahanaDMSClient.uploadAndGetSignedUrl(headers,mediaDataObjects,files);
 
         HttpHeaders responseHeaders = exchange.getHeaders();
         System.out.println("==========================================Returned From DMS Upload Api=========================================");

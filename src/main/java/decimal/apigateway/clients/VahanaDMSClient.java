@@ -19,4 +19,7 @@ public interface VahanaDMSClient {
     @PostMapping(value = "document-manager/upload/v1/uploadDocument", consumes = "multipart/form-data", produces = "application/json")
     public ResponseEntity<Object> uploadFile(@RequestHeader HttpHeaders httpHeaders, @RequestPart String mediaDataObjects, @RequestPart MultipartFile[] files);
 
+    @PostMapping(value = "document-manager/upload/v1/uploadDocumentAndGetUrl", consumes = "multipart/form-data", produces = "application/json")
+    public ResponseEntity<Object> uploadAndGetSignedUrl(@RequestHeader HttpHeaders httpHeaders, @RequestPart String mediaDataObjects, @RequestPart MultipartFile[] files);
+
     }
