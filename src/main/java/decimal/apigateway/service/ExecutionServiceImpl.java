@@ -465,7 +465,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         System.out.println("==========================================Calling DMS Upload Api=========================================");
 
-        ResponseEntity<Object> exchange = httpServletRequest.getRequestURI().endsWith("uploadDocument") ? vahanaDMSClient.uploadAndGetSignedUrl(headers,mediaDataObjects,files) : vahanaDMSClient.uploadAndGetSignedUrl(headers,mediaDataObjects,files);
+        ResponseEntity<Object> exchange = httpServletRequest.getRequestURI().endsWith("uploadDocument") ? vahanaDMSClient.uploadFile(headers,mediaDataObjects,files) : vahanaDMSClient.uploadAndGetSignedUrl(headers,mediaDataObjects,files);
 
         HttpHeaders responseHeaders = exchange.getHeaders();
         System.out.println("==========================================Returned From DMS Upload Api=========================================");
@@ -674,7 +674,6 @@ public class ExecutionServiceImpl implements ExecutionService {
                 .build();
 
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-        //requestFactory.setReadTimeout(readTimeout); This has been replaced by RequestConfig requestConfig = RequestConfig.custom().setResponseTimeout(Timeout.of(Duration.ofMillis(readTimeout))).build();
         requestFactory.setConnectTimeout(connectionTimeout);
         requestFactory.setHttpClient(closeableHttpClient);
         template.setRequestFactory(requestFactory);
