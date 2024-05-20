@@ -450,44 +450,22 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Map<String, String> updateHttpHeaders = requestValidator.validateDynamicRequest(request, httpHeaders, auditPayload);
 
-        String basePath = path + "/engine/v1/dynamic-router/upload-file/" + serviceName;
-
-        String serviceUrl = validateAndGetServiceUrl(serviceName, httpServletRequest.getRequestURI(), basePath, false);
-        System.out.println("URI--------------------"+httpServletRequest.getRequestURI());
-
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        for (MultipartFile file : files) {
-            body.add(Constant.MULTIPART_FILES, new MultipartInputStreamFileResource(file.getInputStream(), file.getOriginalFilename()));
-        }
         HttpHeaders headers = new HttpHeaders();
-
         httpHeaders.forEach((key, value) -> headers.add(key, value));
 
-        body.add("mediaDataObjects", mediaDataObjects);
 
         auditPayload.getRequest().setRequestBody(mediaDataObjects);
         auditPayload.getRequest().setMethod("POST");
         auditPayload.getRequest().setHeaders(httpHeaders);
-        auditPayload.getRequest().setUri(serviceUrl);
-
+        auditPayload.getRequest().setUri(httpServletRequest.getRequestURI());
 
         headers.put("executionsource", Collections.singletonList("API-GATEWAY"));
 
-    //    headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
+        headers.remove("content-length");
 
         System.out.println("==========================================Calling DMS Upload Api=========================================");
 
-        RestTemplate multipartRestTemplate = getRestTemplate();
-
-        headers.remove("content-length");
-
-        System.out.println(httpServletRequest.getRequestURI().endsWith("uploadDocument") );
-        System.out.println(httpServletRequest.getRequestURI().endsWith("uploadDocumentAndGetUrl") );
-
-        ResponseEntity<Object> exchange = httpServletRequest.getRequestURI().endsWith("uploadDocument") ? vahanaDMSClient.uploadFile(headers,mediaDataObjects,files) : vahanaDMSClient.uploadAndGetSignedUrl(headers,mediaDataObjects,files);
+        ResponseEntity<Object> exchange = httpServletRequest.getRequestURI().endsWith("uploadDocument") ? vahanaDMSClient.uploadAndGetSignedUrl(headers,mediaDataObjects,files) : vahanaDMSClient.uploadAndGetSignedUrl(headers,mediaDataObjects,files);
 
         HttpHeaders responseHeaders = exchange.getHeaders();
         System.out.println("==========================================Returned From DMS Upload Api=========================================");
