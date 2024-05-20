@@ -481,6 +481,8 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         RestTemplate multipartRestTemplate = getRestTemplate();
 
+        headers.remove("content-length");
+
         ResponseEntity<Object> exchange = vahanaDMSClient.uploadFile(headers,mediaDataObjects,files);
 
         HttpHeaders responseHeaders = exchange.getHeaders();
