@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import decimal.apigateway.clients.VahanaDMSClient;
 import decimal.apigateway.commons.Constant;
 
 import decimal.apigateway.enums.Headers;
@@ -75,6 +76,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     @Autowired
     RestTemplate restTemplate;
+
+    @Autowired
+    VahanaDMSClient vahanaDMSClient;
 
     @Value("${isHttpTracingEnabled}")
     boolean isHttpTracingEnabled;
@@ -477,7 +481,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         RestTemplate multipartRestTemplate = getRestTemplate();
 
-        ResponseEntity<Object> exchange = multipartRestTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
+        ResponseEntity<Object> exchange = vahanaDMSClient.uploadFile(headers,mediaDataObjects,files);
 
         HttpHeaders responseHeaders = exchange.getHeaders();
         System.out.println("==========================================Returned From DMS Upload Api=========================================");
