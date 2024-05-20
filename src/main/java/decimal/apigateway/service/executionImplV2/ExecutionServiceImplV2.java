@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import decimal.apigateway.clients.EsbClientAuth;
+import decimal.apigateway.clients.VahanaDMSClient;
 import decimal.apigateway.commons.Constant;
 import decimal.apigateway.domain.ApiAuthorizationConfig;
 import decimal.apigateway.enums.Headers;
@@ -101,6 +102,8 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     @Autowired
     SecurityService securityService;
 
+    @Autowired
+    VahanaDMSClient vahanaDMSClient;
 
     @Override
     public Object executeRequest(String destinationAppId,String serviceNmae, String request, Map<String, String> httpHeaders) throws IOException, RouterException {
@@ -466,46 +469,26 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
                 httpHeaders.put(String.valueOf(Headers.appid),bySourceOrgIdAndSourceAppId.get().getDestinationAppId());
             }
 
-
-
         auditPayload = logsWriter.initializeLog(mediaDataObjects,MULTIPART, httpHeaders);
 
         auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
 
         Map<String, String> updateHttpHeaders = requestValidatorV2.validateDynamicRequest(request, httpHeaders,auditPayload);
 
-        String basePath = path + "/engine/v2/dynamic-router/upload-file/" + serviceName;
-
-        String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, true);
-
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        for (MultipartFile file : files) {
-            body.add(Constant.MULTIPART_FILES, new MultipartInputStreamFileResource(file.getInputStream(), file.getOriginalFilename()));
-        }
         HttpHeaders headers = new HttpHeaders();
 
         httpHeaders.forEach((key,value)-> headers.add(key,value));
 
-        body.add("mediaDataObjects", mediaDataObjects);
-
         auditPayload.getRequest().setRequestBody(mediaDataObjects);
         auditPayload.getRequest().setMethod("POST");
         auditPayload.getRequest().setHeaders(httpHeaders);
-        auditPayload.getRequest().setUri(serviceUrl);
-
+        auditPayload.getRequest().setUri(httpServletRequest.getRequestURI());
 
         headers.put("executionsource", Collections.singletonList("API-GATEWAY"));
-
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
+        headers.remove("content-length");
 
         log.info("==========================================Calling DMS Upload Api=========================================" );
-        log.info(" ================ Service Url ==============" + serviceUrl );
-        RestTemplate multipartRestTemplate = getRestTemplate();
-        ResponseEntity<Object> exchange = multipartRestTemplate.exchange(serviceUrl, HttpMethod.POST, requestEntity, Object.class);
-
+        ResponseEntity<Object> exchange = httpServletRequest.getRequestURI().endsWith("uploadDocument") ? vahanaDMSClient.uploadFile(headers,mediaDataObjects,files) : vahanaDMSClient.uploadAndGetSignedUrl(headers,mediaDataObjects,files);
         HttpHeaders responseHeaders= exchange.getHeaders();
         log.info("==========================================Returned From DMS Upload Api=========================================" );
 

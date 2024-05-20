@@ -20,6 +20,8 @@ public class Constant {
     public static final String NO_TOKENS_LEFT_FOR_SERVICE = "No tokens left for SERVICE NAME : ";
 
     public static final String ESB = "esb";
+    public static final String VAHANA_DMS = "vahana-dms";
+
     public static final String MULTIPART_FILES= "files";
     public static final String MONITORING_MICRO_SERVICE = "VMONITORING-EXE";
 
