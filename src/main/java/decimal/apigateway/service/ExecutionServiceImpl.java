@@ -472,7 +472,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         headers.put("executionsource", Collections.singletonList("API-GATEWAY"));
 
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+    //    headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
