@@ -22,7 +22,7 @@ import static decimal.apigateway.enums.Headers.*;
 @Log
 public class KeysGenerator
 {
-    @Value("${systemKey}")
+    @Value("${system.generated.key}")
     String systemKey;
 
     @Autowired
