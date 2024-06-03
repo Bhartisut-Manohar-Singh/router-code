@@ -26,7 +26,6 @@ public class HttpServiceCall {
     @Autowired
     ObjectMapper objectMapper;
 
-//    @Value("${analytics.url}")
     private String analyticsUrlBase;
 
     @Async

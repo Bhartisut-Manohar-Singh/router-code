@@ -63,8 +63,6 @@ public class UserAuthentication {
     @Value("${isAnalyticsRequired}")
     private String isAnalyticsRequired;
 
-//    @Value("${raise.event.topic}")
-    private String raiseEventTopic;
     @Autowired
     SSOTokenRepo ssoTokenRepo;
 
