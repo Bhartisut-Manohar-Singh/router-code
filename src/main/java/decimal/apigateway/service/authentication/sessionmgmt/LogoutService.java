@@ -37,9 +37,6 @@ public class LogoutService {
     @Value("${isAnalyticsRequired}")
     private String isAnalyticsRequired;
 
-    @Value("${raise.event.topic}")
-    private String raiseEventTopic;
-
     @Autowired
     EventRequestUtil eventRequestUtil;
 
