@@ -110,11 +110,6 @@ public class SecurityServiceImpl implements SecurityService {
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
         }
-        try {
-            log.info("MicroserviceResponse  " + objectMapper.writeValueAsString(microserviceResponse));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
 
         return microserviceResponse;
 
