@@ -278,16 +278,23 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
     @Override
     public Object executeDynamicRequest(HttpServletRequest httpServletRequest, String request, Map<String, String> httpHeaders, String serviceName) throws RouterException, IOException {
 
+        Optional<ApiAuthorizationConfig> bySourceOrgIdAndSourceAppId = apiAuthorizationConfigRepo.findBySourceOrgIdAndSourceAppId(httpHeaders.get(String.valueOf(Headers.orgid)), httpHeaders.get(String.valueOf(Headers.appid)));
+        if(bySourceOrgIdAndSourceAppId.isPresent()){
+            httpHeaders.put(String.valueOf(Headers.orgid),bySourceOrgIdAndSourceAppId.get().getDestinationOrgId());
+            httpHeaders.put(String.valueOf(Headers.appid),bySourceOrgIdAndSourceAppId.get().getDestinationAppId());
+        }
+
         auditPayload = logsWriter.initializeLog(request, JSON,httpHeaders);
+
 
         auditTraceFilter.setIsServicesLogsEnabled(isHttpTracingEnabled);
         Map<String, String> updateHttpHeaders = requestValidatorV2.validateDynamicRequest(request, httpHeaders, auditPayload);
 
         JsonNode node = objectMapper.readValue(request, JsonNode.class);
 
-        MicroserviceResponse decryptedResponse = securityService.decryptRequest(node, httpHeaders);
+        MicroserviceResponse decryptedResponse = securityService.decryptRequest(node.get("request"), httpHeaders);
 
-        String basePath = path + "/engine/v1/dynamic-router/" + serviceName;
+        String basePath = path + "/engine/v2/dynamic-router/" + serviceName;
 
         String serviceUrl = validateAndGetServiceUrl(serviceName,httpServletRequest.getRequestURI(),basePath, false);
 
