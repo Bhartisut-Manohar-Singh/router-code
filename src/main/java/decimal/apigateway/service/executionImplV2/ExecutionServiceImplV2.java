@@ -311,6 +311,7 @@ public class ExecutionServiceImplV2 implements ExecutionServiceV2 {
         auditPayload.getRequest().setMethod("POST");
         auditPayload.getRequest().setUri(serviceUrl);
 
+        httpHeaders1.remove("content-length");
         httpHeaders1.put("executionsource", Collections.singletonList("API-GATEWAY"));
 
         HttpEntity<String> requestEntity = new HttpEntity<>(actualRequest, httpHeaders1);
