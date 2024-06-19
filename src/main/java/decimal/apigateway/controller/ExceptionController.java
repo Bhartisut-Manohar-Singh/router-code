@@ -290,12 +290,13 @@ public class ExceptionController {
 
 
     private void setMessage(RouterException ex, Map<String, String> map, WebRequest request) {
-        String userName = request.getHeader("username");
-        if (userName==null || userName.isEmpty()) {
+        String clientid = request.getHeader("clientid");
+        log.info("==== clientid : "+clientid);
+        if (clientid==null || clientid.isEmpty()) {
             map.put("message", ex.getErrorHint());
         } else {
-            String user[] = userName.split("~");
-            Optional<MessageMasterConfig> messageMasterConfigs = masterConfigRepo.findByOrgIdAndAppIdAndApiName(user[0], user[1], ex.getErrorCode());
+            String client[] = clientid.split("~");
+            Optional<MessageMasterConfig> messageMasterConfigs = masterConfigRepo.findByOrgIdAndAppIdAndApiName(client[0], client[1], ex.getErrorCode());
             if (messageMasterConfigs.isPresent()) {
                 ObjectNode data = null;
                 try {
