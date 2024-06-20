@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpServerErrorException;
@@ -283,6 +284,18 @@ public class ExceptionController {
         MicroserviceResponse response = new MicroserviceResponse();
         response.setMessage(ex.getMessage());
         response.setResponse("RunTimeException");
+        HttpHeaders responseHeaders = new HttpHeaders();
+        return new ResponseEntity<>(response, responseHeaders, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = HttpMessageNotReadableException.class)
+    public ResponseEntity<Object> handleMessageException(HttpMessageNotReadableException ex) throws JsonProcessingException {
+        ex.printStackTrace();
+        log.info(" Inside handleRuntimeException - " + ex.getMessage());
+
+        MicroserviceResponse response = new MicroserviceResponse();
+        response.setMessage("Required Request Body is missing");
+        response.setResponse("Bad Request");
         HttpHeaders responseHeaders = new HttpHeaders();
         return new ResponseEntity<>(response, responseHeaders, HttpStatus.BAD_REQUEST);
     }
