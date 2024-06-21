@@ -108,7 +108,7 @@ public class ExceptionController {
         if("625".equals(ex.getErrorCode()))
             isLogoutSuccess = false;
 
-       if(auditPayload != null && auditPayload.getResponse()!=null) {
+       if(auditPayload != null && auditPayload.getResponse()!=null && auditPayload.getRequestTimestamp()!=null) {
             auditPayload.getResponse().setResponse(ex.getResponse() != null ?mapper.writeValueAsString(map): "");
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
             auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
