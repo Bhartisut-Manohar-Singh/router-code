@@ -44,11 +44,6 @@ public class RequestHeadersValidator implements Validator {
             log.info(RouterResponseCode.ROUTER_TXNKEY_MISSING);
             throw new RouterException(RouterResponseCode.ROUTER_TXNKEY_MISSING, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "Validator Failed");
         }
-        if (nounce == null || nounce.isEmpty())
-        {
-            log.info(RouterResponseCode.ROUTER_NOUNCE_MISSING);
-            throw new RouterException(RouterResponseCode.ROUTER_NOUNCE_MISSING, (Exception) null, Constant.ROUTER_ERROR_TYPE_VALIDATION, "Validator Failed");
-        }
 
         if (clientid == null || clientid.isEmpty())
         {
