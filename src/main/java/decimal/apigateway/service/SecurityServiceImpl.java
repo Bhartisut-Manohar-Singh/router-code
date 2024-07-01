@@ -110,8 +110,8 @@ public class SecurityServiceImpl implements SecurityService {
             responseHeaders.set("status", microserviceResponse.getStatus());
             logsWriter.updateLog(auditPayload);
         }
-            log.info("MicroserviceResponse  " + microserviceResponse);
-            return microserviceResponse;
+
+        return microserviceResponse;
 
     }
 
