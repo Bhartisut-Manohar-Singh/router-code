@@ -135,7 +135,7 @@ public class UserAuthentication {
             if (FAILURE_STATUS.equalsIgnoreCase(authResponse.get("status"))) {
                 //logsConnector.textPayload("Failure in auth process because of: " + authResponse.get("auth"), auditTraceFilter.requestIdentifier);
                 System.out.println("Failure in auth process :" + authResponse.get("auth"));
-                String message = authResponse.get("message");
+                String message = authResponse.get("auth");
                 log.info("=======message in authresponse ======"+message);
 
                 RouterException exception = new RouterException(AuthRouterResponseCode.ROUTER_AUTH_FAIL, (Exception) null, "AUTH", message);

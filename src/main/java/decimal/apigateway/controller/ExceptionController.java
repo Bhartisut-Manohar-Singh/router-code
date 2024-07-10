@@ -102,6 +102,11 @@ public class ExceptionController {
         setMessage(ex, map, webRequest);
         map.put("errorType", ex.getErrorType());
 
+        if(ex.getResponse() != null)
+        {
+            map.put("errorResponse", ex.getErrorHint());
+        }
+
         if("625".equals(ex.getErrorCode()))
             isLogoutSuccess = false;
 
