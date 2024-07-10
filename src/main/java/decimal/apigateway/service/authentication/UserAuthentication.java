@@ -123,6 +123,8 @@ public class UserAuthentication {
             Map<String, String> authResponse = objectMapper.convertValue(response, new TypeReference<Map<String, String>>() {
             });
 
+            log.info("======Auth Response ========="+objectMapper.writeValueAsString(authResponse));
+
            // Response response1 = new Response();
             //response1.setTimestamp(Instant.now());
 
@@ -134,8 +136,11 @@ public class UserAuthentication {
                 //logsConnector.textPayload("Failure in auth process because of: " + authResponse.get("auth"), auditTraceFilter.requestIdentifier);
                 System.out.println("Failure in auth process :" + authResponse.get("auth"));
                 String message = authResponse.get("message");
+                log.info("=======message in authresponse ======"+message);
 
                 RouterException exception = new RouterException(AuthRouterResponseCode.ROUTER_AUTH_FAIL, (Exception) null, "AUTH", message);
+                log.info("======= Router Exception object===== :"+exception);
+                log.info("========== auth in authResponse=======: "+authResponse.get("auth"));
                 exception.setResponse(authResponse.get("auth"));
 
                 //VSN-3399
