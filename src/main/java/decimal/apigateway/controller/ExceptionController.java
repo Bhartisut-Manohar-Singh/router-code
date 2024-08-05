@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpServerErrorException;
@@ -104,10 +105,15 @@ public class ExceptionController {
         setMessage(ex, map, webRequest);
         map.put("errorType", ex.getErrorType());
 
+        if(ex.getResponse() != null)
+        {
+            map.put("errorResponse", ex.getErrorHint());
+        }
+
         if("625".equals(ex.getErrorCode()))
             isLogoutSuccess = false;
 
-       if(auditPayload != null && auditPayload.getResponse()!=null) {
+       if(auditPayload != null && auditPayload.getResponse()!=null && auditPayload.getRequestTimestamp()!=null) {
             auditPayload.getResponse().setResponse(ex.getResponse() != null ?mapper.writeValueAsString(map): "");
             auditPayload.getResponse().setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
             auditPayload.getResponse().setTimestamp(LocalDateTime.now(ZoneOffset.UTC));
@@ -287,6 +293,18 @@ public class ExceptionController {
         return new ResponseEntity<>(response, responseHeaders, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(value = HttpMessageNotReadableException.class)
+    public ResponseEntity<Object> handleMessageException(HttpMessageNotReadableException ex) throws JsonProcessingException {
+        ex.printStackTrace();
+        log.info(" Inside handleRuntimeException - " + ex.getMessage());
+
+        MicroserviceResponse response = new MicroserviceResponse();
+        response.setMessage("Required Request Body is missing");
+        response.setResponse("Bad Request");
+        HttpHeaders responseHeaders = new HttpHeaders();
+        return new ResponseEntity<>(response, responseHeaders, HttpStatus.BAD_REQUEST);
+    }
+
 
   /*  @ExceptionHandler(RouterException.class)
     public ResponseEntity<Object> handleRouterException(RouterException ex) {
@@ -303,12 +321,13 @@ public class ExceptionController {
 
 
     private void setMessage(RouterException ex, Map<String, String> map, WebRequest request) {
-        String userName = request.getHeader("username");
-        if (userName==null || userName.isEmpty()) {
+        String clientid = request.getHeader("clientid");
+        log.info("==== clientid : "+clientid);
+        if (clientid==null || clientid.isEmpty()) {
             map.put("message", ex.getErrorHint());
         } else {
-            String user[] = userName.split("~");
-            Optional<MessageMasterConfig> messageMasterConfigs = masterConfigRepo.findByOrgIdAndAppIdAndApiName(user[0], user[1], ex.getErrorCode());
+            String client[] = clientid.split("~");
+            Optional<MessageMasterConfig> messageMasterConfigs = masterConfigRepo.findByOrgIdAndAppIdAndApiName(client[0], client[1], ex.getErrorCode());
             if (messageMasterConfigs.isPresent()) {
                 ObjectNode data = null;
                 try {

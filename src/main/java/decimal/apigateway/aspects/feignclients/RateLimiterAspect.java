@@ -11,6 +11,7 @@ import decimal.apigateway.model.ApplicationDef;
 import decimal.apigateway.repository.ApplicationDefRedisConfigRepo;
 import decimal.apigateway.repository.SecApiAuthorizationConfigRepo;
 import decimal.apigateway.service.rateLimiter.RateLimitService;
+import decimal.apigateway.service.validator.RequestHeadersValidator;
 import lombok.extern.java.Log;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -46,6 +47,9 @@ public class RateLimiterAspect{
     @Autowired
     SecApiAuthorizationConfigRepo apiAuthorizationConfigRepo;
 
+    @Autowired
+    RequestHeadersValidator requestHeadersValidator;
+
 
     @Pointcut("((within(decimal.apigateway.controller.V3.RegistrationControllerV3) && execution(public * executePlainRequest(..)))) && args(requestBody, httpHeaders,..)")
     public void rateLimiters(String requestBody, Map<String, String> httpHeaders) {
@@ -53,7 +57,9 @@ public class RateLimiterAspect{
 
    @Before("within(decimal.apigateway.controller.controllerV2.ExecutionControllerV2) && execution(public * executeRequest(..)) && args(requestBody, httpHeaders, destinationAppId, serviceName)")
    public void rateLimiterAdviceV2(JoinPoint proceedingJoinPoint, String requestBody, Map<String, String> httpHeaders, String destinationAppId, String serviceName) throws Throwable {
-        String[] orgApp = getAppAndOrgId(httpHeaders);
+       requestHeadersValidator.validate(requestBody,httpHeaders);
+
+       String[] orgApp = getAppAndOrgId(httpHeaders);
 
         String orgid = orgApp[0];
         String appid = orgApp[1];
